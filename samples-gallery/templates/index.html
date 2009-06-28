@@ -1,0 +1,149 @@
+{% extends "basegallery.html" %}
+{% block body %}
+<div id="sidebar">
+<div class="module" id="top_rated">
+    <h3> Add your own {{app_name}}</h3>
+    <table class="rec" border="0" cellpadding="0" cellspacing="0" width="100%">
+       <tbody>
+          <tr>
+            <td >
+             <p>The {{title}} is a great place to get 
+                feedback on your {{app_name|lower}}, find out what others are doing and
+                enable others to see your hard work.
+                </p>
+             <p>Sharing your {{app_name|lower}} is as easy as filling out a simple form.</p>
+             <p>
+               <a style="font-size:120%" href="/submit"><b>Add your {{app_name|lower}} now »</b></a>
+             </p>
+            </td>
+         </tr>
+       </tbody>
+     </table>
+</div>
+{% include "module_filter.html" %}
+<div class="clear">&nbsp;</div>
+</div>
+
+<div id="body"> 
+<div id="container">
+  <h1 class="page_title">{{title}}</h1>
+  <div style="float:left;max-width:650px;overflow:hidden">
+  <h3><b> Featured {{app_name}}</b> <a href="/feeds/apps/featured"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
+  <div class="featuredHeader"></div>
+  {% for app in featured %}
+     <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5">
+       <tr>
+         <td width="120" align="center" valign="top" class="rowPadding">
+           <table width="120">
+             <tr>
+               <td>
+           {% if app.thumbnail %}
+               <div align="left"><img class="largeThumbnail" src="/images?img_id={{app.key.id|escape}}&amp;img_type=screenshot" style="margin-top:-10px;"/></div>
+           {% else %}
+               <div align="left"><img src="/static/img/project_gallery_logo.png" style="margin-top:-10px;"/></div>
+           {% endif %}
+               </td>
+              </tr>
+            </table>
+         </td>
+         <td width="100%" align="center" valign="middle" class="rowPadding">
+           <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
+           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+- {{app.created|date:"M d, Y"}} 
+        <!-- - 
+         <span class="gray">
+           <img src="/static/img/{{ app.avg_rating }}-star-rating.png" alt="{{ app.avg_rating }} stars"/>
+           &nbsp;&nbsp;
+         </span> -->
+        <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
+        <div align="left">
+           <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
+           <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
+        </div>
+      {% if app.author_name %}
+           <div style="color:gray;padding-top:3px" align="left">
+        {% ifequal app.author_name user %}
+           <form action="/delete.do" method="post">
+            <button type="submit" value="Delete" style="background-color:white;border:0px;color:#00c;text-decoration:underline">Delete</a>
+            <input type="hidden" name="app_id" value="{{app.key.id|escape}}">
+           </form>
+        {% endifequal %}
+           </div>
+     {% endif %}
+         </td>
+      </tr>
+  </table>
+  {% endfor %}
+
+  <div id="topContainer">
+  <div id="topRated">
+    <h3>Most Recent {{app_name}}s <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
+    
+  <div class="featuredHeader"></div>
+   {% for app in recent_apps %}
+     <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5">
+       <tr>
+         <td width="120" align="center" valign="top" class="rowPadding">
+           <table width="120">
+             <tr>
+               <td>
+           {% if app.thumbnail %}
+               <div align="left"><img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail" style="margin-top:-10px;"/></div>
+           {% else %}
+               <div align="left"><img src="/static/img/project_gallery_logo.png" style="margin-top:-10px;"/></div>
+           {% endif %}
+               </td>
+              </tr>
+            </table>
+         </td>
+         <td width="100%" align="center" valign="middle" class="rowPadding">
+           <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
+           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+- {{app.created|date:"M d, Y"}} 
+        <!-- - 
+         <span class="gray">
+           <img src="/static/img/{{ app.avg_rating }}-star-rating.png" alt="{{ app.avg_rating }} stars"/>
+           &nbsp;&nbsp;
+         </span> -->
+        <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
+        <div align="left">
+           <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
+           <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
+        </div>
+      {% if app.author_name %}
+           <div style="color:gray;padding-top:3px" align="left">
+        {% ifequal app.author_name user %}
+           <form action="/delete.do" method="post">
+            <button type="submit" value="Delete" style="background-color:white;border:0px;color:#00c;text-decoration:underline">Delete</a>
+            <input type="hidden" name="app_id" value="{{app.key.id|escape}}">
+           </form>
+        {% endifequal %}
+           </div>
+     {% endif %}
+         </td>
+      </tr>
+    </table>
+   {% endfor %}
+{% include "asterisk.html" %}
+<!-- Comments -->
+   <div style="horizontal-align:right;padding-top:10px;"><a href="/recent">More »</a></div>
+</div>
+</div>
+</div>
+<div id="bottom">
+  <p class="backlink">
+ &nbsp;
+  </p>
+</div>
+<script>
+  function hide(div_id) {
+    var e = document.getElementById(div_id);
+    e.style.display = "none";
+  }
+
+  function show(div_id) {
+    var e = document.getElementById(div_id);
+    e.style.display = "block";
+  }
+</script>
+{% endblock %}

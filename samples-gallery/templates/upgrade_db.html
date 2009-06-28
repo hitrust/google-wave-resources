@@ -1,0 +1,30 @@
+{% extends "basegallery.html" %}
+
+{% block head %}
+{% if continue %}
+<meta http-equiv="refresh" content="0;url=/upgradedb"/>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+
+<div id="body"> 
+<div id="container">
+<h1 class="page_title">Database Upgrade</h1>
+{% if continue %}
+<p>Processing...</p>
+{% else %}
+<p>All done!</p>
+{% endif %}
+
+
+  <br>
+  </div>
+<div id="bottom">
+  <p class="backlink">
+   <a href="/">« Back toto {{title}}</a>
+  </p>
+</div> 
+
+{% endblock %}
+

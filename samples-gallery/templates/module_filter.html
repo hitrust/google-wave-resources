@@ -1,0 +1,21 @@
+<div class="module" id="categories">
+    <h3> Filter {{app_name|lower}}s</h3>
+    <table class="rec" border="0" cellpadding="0" cellspacing="0" width="100%">
+       <tbody>
+          <tr>
+            <td>
+              <ul>
+              {% for api in apis %}
+                <li><a href="/results?api={{api|escape}}">{{api}}</a></li>
+              {% endfor %}
+              </ul>
+              <ul>
+              {% for language in languages%}
+                <li><a href="/results?language={{language|escape}}">{{language}}</a></li>
+              {% endfor %}
+            </td>
+         </tr>
+       </tbody>
+     </table>
+</div>
+<div class="clear">&nbsp;</div>
