@@ -1,0 +1,98 @@
+               <tr>
+                 <td nowrap style="padding:2px">Author Name:</td>
+                 <td style="padding:2px"> <input class="input" name="author_name" size="50" {% if app.author_name %}value="{{app.author_name|escape}}"{% endif %}></input></div></td>
+               </tr>
+               <tr>
+                 <td nowrap style="padding:2px">Author URL:</td>
+                 <td style="padding:2px"> <input class="input" name="author_url" size="50" {% if app.author_url %}value="{{app.author_url|escape}}"{% endif %}></input></div></td>
+               </tr>
+                {% if is_admin %}
+               <tr>
+                 <td nowrap style="padding:2px">Author is Googler?:</td>
+                 <td style="padding:2px"> <input type="checkbox" name="author_googler" size="50" {% if app.author_googler %} checked="yes" {% endif %}></input></div></td>
+               </tr>
+                {% endif %}
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                 <td nowrap style="padding:2px">Sample Name:*</td>
+                 <td style="padding:2px"> <input class="input" name="title" size="50" {% if app.title %}value="{{app.title|escape}}"{% endif %}></input></div></td>
+               </tr>
+               <tr>    
+                 <td nowrap style="padding:2px">Sample Description:*</td>
+                 <td style="padding:2px"> <TEXTAREA name="content" cols="50" rows="5" class="input textareaSubmitPage">{% if app.description %}{{app.description|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+               <tr>
+                   <td nowrap style="padding:2px;width:175px;">Technical Details:</td>
+                   <td style="padding:2px" > <TEXTAREA name="tech_details" cols="50" rows="5" class="input textareaSubmitPage">{% if app.tech_details %}{{app.tech_details|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+               <tr>
+                 <td nowrap style="padding:2px">Source URL:*</td>
+                 <td style="padding:2px;margin-left:5px"><input class="input" name="source_url" size="50"{% if app.source_url %}value="{{app.source_url|escape}}"{% endif %}></td>
+               </tr>
+               <tr>
+                  <td nowrap style="padding:2px">Tags (comma separated):</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="tags" size="50" {% if app.tags %}value="{% for t in app.tags %}{{t|escape}},{% endfor %}"{% endif %}></td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                  <td nowrap style="padding:2px">APIs Used:</td>
+                  <td style="padding:2px;margin-left:5px">
+                    <input type="checkbox" name="apis" {% if Robots %} checked = true {% endif %} value="Robots">Robots
+                    <input type="checkbox" name="apis" {% if Gadgets %} checked = true {% endif %} value="Gadgets">Gadgets
+                    <input type="checkbox" name="apis" {% if Embed %} checked = true {% endif %} value="Embed">Embed
+                  </td>
+               </tr>
+               <tr>
+                  <td nowrap style="padding:2px">Languages Used:</td>
+                  <td style="padding:2px;margin-left:5px">
+                    <input type="checkbox" name="languages" {% if Java %} checked = true {% endif %} value="Java">Java
+                    <input type="checkbox" name="languages" {% if Python %} checked = true {% endif %} value="Python">Python
+                    <input type="checkbox" name="languages" {% if JavaScript %} checked = true {% endif %} value="JavaScript">JavaScript
+                    <input type="checkbox" name="languages" {% if ActionScript %} checked = true {% endif %} value="ActionScript">ActionScript
+                  </td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                  <td>Sample Wave/Page:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="url" size="50" {% if app.url %}value="{{app.url|escape}}"{% endif %}></td>
+               </tr>
+               <tr><td colspan="2"><em>To make a Wave public (to anyone with access), add public@a.gwave.com to it. </em></td></tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                  <td>Robot Address:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="robot_email" size="50" {% if app.robot_email %}value="{{app.robot_email|escape}}"{% endif %}></td>
+               </tr>
+               <tr>
+                  <td>Gadget XML:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="gadget_xml" size="50" {% if app.gadget_xml %}value="{{app.gadget_xml|escape}}"{% endif %}></td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+                {% if is_admin %}
+               <tr>
+                  <td nowrap style="padding:2px;width:175px;">Admin Tags:</td>
+                <td style="padding:2px;margin-left:5px"><input class="input" name="admin_tags" size="50" value="{{app.admin_tags|join:","|escape}}"></td>
+                </tr>
+                {% endif %}
+
+<script language="JavaScript">
+ var frmvalidator  = new Validator("createapp");
+ frmvalidator.addValidation("title","maxlen=500",
+                            "Max length for the title is 500 characters.");
+ frmvalidator.addValidation("title","req",
+                            "Title is required.");
+ frmvalidator.addValidation("content","maxlen=500",
+                            "Max length for the description is 500 characters.");
+ frmvalidator.addValidation("tech_details","maxlen=500",
+                            "Max length for tech details is 500 characters.");
+ frmvalidator.addValidation("content","req",
+                            "Description is required.");
+ frmvalidator.addValidation("source_url","maxlen=500",
+                            "Max length for the Source URL is 500 characters");
+ frmvalidator.addValidation("source_url","req",
+                            "Source URL is required.");
+ frmvalidator.addValidation("tags","maxlen=500",
+                            "Max length for the tags is 500 characters");
+ frmvalidator.addValidation("author_name","maxlen=500",
+                            "Max length for the authors name is 500 characters.");
+ frmvalidator.addValidation("author_name","req","Author name is required.");
+</script>

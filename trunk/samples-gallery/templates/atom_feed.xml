@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+  <title>{{ feed.title|escape }}</title>
+  <id>{{ feed.id }}</id>
+  <updated>{{ feed.updated }}</updated>
+  {% for entry in feed.entries %}
+  <entry>
+    <content type="html">&lt;div class="project"&gt;&lt;div
+    class="screenshot"&gt; &lt;a
+    href="{{ entry.app_url|escape }}"
+    rel="nofollow"&gt;&lt;img
+    src="{{ entry.ss_url|escape }}"
+    alt="Screenshot"&gt;&lt;/a&gt;
+    &lt;/div&gt; &lt;div class="info"&gt; &lt;div
+    class="name"&gt;&lt;a
+    href="{{ entry.app_url}}"
+    rel="nofollow"&gt;{{ entry.title|escape }}&lt;/a&gt;&lt;/div&gt;&lt;div
+    class="author"&gt;Author: {{ entry.author.name|escape }}&lt;/div&gt;&lt;div
+    class="apis"&gt;{{ entry.description|escape }}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</content>
+    <id>{{ entry.id|escape }}</id>
+    <author>
+      <name>{{ entry.author.name|escape }}</name>
+      <email>{{ entry.author.email|escape }}</email>
+    </author>
+    <link href="{{ entry.app_url }}"
+    rel="alternate" />
+    <updated>{{ entry.updated|escape }}</updated>
+    <published>{{ entry.published|escape }}</published>
+    <title>{{ entry.title|escape }}</title>
+    <media:group>
+      <media:content url="{{ entry.ss_url|escape }}" />
+      <media:thumbnail url="{{ entry.icon_url|escape }}" />
+    </media:group>
+  </entry>
+  {% endfor %}
+</feed>
