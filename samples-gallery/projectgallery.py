@@ -96,7 +96,7 @@ class BaseHandler(webapp.RequestHandler):
       reason: The optional reason to include why the application was rejected.
     """
     template_name = 'reject_email.html'
-    subject = 'Application rejected'
+    subject = 'Sample denied inclusion in gallery'
     
     body = self.renderEmail(app, template_name, { 'reason':reason })
     receiver_email = app.author.email()
@@ -173,35 +173,29 @@ class MainPage(BaseHandler):
 
     Displays a featured app, editors picks, etc.
     """
-
     values = memcache.get('homepage')
-    
-    if not values:
-      # get 5 editor's picks
-      query = self.queryApp()
-      query.filter('admin_tags =', 'editor')
-      #query.order('-avg_rating').order('-total_ratings')
-      top_apps = query.fetch(5)
 
+    if not values:
       # get 5 recent apps
       query = self.queryApp()
       query.order('-created')
-
-      recent_apps = query.fetch(5)
+      recent_apps = query.fetch(6)
+      next = recent_apps[-1].index
+      recent_apps = recent_apps[:-1]
 
       # get 1 featured application
       query = self.queryApp()
       query.filter('admin_tags =', 'featured')
       featured = query.fetch(1)
-    
+
       values = {
+        'next': next,
         'featured': featured,
-        'top_apps': top_apps,
         'recent_apps': recent_apps,
         'title': GALLERY_TITLE,
       }
-      
-      memcache.set('homepage', values, 600)
+
+      memcache.set('homepage', values, 300)
 
     self.generate('index.html', values)
 
@@ -667,7 +661,7 @@ class RecentAppsHandler(BaseHandler):
 
     # Grab the args from the request
     start = self.request.get('start')
-    
+
     if not start:
       start = 0
     else:
@@ -678,7 +672,7 @@ class RecentAppsHandler(BaseHandler):
 
     if start == 0:
       cacheable = True
-      
+
       values = memcache.get(cache_key)
 
     if not values:
@@ -704,12 +698,12 @@ class RecentAppsHandler(BaseHandler):
 
       values = {'apps' : apps,
                 'total' : len(apps),
-                'start' : start, 
-                'next' : next, 
+                'start' : start,
+                'next' : next,
                 'prev' : prev,
                 'num' : 5,
-                'q_type' : 'recentapps', 
-                'q' : "true", 
+                'q_type' : 'recentapps',
+                'q' : "true",
                 'label' : "Recent " + GALLERY_APP_NAME + 's',
                 'title' : 'Recent ' + GALLERY_APP_NAME + 's', 
                 }

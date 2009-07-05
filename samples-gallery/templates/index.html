@@ -78,7 +78,7 @@
   <div id="topContainer">
   <div id="topRated">
     <h3>Most Recent {{app_name}}s <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
-    
+
   <div class="featuredHeader"></div>
    {% for app in recent_apps %}
      <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5">
@@ -126,7 +126,7 @@
    {% endfor %}
 {% include "asterisk.html" %}
 <!-- Comments -->
-   <div style="horizontal-align:right;padding-top:10px;"><a href="/recent">More »</a></div>
+   <div style="horizontal-align:right;padding-top:10px;"><a href="/recent?recentapps=true&amp;start={{ next}}&amp;num=5">More »</a></div>
 </div>
 </div>
 </div>
