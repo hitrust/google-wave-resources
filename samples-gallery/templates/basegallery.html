@@ -108,6 +108,10 @@
 <div class="g-unit" id="gc-pagecontent">
 {% block body %}
 {% endblock %}
+<div style="display:none;" class="middlecontent" id="cse_results_outer">
+ <h1 class="page_title">Search Results</h1>
+ <div style="padding-top:10px;overflow:hidden;" id="cse_results"></div>
+</div>
 </div><!-- end gc-pagecontent -->
 
 </div><!-- end gooey wrapper -->
@@ -142,6 +146,15 @@ var pageTracker = _gat._getTracker("UA-5079855-3");
 pageTracker._trackPageview();
 } catch(err) {}</script>
 
+<style type="text/css">
+.gsc-tabsArea {
+  background:none;
+  border-top:none;
+}
+.gsc-tabHeader.gsc-tabhActive {
+  display: none;
+}
+</style>
 </body>
 </html>
 

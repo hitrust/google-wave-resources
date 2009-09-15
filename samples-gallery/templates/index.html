@@ -20,12 +20,13 @@
        </tbody>
      </table>
 </div>
+{% include "module_search.html" %}
 {% include "module_filter.html" %}
 <div class="clear">&nbsp;</div>
-</div>
+</div> <!-- end sidebar -->
 
 <div id="body"> 
-<div id="container">
+<div id="container" class="middlecontent">
   <h1 class="page_title">{{title}}</h1>
   <div style="float:left;max-width:650px;overflow:hidden">
   <h3><b> Featured {{app_name}}</b> <a href="/feeds/apps/featured"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
@@ -134,6 +135,8 @@
   <p class="backlink">
  &nbsp;
   </p>
+</div>
+</div>
 </div>
 <script>
   function hide(div_id) {

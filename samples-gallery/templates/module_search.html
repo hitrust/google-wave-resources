@@ -1,0 +1,18 @@
+<div class="module">
+    <h3> Search {{app_name|lower}}s</h3>
+<div id="cse_searchbox" style="width:265px;">Loading</div>
+</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1');
+  google.setOnLoadCallback(function(){
+    var options = new google.search.DrawOptions();
+    options.setSearchFormRoot('cse_searchbox');
+    var control = new google.search.CustomSearchControl('008586021709508157834:apmtonzo_ew');
+    control.draw('cse_results', options);
+    control.setSearchCompleteCallback(this, function() {
+      document.getElementById("container").style.display = "none";
+      document.getElementById("cse_results_outer").style.display = "block";
+    });
+  }, true);
+</script>
