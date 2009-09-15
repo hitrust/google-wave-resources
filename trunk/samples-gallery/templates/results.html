@@ -2,10 +2,8 @@
 {% block body %}
 {% include "sidebar.html" %}
 
-<div id="body"> 
- <div id="container">
+ <div id="container" class="middlecontent">
   <h1 class="page_title">Search Results - {{label|escape}}</h1>
-
   <div style="padding-top:10px" id="searchresults">
    {% for app in apps %}
      <table width="100%" style="margin-bottom:2.5em" border="0" cellspacing="0" cellpadding="5" repeat="true" >
@@ -82,11 +80,8 @@
 {% endifequal %}
 
 
-  </div>
-
 {% include "backto.html" %}
 </div>
-
 <script>
   function hide(div_id) {
     var e = document.getElementById(div_id);
@@ -99,4 +94,5 @@
   }
 </script>
 
+</div>
 {% endblock %}

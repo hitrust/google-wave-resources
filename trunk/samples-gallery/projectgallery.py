@@ -101,7 +101,24 @@ class BaseHandler(webapp.RequestHandler):
     body = self.renderEmail(app, template_name, { 'reason':reason })
     receiver_email = app.author.email()
     sender_email = users.get_current_user().email()
-    
+
+    mail.send_mail(sender_email, receiver_email, subject, body, 
+      bcc=self.MODERATION_EMAIL)
+
+  def sendUserApprovalEmail(self, app, reason=''):
+    """Sends the user an e-mail indicating their application has been
+    approved.
+
+    Args:
+      app: The db_models.Application instance the e-mail is about.
+    """
+    template_name = 'approve_email.html'
+    subject = 'Sample approved in gallery'
+
+    body = self.renderEmail(app, template_name)
+    receiver_email = app.author.email()
+    sender_email = users.get_current_user().email()
+
     mail.send_mail(sender_email, receiver_email, subject, body, 
       bcc=self.MODERATION_EMAIL)
     
@@ -266,7 +283,7 @@ class AboutAppHandler(BaseHandler):
       aba_apps = query.fetch(5)
      
       values = {
-        'title': GALLERY_APP_NAME + ' Details',
+        'title': GALLERY_APP_NAME + ' Details - ' + app.title,
         'app': app,
         'comments': comments,
         'num_comments': num_comments,
@@ -408,6 +425,7 @@ class NewAppActionHandler (BaseHandler):
         source_url = "http://" + source_url
       robot_email = self.request.get('robot_email')
       gadget_xml = self.request.get('gadget_xml')
+      video_url = self.request.get('video_url')
       apis_list = self.request.get_all('apis')
       languages_list = self.request.get_all('languages')
       tags_str = self.request.get('tags').replace(" ", "")
@@ -427,6 +445,7 @@ class NewAppActionHandler (BaseHandler):
       app.url = url
       app.robot_email = robot_email
       app.gadget_xml = gadget_xml
+      app.video_url = video_url
 
       if (len(self.request.get('thumbnail')) > 1000000 or
           len(self.request.get('screenshot')) > 1000000):
@@ -512,6 +531,7 @@ class EditAppActionHandler (BaseHandler):
       app.tags = tags_str.strip().split(',')
       app.robot_email = self.request.get('robot_email')
       app.gadget_xml = self.request.get('gadget_xml')
+      app.video_url = self.request.get('video_url')
 
       if self.request.get('updatedthumbnail'):
         thumb = self.request.get('thumbnail')
@@ -938,6 +958,7 @@ class ModerationHandler (BaseHandler):
       if app and action:
         if action == "approve":
           app.moderation_status = db_models.Application.APPROVED
+          self.sendUserApprovalEmail(app)
         elif action == "reject":
           app.moderation_status = db_models.Application.REJECTED
           self.sendUserRejectionEmail(app, self.request.get('reason'))

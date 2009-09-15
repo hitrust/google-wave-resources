@@ -56,7 +56,7 @@
                   <td>Sample Wave/Page:</td>
                   <td style="padding:2px;margin-left:5px"><input class="input" name="url" size="50" {% if app.url %}value="{{app.url|escape}}"{% endif %}></td>
                </tr>
-               <tr><td colspan="2"><em>To make a Wave public (to anyone with access), add public@a.gwave.com to it. </em></td></tr>
+               <tr><td style="padding-left:10px;" colspan="2"><em>To make a Wave public (to anyone with access), add public@a.gwave.com to it and copy the URL from the status bar. </em></td></tr>
                <tr><td style="" colspan="2">&nbsp;</td></tr>
                <tr>
                   <td>Robot Address:</td>
@@ -66,6 +66,12 @@
                   <td>Gadget XML:</td>
                   <td style="padding:2px;margin-left:5px"><input class="input" name="gadget_xml" size="50" {% if app.gadget_xml %}value="{{app.gadget_xml|escape}}"{% endif %}></td>
                </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                  <td>Youtube Video ID:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="video_url" size="50" {% if app.video_url %}value="{{app.video_url|escape}}"{% endif %}></td>
+               </tr>
+               <tr><td style="padding-left:10px" colspan="2"><em>To easily make a screencast of your app, try using <a href="http://www.jingproject.com">Jing</a> or other free screen capture software, and then upload it to Youtube. </em></td></tr>
                <tr><td style="" colspan="2">&nbsp;</td></tr>
                 {% if is_admin %}
                <tr>

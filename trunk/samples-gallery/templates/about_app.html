@@ -5,8 +5,8 @@
 {% include "sidebar.html" %}
 
 <!-- Main Content -->
-<div id="container">
-  <h1 class="page_title">{{title}}</h1>
+<div id="container" class="middlecontent">
+  <h1 class="page_title">Sample Details</h1>
 <div id="app-info">
 <table width="100%">
   <tbody>
@@ -19,17 +19,25 @@
       {% if app.author_googler %}&nbsp; <img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
       - {{app.created|date:"M d, Y"}}
       </p>
+       <div style="float:left">
       <p><a href="{{app.url|escape}}">
        {% if app.screenshot %}
         <img src="/images?img_id={{app.key.id|escape}}&amp;img_type=screenshot" alt="{{app.title|escape}}" class="thumb, largeThumbnail"/>
        {% else %}
        {% if app.thumbnail %}
-        <div align="left"><img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail"/></div>
+        <img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail"/>
        {% else %}
-        <div align="left"><img src="/static/img/project_gallery_logo.png"/></div>
+        <img src="/static/img/project_gallery_logo.png"/>
        {% endif %}
        {% endif %}
        </a></p>
+       </div>
+       {% if app.video_url %}
+       <div style="float:left; border:2px solid #CCCCCC; margin-left:10px; padding:1px">
+    <object width="300" height="200"><param name="movie" value="http://www.youtube.com/v/{{app.video_url}}&hl=en&fs=1&showinfo=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{app.video_url}}&hl=en&fs=1&showinfo=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="300" height="200"></embed></object>
+       </div>
+       {% endif %}
+       <div style="clear:both"></div>
        <p>{{app.description|escape}}</p> 
        <p>{{app.tech_details}}</p>
 
