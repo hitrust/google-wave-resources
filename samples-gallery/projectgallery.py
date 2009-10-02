@@ -609,7 +609,7 @@ class SearchResultsHandler(BaseHandler):
     if not values:
       query = self.queryApp()
       prev_query = self.queryApp()
-      query.order('-rated_index')
+      query.order('-index')
       
       if tag:
         query.filter('tags = ', tag)
@@ -644,17 +644,17 @@ class SearchResultsHandler(BaseHandler):
         return
  
       if start != "0":
-        prev_query.order('rated_index')
-        prev_query.filter('rated_index >', start)
+        prev_query.order('index')
+        prev_query.filter('index >', start)
         prev_results = prev_query.fetch(num)
         if prev_results:
-          prev = prev_results[-1].rated_index
+          prev = prev_results[-1].index
           
-        query.filter('rated_index <=', start)
+        query.filter('index <=', start)
       
       results = query.fetch(num + 1)
       if len(results) == num + 1:
-        next = results[-1].rated_index
+        next = results[-1].index
         apps = results[:-1]
       else:
         next = None
@@ -947,9 +947,15 @@ class GetUrlsHandler(BaseHandler):
     query = self.queryApp()
     apps = query.fetch(1000)
     emails = {}
+    print "<html><body>"
     for app in apps:
-      print app.source_url + "\n"
- 
+      url = app.source_url
+      if url.find("code.google.com/p") > -1:
+        urlSplit = url.partition("/p/")
+        url = "http://" + urlSplit[2].partition("/")[0] + ".googlecode.com/svn/trunk/"
+      print url + "<br>"
+    print "</body></html>"
+
 class GetEmailsHandler(BaseHandler):
   def get(self):
     query = self.queryApp()
@@ -1027,7 +1033,7 @@ application = webapp.WSGIApplication (
    ('/feeds/apps/all', RecentFeedHandler),
    ('/moderate', ModerationHandler),
    ('/getemails', GetEmailsHandler),
-   ('/geturls', GetEmailsHandler),
+   ('/geturls', GetUrlsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
    ('/',MainPage)], debug=DEBUG)
 

@@ -20,6 +20,14 @@ indexes:
   - name: total_ratings
     direction: desc
 
+# Used once in query history.
+- kind: Application
+  properties:
+  - name: apis
+  - name: moderation_status
+  - name: index
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: Application
   properties:
@@ -179,7 +187,7 @@ indexes:
   - name: application
   - name: index
 
-# Used 41 times in query history.
+# Used 44 times in query history.
 - kind: Comment
   properties:
   - name: application
