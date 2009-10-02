@@ -44,12 +44,15 @@
          <div align="left">
            <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
            <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
+           {% if app.installer_xml %}
+           | <a href="{{app.installer_xml|escape}}">Installer XML</a>
+           {% endif %}
          </div>
-        {% if app.robot_email %}
-        <p>Robot Address: <a href="{{app.robot_email|escape}}">{{app.robot_email|escape}}</a></p>
-        {% endif %}
         {% if app.gadget_xml %}
-        <p>Gadget XML: <a href="{{app.gadget_xml|escape}}">{{app.gadget_xml|escape}}</a></p>
+        <p><a href="{{app.gadget_xml|escape}}">Gadget XML</a></p>
+        {% endif %}
+        {% if app.robot_email %}
+        <p>Robot Address: {{app.robot_email|escape}}</p>
         {% endif %}
         <p><b>APIs</b>: {{app.apis|join:", "|escape}}</p>
         <p><b>Languages</b>: {{app.languages|join:", "|escape}}</p>
@@ -67,6 +70,14 @@
            </div>
         {% endif %}
         {% if is_admin %}
+            <br>
+            Thumbnail:<br> 
+           {% if app.thumbnail %}
+           <img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail"/>
+           {% else %}
+           <img src="/static/img/project_gallery_logo.png"/>
+           {% endif %}
+
            <p> Tags:
            {% for t in app.admin_tags %}
            <a href="/results?q={{t|escape}}">{{t|escape}}</a>
@@ -91,6 +102,7 @@
             <input type="hidden" name="app_id" value="{{app.key.id|escape}}" />
             <input type="hidden" name="moderate_action" value="reject"/>
             <textarea name="reason" class="input textareaSubmitPage"></textarea>
+            <br>
             <button type="submit" value="Reject" style="background-color:white;border:0px;color:#00c;padding:0px;cursor:pointer"><span style="text-decoration: underline !important">Reject</span></button>
            </form>
            </div>
@@ -134,7 +146,7 @@
        </span>
        <input id="star_value" name="star_rating" value="0" type="hidden">
        <input name="app_id" value="{{app.key.id|escape}}" type="hidden">
-        
+
       </p>
       <p>
         <input value="Post Comment" type="submit">&nbsp;
@@ -145,7 +157,7 @@
      </div>
    <div id="cp_1">
      {% for c in comments %}
-  
+
      <div class="comment">
        <p>
          <b>{{c.title|escape}}</b>&nbsp;&nbsp; 
