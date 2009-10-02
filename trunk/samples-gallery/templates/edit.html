@@ -18,6 +18,7 @@
                  </td>
                </tr>
               {% include "form.html" %}
+              {% ifequal app.type "app" %}
                <tr id="thumbnail">
                  <td nowrap style="padding:2px;width:175px;">Current Thumbnail:</td>
                  <td style="padding:2px;margin-left:5px">{% if app.thumbnail %}<img src="/images?img_id={{app.key.id}}&amp;img_type=thumbnail" width="120" onLoad="if (this.width > 120) {this.height = this.height * (120/this.width);this.width = 300;} this.style.display='inline';"
@@ -36,6 +37,7 @@ display="none"/>{% else %}<img src="/static/img/project_gallery_logo.png" style=
                  <td nowrap style="padding:2px;width:175px;">Update Screenshot (300x200):</td>
                  <td style="padding:2px;margin-left:5px"><div class="fileinputs"><input class="file" type="file" name="screenshot" size="45" onchange="updateEditStatus('ss')"></div></td>
                </tr>
+              {% endifequal %}
                <tr>
                  <td style="padding-top:25px">
                    <input type="hidden" name="app_id" value="{{app.key.id}}" />

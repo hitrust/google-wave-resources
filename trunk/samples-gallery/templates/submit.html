@@ -1,16 +1,14 @@
 {% extends "basegallery.html" %}
 {% block body %}
-<script language="JavaScript" src="/static/js/gen_validatorv2.js" type="text/javascript"></script>
-
 <div id="container" class="middlecontent">
 <h1 class="page_title">Share Your {{app_name}}</h1>
   <div style="display:none;padding-top:10px;overflow:hidden;" id="cse_results"></div>
 <br/>
-<p>Want to inspire and help other developers by sharing your {{app_name}}?
-Use the form below to submit your {{app_name}} to the gallery.</p>
+<p>Want to inspire and help other developers by sharing your {{app_name|lower}}?
+Use the form below to submit your {{app_name|lower}} to the gallery.</p>
 <p>Fields marked with * are required.</p>
 
-  <form action="/submit.do" enctype="multipart/form-data" method="post" name="createapp">
+  <form action="/submit.do" id="submit" enctype="multipart/form-data" method="post" name="createapp">
       <div id="form" style="padding-top:10px;width:75%">
              <table>
                <tr>
@@ -19,11 +17,11 @@ Use the form below to submit your {{app_name}} to the gallery.</p>
                  </td>
                </tr>
               {% include "form.html" %}
-               <tr>
+               <tr class="app-class">
                   <td nowrap style="padding:2px">Thumbnail (120x60):</td>
                   <td style="padding:2px;margin-left:5px"><div class="fileinputs"><input type="file" name="thumbnail" size="45"></div></td>
                </tr>
-               <tr>
+               <tr class="app-class">
                   <td nowrap style="padding:2px">Screenshot (300x200):</td>
                   <td style="padding:2px;margin-left:5px"><div class="fileinputs"><input class="file" type="file" name="screenshot" size="45"></div></td>
                </tr>
@@ -45,6 +43,17 @@ Use the form below to submit your {{app_name}} to the gallery.</p>
   <br>
   <br>
   <br>
+<script>
+  function toggleForm(formValue) {
+    if (formValue == "code") {
+      jQuery(".code-class").show();
+      jQuery(".app-class").hide();
+    } else {
+      jQuery(".code-class").hide();
+      jQuery(".app-class").show();
+    }
+  }
+</script>
 
 {% include "backto.html" %}
   </div>

@@ -413,13 +413,13 @@ class NewAppActionHandler (BaseHandler):
       author = users.get_current_user()
       author_name = self.request.get('author_name')
       author_url = self.request.get('author_url')
+      type = self.request.get('type')
+      code_snippet = self.request.get('code_snippet').lstrip()
       description = self.request.get('content')
       tech_details = self.request.get('tech_details')
       thumbnail = self.request.get('thumbnail')
       screenshot = self.request.get('screenshot')
       url = self.request.get('url')
-      #if url and not url.startswith('http://') and not url.startswith('https://'):
-      #  url = "http://" + url
       source_url = self.request.get('source_url')
       if source_url and not source_url.startswith('http://'):
         source_url = "http://" + source_url
@@ -436,6 +436,8 @@ class NewAppActionHandler (BaseHandler):
       app.author = author
       app.author_name = author_name
       app.author_url = author_url
+      app.type = type
+      app.code_snippet = code_snippet
       app.title = title
       app.description = description
       app.tech_details = tech_details
@@ -518,10 +520,11 @@ class EditAppActionHandler (BaseHandler):
       app.title=self.request.get('title')
       app.author_name = self.request.get('author_name')
       app.author_url = self.request.get('author_url')
-      logging.info("GOOGLER?" + self.request.get('author_googler'))
+      app.type = self.request.get('type')
       if self.request.get('author_googler') == 'on':
         app.author_googler = True
       app.description = self.request.get('content')
+      app.code_snippet = self.request.get('code_snippet').lstrip()
       app.tech_details = self.request.get('tech_details')
       app.url = self.request.get('url')
       #if app.url and not app.url.startswith('http://'):
@@ -939,6 +942,13 @@ class RecentFeedHandler(FeedHandler):
     self.response.headers['Content-Type'] = 'application/atom+xml'
     self.response.out.write(feed)
 
+class GetUrlsHandler(BaseHandler):
+  def get(self):
+    query = self.queryApp()
+    apps = query.fetch(1000)
+    emails = {}
+    for app in apps:
+      print app.source_url + "\n"
  
 class GetEmailsHandler(BaseHandler):
   def get(self):
@@ -1017,6 +1027,7 @@ application = webapp.WSGIApplication (
    ('/feeds/apps/all', RecentFeedHandler),
    ('/moderate', ModerationHandler),
    ('/getemails', GetEmailsHandler),
+   ('/geturls', GetEmailsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
    ('/',MainPage)], debug=DEBUG)
 
