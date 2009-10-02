@@ -425,6 +425,7 @@ class NewAppActionHandler (BaseHandler):
         source_url = "http://" + source_url
       robot_email = self.request.get('robot_email')
       gadget_xml = self.request.get('gadget_xml')
+      installer_xml = self.request.get('installer_xml')
       video_url = self.request.get('video_url')
       apis_list = self.request.get_all('apis')
       languages_list = self.request.get_all('languages')
@@ -445,6 +446,7 @@ class NewAppActionHandler (BaseHandler):
       app.url = url
       app.robot_email = robot_email
       app.gadget_xml = gadget_xml
+      app.installer_xml = installer_xml
       app.video_url = video_url
 
       if (len(self.request.get('thumbnail')) > 1000000 or
@@ -531,7 +533,10 @@ class EditAppActionHandler (BaseHandler):
       app.tags = tags_str.strip().split(',')
       app.robot_email = self.request.get('robot_email')
       app.gadget_xml = self.request.get('gadget_xml')
+      app.installer_xml = self.request.get('installer_xml')
       app.video_url = self.request.get('video_url')
+      app.apis = self.request.get_all('apis')
+      app.languages = self.request.get_all('languages')
 
       if self.request.get('updatedthumbnail'):
         thumb = self.request.get('thumbnail')
@@ -935,6 +940,16 @@ class RecentFeedHandler(FeedHandler):
     self.response.out.write(feed)
 
  
+class GetEmailsHandler(BaseHandler):
+  def get(self):
+    query = self.queryApp()
+    apps = query.fetch(1000)
+    emails = {}
+    for app in apps:
+      emails[app.author.email()] = 1
+    for email in emails:
+      print email + ","
+
 class ModerationHandler (BaseHandler):
   """Handler for moderation queue actions."""
 
@@ -1001,6 +1016,7 @@ application = webapp.WSGIApplication (
    ('/feeds/apps/editor_picks', EditorsPicksFeedHandler),
    ('/feeds/apps/all', RecentFeedHandler),
    ('/moderate', ModerationHandler),
+   ('/getemails', GetEmailsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
    ('/',MainPage)], debug=DEBUG)
 

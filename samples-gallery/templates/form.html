@@ -59,6 +59,11 @@
                <tr><td style="padding-left:10px;" colspan="2"><em>To make a Wave public (to anyone with access), add public@a.gwave.com to it and copy the URL from the status bar. </em></td></tr>
                <tr><td style="" colspan="2">&nbsp;</td></tr>
                <tr>
+                  <td>Installer XML:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="installer_xml" size="50" {% if app.installer_xml %}value="{{app.installer_xml|escape}}"{% endif %}></td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
                   <td>Robot Address:</td>
                   <td style="padding:2px;margin-left:5px"><input class="input" name="robot_email" size="50" {% if app.robot_email %}value="{{app.robot_email|escape}}"{% endif %}></td>
                </tr>

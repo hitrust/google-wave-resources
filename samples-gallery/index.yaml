@@ -27,7 +27,7 @@ indexes:
   - name: moderation_status
   - name: rated_index
 
-# Used 11 times in query history.
+# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: apis
@@ -92,7 +92,7 @@ indexes:
   - name: moderation_status
   - name: rated_index
 
-# Used 2 times in query history.
+# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: languages
@@ -115,7 +115,7 @@ indexes:
   - name: moderation_status
   - name: created
 
-# Used 10 times in query history.
+# Used 2 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
@@ -179,7 +179,7 @@ indexes:
   - name: application
   - name: index
 
-# Used 35 times in query history.
+# Used 19 times in query history.
 - kind: Comment
   properties:
   - name: application

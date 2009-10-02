@@ -56,6 +56,7 @@ class Application(db.Model):
   source_url = db.StringProperty()
   robot_email = db.StringProperty()
   gadget_xml = db.StringProperty()
+  installer_xml = db.StringProperty()
   video_url = db.StringProperty()
   thumbnail = db.BooleanProperty(default = False)
   screenshot = db.BooleanProperty(default = False)
