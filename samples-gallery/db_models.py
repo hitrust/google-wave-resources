@@ -49,7 +49,9 @@ class Application(db.Model):
   author_url = db.StringProperty()
   author_googler = db.BooleanProperty()
 
+  type = db.StringProperty()
   title = db.StringProperty()
+  code_snippet = db.TextProperty()
   description = db.TextProperty()
   tech_details = db.TextProperty()
   url = db.StringProperty()

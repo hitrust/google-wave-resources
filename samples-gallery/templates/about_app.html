@@ -19,6 +19,7 @@
       {% if app.author_googler %}&nbsp; <img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
       - {{app.created|date:"M d, Y"}}
       </p>
+       {% ifequal app.type "app" %}
        <div style="float:left">
       <p><a href="{{app.url|escape}}">
        {% if app.screenshot %}
@@ -38,9 +39,10 @@
        </div>
        {% endif %}
        <div style="clear:both"></div>
-       <p>{{app.description|escape}}</p> 
+       {% endifequal %}
+       <p>{{app.description|escape}}</p>
+       {% ifequal app.type "app" %}
        <p>{{app.tech_details}}</p>
-
          <div align="left">
            <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
            <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
@@ -54,6 +56,10 @@
         {% if app.robot_email %}
         <p>Robot Address: {{app.robot_email|escape}}</p>
         {% endif %}
+        {%endifequal %}
+        {% ifequal app.type "code" %}
+          <pre class="prettyprint">{{app.code_snippet|escape}}</pre>
+        {% endifequal %}
         <p><b>APIs</b>: {{app.apis|join:", "|escape}}</p>
         <p><b>Languages</b>: {{app.languages|join:", "|escape}}</p>
         <p> Tags:
@@ -70,14 +76,15 @@
            </div>
         {% endif %}
         {% if is_admin %}
-            <br>
+            <hr>
+           {% ifequal app.type "app %}
             Thumbnail:<br> 
            {% if app.thumbnail %}
            <img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail"/>
            {% else %}
            <img src="/static/img/project_gallery_logo.png"/>
            {% endif %}
-
+           {% endifequal %}
            <p> Tags:
            {% for t in app.admin_tags %}
            <a href="/results?q={{t|escape}}">{{t|escape}}</a>

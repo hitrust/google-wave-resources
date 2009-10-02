@@ -82,48 +82,7 @@
 
   <div class="featuredHeader"></div>
    {% for app in recent_apps %}
-     <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5">
-       <tr>
-         <td width="120" align="center" valign="top" class="rowPadding">
-           <table width="120">
-             <tr>
-               <td>
-           {% if app.thumbnail %}
-               <div align="left"><img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail" style="margin-top:-10px;"/></div>
-           {% else %}
-               <div align="left"><img src="/static/img/project_gallery_logo.png" style="margin-top:-10px;"/></div>
-           {% endif %}
-               </td>
-              </tr>
-            </table>
-         </td>
-         <td width="100%" align="center" valign="middle" class="rowPadding">
-           <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
-           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
-- {{app.created|date:"M d, Y"}} 
-        <!-- - 
-         <span class="gray">
-           <img src="/static/img/{{ app.avg_rating }}-star-rating.png" alt="{{ app.avg_rating }} stars"/>
-           &nbsp;&nbsp;
-         </span> -->
-        <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
-        <div align="left">
-           <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
-           <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
-        </div>
-      {% if app.author_name %}
-           <div style="color:gray;padding-top:3px" align="left">
-        {% ifequal app.author_name user %}
-           <form action="/delete.do" method="post">
-            <button type="submit" value="Delete" style="background-color:white;border:0px;color:#00c;text-decoration:underline">Delete</a>
-            <input type="hidden" name="app_id" value="{{app.key.id|escape}}">
-           </form>
-        {% endifequal %}
-           </div>
-     {% endif %}
-         </td>
-      </tr>
-    </table>
+     {% include "result.html" %}
    {% endfor %}
 {% include "asterisk.html" %}
 <!-- Comments -->
