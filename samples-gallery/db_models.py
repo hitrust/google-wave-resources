@@ -41,7 +41,7 @@ class Application(db.Model):
 
   DEFAULT_SCHEMA_VERSION = 3
 
-  APIS = ['Robots', 'Gadgets', 'Embed']
+  APIS = ['Robots', 'Gadgets', 'Embed', 'Installer']
   LANGUAGES = ['Java', 'Python', 'JavaScript', 'ActionScript']
 
   author = db.UserProperty()
