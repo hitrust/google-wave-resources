@@ -13,6 +13,13 @@
               {% for language in languages%}
                 <li><a href="/results?language={{language|escape}}">{{language}}</a></li>
               {% endfor %}
+              </ul>
+              <ul>
+                <li><a href="/results?google=True">
+                By Google</a>
+                <img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">
+                </li>
+              </ul>
             </td>
          </tr>
        </tbody>

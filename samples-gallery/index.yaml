@@ -68,6 +68,14 @@ indexes:
   - name: rated_index
     direction: desc
 
+# Used 10 times in query history.
+- kind: Application
+  properties:
+  - name: author_googler
+  - name: moderation_status
+  - name: index
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: Application
   properties:
@@ -91,6 +99,14 @@ indexes:
   - name: category
   - name: moderation_status
   - name: rated_index
+    direction: desc
+
+# Used once in query history.
+- kind: Application
+  properties:
+  - name: languages
+  - name: moderation_status
+  - name: index
     direction: desc
 
 # Unused in query history -- copied from input.
@@ -136,7 +152,7 @@ indexes:
   - name: moderation_status
   - name: index
 
-# Unused in query history -- copied from input.
+# Used 2 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
@@ -187,7 +203,7 @@ indexes:
   - name: application
   - name: index
 
-# Used 44 times in query history.
+# Used 49 times in query history.
 - kind: Comment
   properties:
   - name: application

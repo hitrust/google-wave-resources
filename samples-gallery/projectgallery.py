@@ -576,6 +576,7 @@ class SearchResultsHandler(BaseHandler):
     language = self.request.get('language')
     tag = self.request.get('q')
     topapps = self.request.get('topapps')
+    google = self.request.get('google')
     try:
       author = users.User(self.request.get('author'))
     except users.UserNotFoundError:
@@ -639,6 +640,13 @@ class SearchResultsHandler(BaseHandler):
         q_type = "author"
         q = author.email()
         label = 'Author: %s' % author.email()
+      elif google:
+        query.filter('author_googler =', True)
+        prev_query.filter('author_googler =', True)
+        q_type = "google"
+        q = "google"
+        label = "By Google"
+
       else: #default to most recent apps. 
         self.redirect('/recent')
         return
@@ -932,7 +940,7 @@ class RecentFeedHandler(FeedHandler):
     
     if not feed:
       query = self.queryApp()
-      query.order('created')
+      query.order('-created')
       apps = query.fetch(25)
 
       feed_id = 'http://%s/feeds/apps/all' % self.request.host
