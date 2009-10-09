@@ -20,14 +20,14 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Used 2 times in query history.
+# Used 7 times in query history.
 - kind: Application
   properties:
   - name: apis
   - name: moderation_status
   - name: index
 
-# Used 4 times in query history.
+# Used 16 times in query history.
 - kind: Application
   properties:
   - name: apis
@@ -146,20 +146,20 @@ indexes:
   - name: moderation_status
   - name: created
 
-# Used 2 times in query history.
+# Used 5 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: created
     direction: desc
 
-# Unused in query history -- copied from input.
+# Used 2 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: index
 
-# Unused in query history -- copied from input.
+# Used 2 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
@@ -210,7 +210,7 @@ indexes:
   - name: application
   - name: index
 
-# Used 35 times in query history.
+# Used 36 times in query history.
 - kind: Comment
   properties:
   - name: application

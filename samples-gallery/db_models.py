@@ -55,6 +55,7 @@ class Application(db.Model):
   description = db.TextProperty()
   tech_details = db.TextProperty()
   url = db.StringProperty()
+  api_usage = db.StringProperty()
   source_url = db.StringProperty()
   robot_email = db.StringProperty()
   gadget_xml = db.StringProperty()
