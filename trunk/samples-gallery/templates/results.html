@@ -5,53 +5,20 @@
  <div id="container" class="middlecontent">
   <h1 class="page_title">Search Results - {{label|escape}}</h1>
   <div style="padding-top:10px" id="searchresults">
+{% ifequal total 0 %}
+There are no matching results
+{% else %}
+  {% include "pager.html" %}
    {% for app in apps %}
      {% include "result.html" %}
    {% endfor %}
-{% include "asterisk.html" %}
-<!-- Comments -->
-
-{% ifequal total 0 %}
-<div>
-<table>
-  <tr>
-     <td align="center">There are no matching results</td>
-  </tr>
-</table>
-</div>
-{% else %}
-<div id="pager">
-<table class="pager">
-  <tr class="text">
-    <td class="prevnext" style="padding-right:5px;">
-      {% if prev %}
-        <a href="{{ request.path }}?{{q_type}}={{q|escape}}&amp;start={{ prev }}&amp;num={{ num }}">Previous</a>
-      {% endif %}
-    </td>
-    <td class="prevnext">
-      {% if next %}
-        <a href="{{ request.path }}?{{q_type}}={{q|escape}}&amp;start={{ next }}&amp;num={{ num }}">Next</a>
-      {% endif %}
-    </td>
-  </tr>
-</table>
-</div>
+  {% include "pager.html" %}
 {% endifequal %}
 
+{% include "asterisk.html" %}
 
 {% include "backto.html" %}
 </div>
-<script>
-  function hide(div_id) {
-    var e = document.getElementById(div_id);
-    e.style.display = "none";
-  }
-
-  function show(div_id) {
-    var e = document.getElementById(div_id);
-    e.style.display = "block";
-  }
-</script>
 
 </div>
 {% endblock %}

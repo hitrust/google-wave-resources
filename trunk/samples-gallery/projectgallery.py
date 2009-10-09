@@ -441,6 +441,7 @@ class NewAppActionHandler (BaseHandler):
       app.title = title
       app.description = description
       app.tech_details = tech_details
+      app.api_usage = self.request.get('api_usage')
       app.source_url = source_url
       app.tags = tags
       app.apis = apis_list
@@ -528,6 +529,7 @@ class EditAppActionHandler (BaseHandler):
       app.description = self.request.get('content')
       app.code_snippet = self.request.get('code_snippet').lstrip()
       app.tech_details = self.request.get('tech_details')
+      app.api_usage = self.request.get('api_usage')
       app.url = self.request.get('url')
       #if app.url and not app.url.startswith('http://'):
       #  app.url = "http://" + app.url
@@ -657,6 +659,7 @@ class SearchResultsHandler(BaseHandler):
         self.redirect('/recent')
         return
 
+      count = query.count(300)
       if start > 0:
         prev_query.filter('index >', start)
         prev_results = prev_query.fetch(num)
@@ -679,6 +682,7 @@ class SearchResultsHandler(BaseHandler):
             'q_type' : q_type,
             'num' : num,
             'q' : q,
+            'count': count,
             'label' : label }
 
       if cacheable:
