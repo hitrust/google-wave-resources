@@ -450,6 +450,8 @@ class NewAppActionHandler (BaseHandler):
       app.gadget_xml = gadget_xml
       app.installer_xml = installer_xml
       app.video_url = video_url
+      if users.is_current_user_admin():
+        app.moderation_status = db_models.Application.APPROVED
 
       if (len(self.request.get('thumbnail')) > 1000000 or
           len(self.request.get('screenshot')) > 1000000):
@@ -564,10 +566,9 @@ class SearchResultsHandler(BaseHandler):
   
   def get(self):
     """Handler for GET requests to search applications in the datastore."""
-    
-    MAX_NUM = 25 # maximum number of results to return based on query string
+
     DEFAULT_NUM = 5
-    
+
     cache_key = None
     cacheable = False
 
@@ -581,37 +582,42 @@ class SearchResultsHandler(BaseHandler):
       author = users.User(self.request.get('author'))
     except users.UserNotFoundError:
       author = None
-    
+
     values = None
     start = None
     prev = None
-    
+
     # Grab the args from the request
     start = self.request.get('start')
-    
+
     if not start:
-      start = "0"
+      start = 0
+    else:
+      try:
+        start = int(start)
+      except ValueError:
+        start = 0
 
     # custom page sizes are overrated and hard to cache.
     num = DEFAULT_NUM
 
-    
     if topapps:
       cache_key = 'topapps'
     elif api:
       cache_key = 'api_' + api
     elif language:
       cache_key = 'language_' + language
-      
-    if start == "0" and num == DEFAULT_NUM and cache_key:
+
+    if start == 0 and num == DEFAULT_NUM and cache_key:
       cacheable = True
       values = memcache.get(cache_key)
-    
+
     if not values:
       query = self.queryApp()
       prev_query = self.queryApp()
       query.order('-index')
-      
+      prev_query.order('index')
+
       if tag:
         query.filter('tags = ', tag)
         prev_query.filter('tags = ', tag)
@@ -650,16 +656,14 @@ class SearchResultsHandler(BaseHandler):
       else: #default to most recent apps. 
         self.redirect('/recent')
         return
- 
-      if start != "0":
-        prev_query.order('index')
+
+      if start > 0:
         prev_query.filter('index >', start)
         prev_results = prev_query.fetch(num)
         if prev_results:
           prev = prev_results[-1].index
-          
         query.filter('index <=', start)
-      
+
       results = query.fetch(num + 1)
       if len(results) == num + 1:
         next = results[-1].index
@@ -671,12 +675,12 @@ class SearchResultsHandler(BaseHandler):
       values = {'apps' : apps,
             'total' : len(apps),
             'prev' : prev,
-            'next' : next, 
-            'q_type' : q_type, 
+            'next' : next,
+            'q_type' : q_type,
             'num' : num,
-            'q' : q, 
+            'q' : q,
             'label' : label }
-        
+
       if cacheable:
           memcache.set(cache_key, values, 600)
 
