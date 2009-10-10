@@ -1,28 +1,18 @@
 <div class="module" id="categories">
     <h3> Filter {{app_name|lower}}s</h3>
-    <table class="rec" border="0" cellpadding="0" cellspacing="0" width="100%">
-       <tbody>
-          <tr>
-            <td>
-              <ul>
-              {% for api in apis %}
-                <li><a href="/results?api={{api|escape}}">{{api}}</a></li>
-              {% endfor %}
-              </ul>
-              <ul>
-              {% for language in languages%}
-                <li><a href="/results?language={{language|escape}}">{{language}}</a></li>
-              {% endfor %}
-              </ul>
-              <ul>
-                <li><a href="/results?google=True">
-                By Google</a>
-                <img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">
-                </li>
-              </ul>
-            </td>
-         </tr>
-       </tbody>
-     </table>
+    <div>
+    <br>
+    By API: <br>
+    {% for api in apis %}
+     <a href="/results?api={{api|escape}}">{{api}}</a>
+    {% endfor %}
+    <br><br>
+    By Language: <br>
+    {% for language in languages%} 
+      <a href="/results?language={{language|escape}}">{{language}}</a>
+    {% endfor %}
+    <br><br>
+    <a href="/results?google=True">By Google</a> <img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">
+   </div>
 </div>
 <div class="clear">&nbsp;</div>
