@@ -196,19 +196,32 @@ class MainPage(BaseHandler):
       # get 5 recent apps
       query = self.queryApp()
       query.order('-created')
-      recent_apps = query.fetch(6)
-      next = recent_apps[-1].index
-      recent_apps = recent_apps[:-1]
+      recent = query.fetch(4)
+      recent_next = recent[-1].index
+      recent = recent[:-1]
 
       # get 1 featured application
       query = self.queryApp()
       query.filter('admin_tags =', 'featured')
       featured = query.fetch(1)
 
+      # get 5 editor's picks
+      query = self.queryApp()
+      query.filter('admin_tags =', 'editors')
+      query.order('-created')
+      editors = query.fetch(6)
+      if len(editors) == 6:
+        editors_next = editors[-1].index
+        editors = editors[:-1]
+      else:
+        editors_next = 0
+
       values = {
-        'next': next,
+        'recent_next': recent_next,
+        'editors_next': editors_next,
         'featured': featured,
-        'recent_apps': recent_apps,
+        'editors': editors,
+        'recent': recent,
         'title': GALLERY_TITLE,
       }
 
@@ -627,9 +640,10 @@ class SearchResultsHandler(BaseHandler):
         q = tag
         label = 'Tag: %s' % tag
       elif topapps:
+        query.filter('admin_tags = ', 'editors')
         q_type = "topapps"
         q="true"
-        label = "Top Apps"
+        label = "Editor's Picks"
       elif language:
         query.filter('languages =', language)
         prev_query.filter('languages =', language)
@@ -722,7 +736,7 @@ class RecentAppsHandler(BaseHandler):
     if not values:
       query = self.queryApp()
       query.order('-index')
-
+      count = query.count()
       if start > 0:
         prev_query = self.queryApp()
         prev_query.order('index')
@@ -744,6 +758,7 @@ class RecentAppsHandler(BaseHandler):
                 'total' : len(apps),
                 'start' : start,
                 'next' : next,
+                'count': count,
                 'prev' : prev,
                 'num' : 5,
                 'q_type' : 'recentapps',

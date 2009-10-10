@@ -22,6 +22,7 @@
 </div>
 {% include "module_search.html" %}
 {% include "module_filter.html" %}
+{% include "module_recent.html" %}
 <div class="clear">&nbsp;</div>
 </div> <!-- end sidebar -->
 
@@ -51,11 +52,6 @@
            <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
            <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
 - {{app.created|date:"M d, Y"}} 
-        <!-- - 
-         <span class="gray">
-           <img src="/static/img/{{ app.avg_rating }}-star-rating.png" alt="{{ app.avg_rating }} stars"/>
-           &nbsp;&nbsp;
-         </span> -->
         <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
         <div align="left">
            <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
@@ -78,15 +74,14 @@
 
   <div id="topContainer">
   <div id="topRated">
-    <h3>Most Recent {{app_name}}s <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
+    <h3>Editor's Picks <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
 
   <div class="featuredHeader"></div>
-   {% for app in recent_apps %}
+   {% for app in editors %}
      {% include "result.html" %}
    {% endfor %}
-{% include "asterisk.html" %}
-<!-- Comments -->
-   <div style="horizontal-align:right;padding-top:10px;"><a href="/recent?recentapps=true&amp;start={{ next}}&amp;num=5">More »</a></div>
+   {% include "asterisk.html" %}
+   <div style="horizontal-align:right;padding-top:10px;"><a href="/results?topapps=true&amp;start={{ editors_next }}&amp;num=5">More »</a></div>
 </div>
 </div>
 </div>
@@ -97,15 +92,4 @@
 </div>
 </div>
 </div>
-<script>
-  function hide(div_id) {
-    var e = document.getElementById(div_id);
-    e.style.display = "none";
-  }
-
-  function show(div_id) {
-    var e = document.getElementById(div_id);
-    e.style.display = "block";
-  }
-</script>
 {% endblock %}

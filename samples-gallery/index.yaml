@@ -20,14 +20,30 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Used 7 times in query history.
+# Used 5 times in query history.
+- kind: Application
+  properties:
+  - name: admin_tags
+  - name: moderation_status
+  - name: created
+    direction: desc
+
+# Used 2 times in query history.
+- kind: Application
+  properties:
+  - name: admin_tags
+  - name: moderation_status
+  - name: index
+    direction: desc
+
+# Used 15 times in query history.
 - kind: Application
   properties:
   - name: apis
   - name: moderation_status
   - name: index
 
-# Used 16 times in query history.
+# Used 42 times in query history.
 - kind: Application
   properties:
   - name: apis
@@ -108,7 +124,14 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Used once in query history.
+# Unused in query history -- copied from input.
+- kind: Application
+  properties:
+  - name: languages
+  - name: moderation_status
+  - name: index
+
+# Used 5 times in query history.
 - kind: Application
   properties:
   - name: languages
@@ -146,20 +169,20 @@ indexes:
   - name: moderation_status
   - name: created
 
-# Used 5 times in query history.
+# Used 12 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: created
     direction: desc
 
-# Used 2 times in query history.
+# Used 8 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: index
 
-# Used 2 times in query history.
+# Used 11 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
@@ -187,6 +210,14 @@ indexes:
   - name: avg_rating
     direction: desc
   - name: total_ratings
+    direction: desc
+
+# Used 6 times in query history.
+- kind: Application
+  properties:
+  - name: moderation_status
+  - name: tags
+  - name: index
     direction: desc
 
 # Unused in query history -- copied from input.
@@ -210,7 +241,7 @@ indexes:
   - name: application
   - name: index
 
-# Used 36 times in query history.
+# Used 39 times in query history.
 - kind: Comment
   properties:
   - name: application
