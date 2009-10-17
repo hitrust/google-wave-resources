@@ -30,7 +30,7 @@
 <div id="container" class="middlecontent">
   <h1 class="page_title">{{title}}</h1>
   <div style="float:left;max-width:650px;overflow:hidden">
-  <h3><b> Featured {{app_name}}</b> <a href="/feeds/apps/featured"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
+  <h3><b> Featured {{app_name}}</b></h3>
   <div class="featuredHeader"></div>
   {% for app in featured %}
      <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5">
@@ -50,13 +50,14 @@
          </td>
          <td width="100%" align="center" valign="middle" class="rowPadding">
            <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
-           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
 - {{app.created|date:"M d, Y"}} 
         <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
-        <div align="left">
+<!--        <div align="left">
            <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
            <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
         </div>
+-->
       {% if app.author_name %}
            <div style="color:gray;padding-top:3px" align="left">
         {% ifequal app.author_name user %}
@@ -74,9 +75,12 @@
 
   <div id="topContainer">
   <div id="topRated">
-    <h3>Editor's Picks <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
-
+    <h3>Best Practices</h3>
   <div class="featuredHeader"></div>
+    <p>The highlighted samples below show off
+different features of the APIs and ways of using the APIs,
+and are examples of best practices.
+   </p>
    {% for app in editors %}
      {% include "result.html" %}
    {% endfor %}

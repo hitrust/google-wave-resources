@@ -70,11 +70,11 @@ class BaseHandler(webapp.RequestHandler):
 
     if mail_type == 'new':
       template_name = 'new_email.html'
-      subject = 'New application to moderate'
+      subject = 'New sample to moderate: ' + app.title
       values['moderation_url'] = self.makeAbsoluteUrl('/moderate')
     else:
       template_name = 'edit_email.html'
-      subject = 'Existing application was edited'
+      subject = 'Existing sample was edited' + app.title
 
     body = self.renderEmail(app, template_name, values)
 
@@ -96,7 +96,7 @@ class BaseHandler(webapp.RequestHandler):
       reason: The optional reason to include why the application was rejected.
     """
     template_name = 'reject_email.html'
-    subject = 'Sample denied inclusion in gallery'
+    subject = 'Sample denied inclusion in gallery: ' + app.title
     
     body = self.renderEmail(app, template_name, { 'reason':reason })
     receiver_email = app.author.email()
@@ -113,13 +113,13 @@ class BaseHandler(webapp.RequestHandler):
       app: The db_models.Application instance the e-mail is about.
     """
     template_name = 'approve_email.html'
-    subject = 'Sample approved in gallery'
+    subject = 'Sample approved in gallery: ' + app.title
 
     body = self.renderEmail(app, template_name)
     receiver_email = app.author.email()
     sender_email = users.get_current_user().email()
 
-    mail.send_mail(sender_email, receiver_email, subject, body, 
+    mail.send_mail(sender_email, receiver_email, subject, body,
       bcc=self.MODERATION_EMAIL)
     
     
@@ -207,7 +207,7 @@ class MainPage(BaseHandler):
 
       # get 5 editor's picks
       query = self.queryApp()
-      query.filter('admin_tags =', 'editors')
+      query.filter('best_practice = ', True)
       query.order('-created')
       editors = query.fetch(6)
       if len(editors) == 6:
@@ -254,7 +254,7 @@ class AboutAppHandler(BaseHandler):
           self.redirect('/')
           return
       num_comments = app.comment_count
-      
+
       # check if we're paging through comments
       start = self.request.get('start')
       prev = None
@@ -265,12 +265,11 @@ class AboutAppHandler(BaseHandler):
           start = int(start)
         except ValueError:
           start = None
-      
+
       query = db_models.Comment.all()
       query.filter('application =', app)
       query.order('-index')
-      
-      
+
       if start:
         prev_query = db_models.Comment.all()
         prev_query.filter('application =', app)
@@ -279,28 +278,21 @@ class AboutAppHandler(BaseHandler):
         prev_results = prev_query.fetch(5)
         if prev_results:
           prev = prev_results[-1].index
-        
+
         query.filter('index <=', start)
-      
+
       # see if we have another page of results to look at
       comments = query.fetch(6)
-      
+
       if len(comments) == 6:
         next = comments[-1].index
         comments = comments[:-1]
-    
-      # get 5 of the top apps submitted by the same user 
-      query = self.queryApp()
-      query.filter('author =', app.author)
-      #query.order('-avg_rating').order('-total_ratings')
-      aba_apps = query.fetch(5)
-     
+
       values = {
         'title': GALLERY_APP_NAME + ' Details - ' + app.title,
         'app': app,
         'comments': comments,
         'num_comments': num_comments,
-        'aba_apps':aba_apps,
         'can_edit':can_edit,
         'is_admin':is_admin,
         'next':next,
@@ -449,6 +441,8 @@ class NewAppActionHandler (BaseHandler):
       app.author = author
       app.author_name = author_name
       app.author_url = author_url
+      if self.request.get('best_practice') == 'on':
+        app.best_practice = True
       app.type = type
       app.code_snippet = code_snippet
       app.title = title
@@ -539,6 +533,8 @@ class EditAppActionHandler (BaseHandler):
       app.type = self.request.get('type')
       if self.request.get('author_googler') == 'on':
         app.author_googler = True
+      if self.request.get('best_practice') == 'on':
+        app.best_practice = True
       app.description = self.request.get('content')
       app.code_snippet = self.request.get('code_snippet').lstrip()
       app.tech_details = self.request.get('tech_details')
@@ -640,10 +636,10 @@ class SearchResultsHandler(BaseHandler):
         q = tag
         label = 'Tag: %s' % tag
       elif topapps:
-        query.filter('admin_tags = ', 'editors')
+        query.filter('best_practice = ', True)
         q_type = "topapps"
         q="true"
-        label = "Editor's Picks"
+        label = "Best Practices"
       elif language:
         query.filter('languages =', language)
         prev_query.filter('languages =', language)
@@ -946,7 +942,7 @@ class EditorsPicksFeedHandler(FeedHandler):
       editor_picks = query.fetch(5)
 
       feed_id = 'http://%s/feeds/apps/editor_picks' % self.request.host
-      feed = self.RenderFeed("Editor's Picks", feed_id, editor_picks)
+      feed = self.RenderFeed("Best Practices", feed_id, editor_picks)
       memcache.set('editors_picks_feed', feed, 600)
       
     self.response.headers['Content-Type'] = 'application/atom+xml'

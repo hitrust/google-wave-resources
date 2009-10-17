@@ -55,7 +55,7 @@ class Application(db.Model):
   description = db.TextProperty()
   tech_details = db.TextProperty()
   url = db.StringProperty()
-  api_usage = db.StringProperty()
+  api_usage = db.StringProperty(multiline = True)
   source_url = db.StringProperty()
   robot_email = db.StringProperty()
   gadget_xml = db.StringProperty()
@@ -77,6 +77,7 @@ class Application(db.Model):
   rated_index = db.StringProperty()
   comment_count = db.IntegerProperty(default = 0)
   SCHEMA_VERSION = db.IntegerProperty(default=DEFAULT_SCHEMA_VERSION)
+  best_practice = db.BooleanProperty()
 
   def GetLink(self):
     """ Returns a relative URL to a page about this application. """
