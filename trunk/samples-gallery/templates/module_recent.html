@@ -1,0 +1,8 @@
+<div class="module" id="categories">
+    <h3> Recent {{app_name|lower}}s <a href="/feeds/apps/all"><img src="http://www.google.com/images/feed-icon.gif" /></a></h3>
+   {% for app in recent %}
+     {% include "result_small.html" %}
+   {% endfor %}
+   <div style="horizontal-align:right;padding-top:10px;"><a href="/results?recentapps=true&amp;start={{ recent_next }}&amp;num=5">More »</a></div>
+</div>
+<div class="clear">&nbsp;</div>

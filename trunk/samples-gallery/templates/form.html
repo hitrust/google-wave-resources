@@ -34,9 +34,21 @@
                  <td nowrap style="padding:2px">Code Snippet*:</td>
                    <td style="padding:2px" > <TEXTAREA id="code_snippet" name="code_snippet" class="input" cols="50" rows="20">{% if app.code_snippet %}{{app.code_snippet|escape}}{% endif %}</TEXTAREA></td>
                </tr>
+                {% if is_admin %}
+               <tr>
+                 <td nowrap style="padding:2px">Best Practice?:</td>
+                 <td style="padding:2px"> <input type="checkbox" name="best_practice" size="50" {% if app.best_practice %} checked="yes" {% endif %}></input></div></td>
+               </tr>
+               {% endif %}
                <tr class="app-class">
                    <td nowrap style="padding:2px;width:175px;">What aspects of the API does this show off?</td>
                    <td style="padding:2px" > <TEXTAREA name="api_usage" cols="50" rows="3" class="input">{% if app.api_usage %}{{app.api_usage|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+               <tr {% if not is_admin %} style="display:none" {% endif %}>
+                  <td>Tech details</td>
+                  <td>
+                   <TEXTAREA name="tech_details" {% if not is_admin %} style="display:none" {% endif %} cols="50" rows="3" class="input">{% if app.tech_details %}{{app.tech_details|escape}}{% endif %}</TEXTAREA>
+                  </td>
                </tr>
                <tr class="app-class">
                  <td nowrap style="padding:2px">Source URL*:</td>

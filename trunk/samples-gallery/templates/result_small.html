@@ -1,4 +1,4 @@
-     <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5" repeat="true" >
+     <table width="100%" style="margin-bottom:.2em" border="0" cellspacing="0" cellpadding="5" repeat="true" >
        <tr>
          <td width="120" align="center" valign="top" class="rowPadding">
           <table width="120">
@@ -20,36 +20,12 @@
          </td>
          <td width="100%" align="center" valign="middle" class="rowPadding">
            <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
-           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
-- {{app.created|date:"M d, Y"}} 
-         <!--- 
-         <span class="gray">
-           <img src="/static/img/{{ app.avg_rating }}-star-rating.png" alt="{{ app.avg_rating }} stars"/>
-          &nbsp;&nbsp;
-         </span> -->
-        <div align="left" style="color:black;padding-top:3px">{{ app.description|escape }}</div>
-       <div {% if app.best_practice %}style="background-color:#f5f0b4; border: 1px dotted #a6822c; padding: 5px; margin-top:7px; margin-bottom:7px" {% endif %}>
-       {% if app.best_practice %}<img align="absmiddle" width="16" height="16" src="static/img/icon_check.gif" title="Best Practice"> {% endif %}
-       {% if app.api_usage %}
-        <span style="color:black;">{{ app.api_usage|escape }}</span>
-       {% endif %}
-       </div>
-       {% ifequal app.type "app" %}
-       <!-- <div align="left">
-           <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
-           <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
-        </div> -->
-       {% endifequal %}
-      {% if app.author %}
-           <div style="color:gray;padding-top:3px" align="left">
         {% ifequal app.author user %}
            <form action="/delete.do" method="post"><a href="/edit?app_id={{app.key.id|escape}}">Edit</a>&nbsp;&nbsp;|
             <input type="hidden" name="app_id" value="{{app.key.id|escape}}" />
             <button type="submit" value="Delete" style="background-color:white;border:0px;color:#00c;padding:0px;cursor:pointer"><span style="text-decoration: underline !important">Delete</span></button>
            </form>
         {% endifequal %}
-           </div>
-     {% endif %}
          </td>
       </tr>
     </table>
