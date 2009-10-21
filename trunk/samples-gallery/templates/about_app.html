@@ -40,10 +40,10 @@
        {% endif %}
        <div style="clear:both"></div>
        {% endifequal %}
-       <p>{{app.description|escape}}</p>
+       <p>{{app.description|urlize}}</p>
        <div {% if app.best_practice %}style="background-color:#f5f0b4; border: 1px dotted #a6822c; padding: 5px; margin-t    op:7px; margin-bottom:7px" {% endif %}>
        {% if app.best_practice %}<div style="font-weight:bold;"><img align="absmiddle" title="Best Practice" width="16" height="16" src="static/img/icon_check.gif">&nbsp;BEST PRACTICE</div> {% endif %}
-         {% if app.api_usage %}<div>{{app.api_usage}}</div> {% endif %}
+         {% if app.api_usage %}<div>{{app.api_usage|urlize}}</div> {% endif %}
        </div>
          <div align="left" style="margin-top:.5em">
            <a style="color:#008000 !important;" href="{{app.url|escape}}">Live Demo</a>* |
