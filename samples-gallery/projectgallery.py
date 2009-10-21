@@ -74,7 +74,7 @@ class BaseHandler(webapp.RequestHandler):
       values['moderation_url'] = self.makeAbsoluteUrl('/moderate')
     else:
       template_name = 'edit_email.html'
-      subject = 'Existing sample was edited' + app.title
+      subject = 'Existing sample was edited: ' + app.title
 
     body = self.renderEmail(app, template_name, values)
 
