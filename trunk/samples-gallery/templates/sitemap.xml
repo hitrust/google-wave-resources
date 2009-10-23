@@ -3,7 +3,7 @@
   {% for app in apps %}
   <url>
     <loc>http://wave-samples-gallery.appspot.com/about_app?app_id={{app.key.id}}</loc>
-    <lastmod>{{app.updated}}</lastmod>
+    <lastmod>{{app.updated.date}}</lastmod>
     <changefreq>weekly</changefreq>
   </url>
   {% endfor %}

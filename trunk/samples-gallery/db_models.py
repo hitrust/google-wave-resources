@@ -95,97 +95,97 @@ class Application(db.Model):
       index.max_index += 1
       index.put()
       return index.max_index
-    
+
     self.index = db.run_in_transaction(GetNextIndexValue, 'index1')
     self.rated_index = "%d:%d:%d" % (self.avg_rating, self.total_ratings, self.index)
     self.put()
-    
+
   def Upgrade(self):
     """Handle upgrading the data model for this instance."""
-    
+
     if self.SCHEMA_VERSION == 2:
       self.comment_count = len(list(self.comments))
-    
+
     self.SCHEMA_VERSION = Application.DEFAULT_SCHEMA_VERSION
     self.put()
-    
+
   def UpdateScreenshot(self, screenshot):
     """Updates the screenshot for the application. 
-    
+
     Args:
       screenshot: A binary blob containing screenshot data.
     """
-    
+
     if not screenshot:
       return
-    
+
     query = ApplicationImage.all()
     query.filter('application =', self)
     query.filter('img_type =', 'screenshot')
     former = query.get()
-      
+
     self.AddImage(screenshot, 300, 200, 'screenshot', former)
     self.screenshot = True
-    
+
   def UpdateThumbnail(self, thumbnail):
     """Updates the thumbnail for the application.
-    
+
     Args:
       thumbnail: A binary blob containing thumbnail data.
     """
-    
+
     if not thumbnail:
       return
-      
+
     query = ApplicationImage.all()
     query.filter('application =', self)
     query.filter('img_type =', 'thumbnail')
     former = query.get()
-      
+
     self.AddImage(thumbnail, 120, 60, 'thumbnail', former)
     self.thumbnail = True
-    
+
   def AddScreenshot(self, screenshot):
     """ Handle adding a screenshot of the application. 
-    
+
     Args:
       screenshot: A binary blob containing screenshot data.
     """
-    
+
     if not screenshot:
       return
-      
+
     self.AddImage(screenshot, 300, 200, 'screenshot')
     self.screenshot = True
-    
+
   def AddThumbnail(self, thumbnail):
     """ Handle adding a thumbnail of the application. 
-    
+
     Args:
       thumbnail: A binary blob containing thumbnail data.
     """
-    
+
     if not thumbnail:
       return
-    
+
     self.AddImage(thumbnail, 120, 60, 'thumbnail')
     self.thumbnail = True
-    
+
   def AddImage(self, image_data, width, height, img_type, instance = None):
     """ Handle adding an image of the application.
-    
+
     Args:
       image_data: binary blob from an HTTP request.
       width: the image maximum width in pixels.
       height: the image maximum height in pixels.
       img_type: the type of the image (screenshot or thumbnail)
       instance: a previously stored image for this app, if one exists. """
-    
+
     from google.appengine.api.images import Image
-    
+
     imageContent = Image(image_data)
     imageContent.resize(width, height)
-    
+
     if instance is None:
       image = ApplicationImage()
     else:
@@ -194,7 +194,7 @@ class Application(db.Model):
     image.img_type = img_type
     image.content = imageContent.execute_transforms()
     image.put()
-  
+
 
 class CommentIndex(db.Model):
 
@@ -205,11 +205,11 @@ class CommentIndex(db.Model):
 
 class Comment(db.Model):
   """Comment
-   
+
   Entities of this type will store the information
   for comment. A reference is made to the app the
   comment is being associated with.
-  
+
   Properties:
     application: reference to the parent the application
     title: title of the comment
@@ -220,7 +220,7 @@ class Comment(db.Model):
     created: date the comment was created
   """
   DEFAULT_SCHEMA_VERSION = 1
-  
+
   application = db.Reference(Application, collection_name='comments')
   title = db.StringProperty()
   body = db.TextProperty()
@@ -230,13 +230,13 @@ class Comment(db.Model):
   index = db.IntegerProperty()
   author = db.UserProperty()
   SCHEMA_VERSION = db.IntegerProperty(default=DEFAULT_SCHEMA_VERSION)
-  
+
   def Add(self):
     """ Handle adding a new entity to the datastore with a unique incrementing
     index. """
-    
+
     def GetNextIndexValue(application):
-      
+
       index = CommentIndex.get_by_key_name('app:' + str(application.key().id()))
       if not index:
         index = CommentIndex(key_name = 'app:' + str(application.key().id()))
