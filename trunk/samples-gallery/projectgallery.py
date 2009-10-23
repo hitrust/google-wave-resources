@@ -971,12 +971,16 @@ class RecentFeedHandler(FeedHandler):
 
 class SitemapHandler(BaseHandler):
   def get(self):
-    query = self.queryApp()
-    apps = query.fetch(1000)
-    template_values = {"apps": apps}
-    directory = os.path.dirname(os.environ['PATH_TRANSLATED'])
-    path = os.path.join(directory, os.path.join('templates', 'sitemap.xml'))
-    self.response.out.write(template.render(path, template_values))
+    sitemap = memcache.get('sitemap')
+    if sitemap is None:
+      query = self.queryApp()
+      apps = query.fetch(1000)
+      template_values = {"apps": apps}
+      directory = os.path.dirname(os.environ['PATH_TRANSLATED'])
+      path = os.path.join(directory, os.path.join('templates', 'sitemap.xml'))
+      sitemap = template.render(path, template_values)
+      memcache.set('sitemap', sitemap, 300)
+    self.response.out.write(sitemap)
 
 class GetUrlsHandler(BaseHandler):
   def get(self):
