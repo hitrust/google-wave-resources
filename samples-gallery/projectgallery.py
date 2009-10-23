@@ -1056,6 +1056,24 @@ class UpgradeDatabaseHandler (BaseHandler):
 
     self.generate('upgrade_db.html', values)
 
+class ReportHandler(BaseHandler):
+  def get(self):
+    query = self.queryApp()
+    appCount = query.count()
+    self.response.out.write("Total Samples: " + str(appCount) + '<br>')
+
+    self.response.out.write('<img src="' + self.getChartForArray(db_models.Application.APIS, 'apis') + '"><br>')
+    self.response.out.write('<img src="' + self.getChartForArray(db_models.Application.LANGUAGES, 'languages') + '"><br>')
+
+  def getChartForArray(self, array, prop):
+    counts = []
+    baseUrl = "http://chart.apis.google.com/chart?chxt=x,y&chxl=0:|" + "|".join(array) + "|&cht=bvs&chco=76A4FB&chls=2.0&chs=300x250&chbh=r,0.3&chd=t:"
+    for item in array:
+      query = self.queryApp()
+      query.filter(prop + ' =', item)
+      counts.append(str(query.count()))
+    return baseUrl + ','.join(counts)
+
 
 application = webapp.WSGIApplication ( 
   [('/submit', NewAppHandler),
@@ -1076,6 +1094,7 @@ application = webapp.WSGIApplication (
    ('/geturls', GetUrlsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
    ('/sitemap.xml', SitemapHandler),
+   ('/report', ReportHandler),
    ('/',MainPage)], debug=DEBUG)
 
 
