@@ -9,4 +9,4 @@
   * Issue 278: Robots not responding to events at old application identifiers
 
 Other noticeable changes:
-  * Robots now get a DOCUMENT_CHANGED event after appending a DataDocument to a Wave.
+  * Robots now get a DOCUMENT_CHANGED event after appending a !DataDocument to a Wave.
