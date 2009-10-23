@@ -965,9 +965,18 @@ class RecentFeedHandler(FeedHandler):
       feed_id = 'http://%s/feeds/apps/all' % self.request.host
       feed = self.RenderFeed("Recent Apps", feed_id, apps)
       memcache.set('recent_feed', feed, 60)
-      
+
     self.response.headers['Content-Type'] = 'application/atom+xml'
     self.response.out.write(feed)
+
+class SitemapHandler(BaseHandler):
+  def get(self):
+    query = self.queryApp()
+    apps = query.fetch(1000)
+    template_values = {"apps": apps}
+    directory = os.path.dirname(os.environ['PATH_TRANSLATED'])
+    path = os.path.join(directory, os.path.join('templates', 'sitemap.xml'))
+    self.response.out.write(template.render(path, template_values))
 
 class GetUrlsHandler(BaseHandler):
   def get(self):
@@ -1040,7 +1049,7 @@ class UpgradeDatabaseHandler (BaseHandler):
     models[0].Upgrade()
     if len(models) == 2:
       values['continue'] = True
-      
+
     self.generate('upgrade_db.html', values)
 
 
@@ -1062,6 +1071,7 @@ application = webapp.WSGIApplication (
    ('/getemails', GetEmailsHandler),
    ('/geturls', GetUrlsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
+   ('/sitemap.xml', SitemapHandler),
    ('/',MainPage)], debug=DEBUG)
 
 

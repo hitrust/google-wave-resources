@@ -10,7 +10,6 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: admin_tags
@@ -20,7 +19,6 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Used 16 times in query history.
 - kind: Application
   properties:
   - name: admin_tags
@@ -28,7 +26,6 @@ indexes:
   - name: created
     direction: desc
 
-# Used 6 times in query history.
 - kind: Application
   properties:
   - name: admin_tags
@@ -36,14 +33,12 @@ indexes:
   - name: index
     direction: desc
 
-# Used 20 times in query history.
 - kind: Application
   properties:
   - name: apis
   - name: moderation_status
   - name: index
 
-# Used 56 times in query history.
 - kind: Application
   properties:
   - name: apis
@@ -51,14 +46,12 @@ indexes:
   - name: index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: apis
   - name: moderation_status
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: apis
@@ -66,7 +59,6 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: author
@@ -76,14 +68,12 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: author
   - name: moderation_status
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: author
@@ -91,14 +81,12 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: author_googler
   - name: moderation_status
   - name: index
 
-# Used 2 times in query history.
 - kind: Application
   properties:
   - name: author_googler
@@ -106,7 +94,6 @@ indexes:
   - name: index
     direction: desc
 
-# Used once in query history.
 - kind: Application
   properties:
   - name: best_practice
@@ -114,7 +101,6 @@ indexes:
   - name: created
     direction: desc
 
-# Used 2 times in query history.
 - kind: Application
   properties:
   - name: best_practice
@@ -122,7 +108,6 @@ indexes:
   - name: index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: category
@@ -132,14 +117,12 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: category
   - name: moderation_status
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: category
@@ -147,14 +130,12 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: languages
   - name: moderation_status
   - name: index
 
-# Used 5 times in query history.
 - kind: Application
   properties:
   - name: languages
@@ -162,14 +143,12 @@ indexes:
   - name: index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: languages
   - name: moderation_status
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: languages
@@ -177,7 +156,6 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
@@ -186,46 +164,39 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
   - name: created
 
-# Used 25 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: created
     direction: desc
 
-# Used 11 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: index
 
-# Used 19 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
   - name: index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
@@ -235,14 +206,12 @@ indexes:
   - name: total_ratings
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
   - name: tags
   - name: index
 
-# Used 6 times in query history.
 - kind: Application
   properties:
   - name: moderation_status
@@ -250,14 +219,12 @@ indexes:
   - name: index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
   - name: tags
   - name: rated_index
 
-# Unused in query history -- copied from input.
 - kind: Application
   properties:
   - name: moderation_status
@@ -265,13 +232,11 @@ indexes:
   - name: rated_index
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Comment
   properties:
   - name: application
   - name: index
 
-# Used 48 times in query history.
 - kind: Comment
   properties:
   - name: application
