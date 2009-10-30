@@ -1,12 +1,21 @@
 #summary Release notes for API changes and developer-facing changes
 #labels Featured
 
+= Oct 30, 2009=
+
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Oct30 Resolved Issues]
+  * Issue 212: insertInlineBlip Doesn't create blip
+  * Issue 250: Bug: BLIP_CREATE_CHILD / DOCUMENT_INLINE_BLIP_APPEND nonfunctional
+  * Issue 255: Bug: rootBlip.getChildren returns only 1 child
+  * Issue 278: Robots not responding to events at old application identifiers
+
+
 = Oct 20, 2009=
 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Oct20 Resolved Issues]
   * Issue 227: Contact storage
   * Issue 262: Wave toolbar should have a arrow to all resource
-  * Issue 278: Robots not responding to events at old application identifiers
+
 
 Other noticeable changes:
   * Robots now get a DOCUMENT_CHANGED event after appending a !DataDocument to a Wave.
