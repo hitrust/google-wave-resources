@@ -35,6 +35,8 @@
     {% if user %}
       {{ user|escape }} 
       <span>|</span>
+      <a href="/edit_profile">Profile</a> 
+      <span>|</span>
       <a href="{{url}}">Sign Out</a> 
     {% else %}
       <a href="{{url}}">Sign in</a>  
@@ -45,30 +47,7 @@
    <img src="http://code.google.com/images/code_labs_logo.gif" height="43" width="161" alt="Google Code Labs" style="border:0;"/> 
    </a></div>
   <div id="search">
-    <div id="searchForm" class="searchForm" style="display:none">
-      <form action="" accept-charset="utf-8" class="gsc-search-box" onsubmit="executeGSearch(document.getElementById('gsearchInput').value); return false;">
-        <table class="gsc-search-box" cellpadding="0" cellspacing="0">
-          <tbody>
-
-            <tr>
-              <td class="gsc-input">
-                <input id="gsearchInput" type="text" name="q" maxlength="2048" class="gsc-input" autocomplete="off" title="Google Code Search" style="width:345px"/>
-              </td>
-              <td class="gsc-search-button">
-                <div id='cs-searchresults' onclick='event.cancelBubble = true;'></div>
-                <input title="Search" id="gsearchButton" class="gsc-search-button" value="Search" type="submit"/>
-              </td>
-            </tr>
-
-            <tr>
-              <td class="greytext">e.g. &quot;java guide&quot; or &quot;chromeless player&quot;</td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-
-    </div> <!-- end searchForm -->
-    <div id="searchForm2" class="searchForm2" style="display:block">
+    <div id="searchForm" class="searchForm2" style="display:block">
       <form id="cse" action="http://www.google.com/cse">
         <input type="hidden" name="cref" value="http://code.google.com/cse/googlecode-context.xml" />
         <input type="text" name="q" maxlength="2048" autocomplete="off" title="Google Code Search" style="width:345px"/>

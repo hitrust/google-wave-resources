@@ -15,8 +15,8 @@
       <div class="back"><a href="/">«&nbsp;Back to gallery</a></div>
       <h3 class="app-title"  style="margin-top:0.5em;margin-bottom:.5em;">{{app.title|escape}}</h3>
       <span style="color:gray;">By: 
-      {% if app.author_url %}<a href="{{app.author_url}}">{% endif %}{{app.author_name|escape}}{% if app.author_url %}</a> {% endif %}
-      {% if app.author_googler %}&nbsp; <img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+      <a href="/profile?id={{app.author_ref.key.id}}">{{app.author_ref.name}}</a>
+      {% if app.author_ref.googler %}&nbsp; <img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
       - {{app.created|date:"M d, Y"}}
       </span><br/>
        {% ifequal app.type "app" %}
