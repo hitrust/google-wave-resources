@@ -2,6 +2,15 @@ from google.appengine.ext import db
 
 # Define our Models for the datastore
 
+class ApplicationAuthor(db.Model):
+  user = db.UserProperty()
+  name = db.StringProperty()
+  url = db.StringProperty(default='')
+  googler = db.BooleanProperty(default=False)
+  location = db.StringProperty(default='')
+  latlng = db.GeoPtProperty()
+
+
 class ApplicationIndex(db.Model):
 
   DEFAULT_SCHEMA_VERSION = 1
@@ -43,12 +52,10 @@ class Application(db.Model):
 
   APIS = ['Robots', 'Gadgets', 'Embed', 'Installer']
   LANGUAGES = ['Java', 'Python', 'JavaScript', 'ActionScript']
-
-  author = db.UserProperty()
-  author_name = db.StringProperty()
-  author_url = db.StringProperty()
-  author_googler = db.BooleanProperty()
-
+  author = db.UserProperty() # deprecated
+  author_ref = db.ReferenceProperty(ApplicationAuthor)
+  author_name = db.StringProperty() #deprecated
+  author_url = db.StringProperty() #deprecated
   type = db.StringProperty()
   title = db.StringProperty()
   code_snippet = db.TextProperty()
@@ -195,6 +202,16 @@ class Application(db.Model):
     image.content = imageContent.execute_transforms()
     image.put()
 
+  def AddAuthor(self, user):
+    query = db.Query(ApplicationAuthor)
+    query.filter('user =', user)
+    author = query.get()
+    if author is None:
+      author = ApplicationAuthor()
+      author.user = user
+      author.name = user.nickname().split('@')[0]
+      author.put()
+    self.author_ref = author
 
 class CommentIndex(db.Model):
 
@@ -287,9 +304,16 @@ class ApplicationImage(db.Model):
   
 def GetApplicationById(id):
   """ Returns an Application instance corresponding to the provided id."""
-  
   try:
     app = Application.get_by_id(int(id))
+    return app
+  except ValueError:
+    return None
+
+def GetApplicationAuthorById(id):
+  """ Returns an Application instance corresponding to the provided id."""
+  try:
+    app = ApplicationAuthor.get_by_id(int(id))
     return app
   except ValueError:
     return None

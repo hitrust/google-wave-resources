@@ -20,7 +20,7 @@
          </td>
          <td width="100%" align="center" valign="middle" class="rowPadding">
            <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
-           <div style="color:gray;padding-top:3px">{{app.author_name|escape}}{% if app.author_googler %}&nbsp;<img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+           <div style="color:gray;padding-top:3px">{{app.author_ref.name}}{% if app.author_ref.googler %}&nbsp;<img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
 - {{app.created|date:"M d, Y"}} 
          <!--- 
          <span class="gray">
@@ -40,9 +40,9 @@
            <a style="color:#008000 !important;" href="{{app.source_url|escape}}">Source Code</a>
         </div> -->
        {% endifequal %}
-      {% if app.author %}
+      {% if app.author_ref %}
            <div style="color:gray;padding-top:3px" align="left">
-        {% ifequal app.author user %}
+        {% ifequal app.author_ref.user user %}
            <form action="/delete.do" method="post"><a href="/edit?app_id={{app.key.id|escape}}">Edit</a>&nbsp;&nbsp;|
             <input type="hidden" name="app_id" value="{{app.key.id|escape}}" />
             <button type="submit" value="Delete" style="background-color:white;border:0px;color:#00c;padding:0px;cursor:pointer"><span style="text-decoration: underline !important">Delete</span></button>

@@ -84,22 +84,22 @@ class BaseHandler(webapp.RequestHandler):
       sender_email = self.SENDER_EMAIL
 
     receiver_email = self.MODERATION_EMAIL
-    
+
     mail.send_mail(sender_email, receiver_email, subject, body)
-    
+
   def sendUserRejectionEmail(self, app, reason=''):
     """Sends the user an e-mail indicating their application has been
     rejected.
-    
+
     Args:
       app: The db_models.Application instance the e-mail is about.
       reason: The optional reason to include why the application was rejected.
     """
     template_name = 'reject_email.html'
     subject = 'Sample denied inclusion in gallery: ' + app.title
-    
+
     body = self.renderEmail(app, template_name, { 'reason':reason })
-    receiver_email = app.author.email()
+    receiver_email = app.author_ref.user.email()
     sender_email = users.get_current_user().email()
 
     mail.send_mail(sender_email, receiver_email, subject, body, 
@@ -116,7 +116,7 @@ class BaseHandler(webapp.RequestHandler):
     subject = 'Sample approved in gallery: ' + app.title
 
     body = self.renderEmail(app, template_name)
-    receiver_email = app.author.email()
+    receiver_email = app.author_ref.user.email()
     sender_email = users.get_current_user().email()
 
     mail.send_mail(sender_email, receiver_email, subject, body,
@@ -415,9 +415,7 @@ class NewAppActionHandler (BaseHandler):
     if users.get_current_user():
       # Get the args. First check to see that the image files are under 1MB 
       title = self.request.get('title')
-      author = users.get_current_user()
-      author_name = self.request.get('author_name')
-      author_url = self.request.get('author_url')
+      user = users.get_current_user()
       type = self.request.get('type')
       code_snippet = self.request.get('code_snippet').lstrip()
       description = self.request.get('content')
@@ -438,9 +436,6 @@ class NewAppActionHandler (BaseHandler):
       tags = tags_str.split(',')
 
       app = db_models.Application()
-      app.author = author
-      app.author_name = author_name
-      app.author_url = author_url
       if self.request.get('best_practice') == 'on':
         app.best_practice = True
       app.type = type
@@ -478,12 +473,52 @@ class NewAppActionHandler (BaseHandler):
         app.Add()
         app.AddThumbnail(thumbnail)
         app.AddScreenshot(screenshot)
+        app.AddAuthor(user)
         app.put()
 
         self.sendAdminEmail(app)
         self.redirect(app.GetLink())
     else:
       self.loginUser()
+
+class EditProfileHandler(BaseHandler):
+  def get(self):
+    query = db.Query(db_models.ApplicationAuthor)
+    query.filter('user = ', users.get_current_user())
+    author = query.get()
+    template_values = {
+      'author': author
+    }
+    self.generate('edit_profile.html', template_values)
+
+class ProfileHandler(BaseHandler):
+  def get(self):
+    id = self.request.get('id')
+    author = db_models.GetApplicationAuthorById(id)
+    template_values = {
+      'author': author
+    }
+    if author:
+      apps = author.application_set
+      template_values['apps'] = apps
+
+    self.generate('profile.html', template_values)
+
+
+class EditProfileActionHandler(BaseHandler):
+  def post(self):
+    query = db.Query(db_models.ApplicationAuthor)
+    query.filter('user = ', users.get_current_user())
+    author = query.get()
+    author.name = self.request.get('name')
+    author.url = self.request.get('url')
+    author.location = self.request.get('location')
+    lat = self.request.get('latbox')
+    lng = self.request.get('lonbox')
+    if lat:
+      author.latlng = db.GeoPt(float(lat), float(lng))
+    author.put()
+    self.redirect('/profile?id=' + str(author.key().id()))
 
 class EditAppHandler(BaseHandler):
   """Handler for displaying an app for editing."""
@@ -868,8 +903,7 @@ class FeedHandler (BaseHandler):
     entry['title'] = app.title
     entry['description'] = app.description
     entry['author'] = {}
-    entry['author']['name'] = app.author_name
-    entry['author']['email'] = app.author.email()
+    entry['author']['name'] = app.author_ref.name
     entry['id'] = 'http://%s/feeds/apps/appid/%s' % (
       self.request.host, str(app.key().id()))
     
@@ -1002,7 +1036,7 @@ class GetEmailsHandler(BaseHandler):
     apps = query.fetch(1000)
     emails = {}
     for app in apps:
-      emails[app.author.email()] = 1
+      emails[app.author_ref.user.email()] = 1
     for email in emails:
       print email + ","
 
@@ -1056,6 +1090,26 @@ class UpgradeDatabaseHandler (BaseHandler):
 
     self.generate('upgrade_db.html', values)
 
+class UpgradeAuthorsHandler(BaseHandler):
+  def get(self):
+    self.response.out.write("Upgrading authors <br>")
+    app = db_models.GetApplicationById(self.request.get('id'))
+    if app is None:
+      query = self.queryApp()
+      apps = query.fetch(170)
+      for app in apps:
+        app.author_ref.name = app.author_name
+        app.author_ref.url = app.author_url
+        app.author_ref.put()
+        if app.author_ref is None:
+          self.response.out.write("upgrading " + app.title + "<br>")
+          self.response.out.write(app.AddAuthor(app.author))
+          app.put()
+    elif app.author_ref is None:
+      self.response.out.write("upgrading " + app.title + "<br>")
+      self.response.out.write(app.AddAuthor(app.author))
+      app.put()
+
 class ReportHandler(BaseHandler):
   def get(self):
     query = self.queryApp()
@@ -1083,7 +1137,10 @@ application = webapp.WSGIApplication (
    ('/delete.do', DeleteAppActionHandler),
    ('/edit', EditAppHandler),
    ('/edit.do', EditAppActionHandler),
+   ('/edit_profile', EditProfileHandler),
+   ('/edit_profile.do', EditProfileActionHandler),
    ('/about_app', AboutAppHandler),
+   ('/profile', ProfileHandler),
    ('/results', SearchResultsHandler),
    ('/recent', RecentAppsHandler),
    ('/feeds/apps/featured', FeaturedFeedHandler),
@@ -1093,6 +1150,7 @@ application = webapp.WSGIApplication (
    ('/getemails', GetEmailsHandler),
    ('/geturls', GetUrlsHandler),
    ('/upgradedb', UpgradeDatabaseHandler),
+   ('/upgradeauthors', UpgradeAuthorsHandler),
    ('/sitemap.xml', SitemapHandler),
    ('/report', ReportHandler),
    ('/',MainPage)], debug=DEBUG)

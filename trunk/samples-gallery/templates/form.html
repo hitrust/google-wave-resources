@@ -1,19 +1,4 @@
                <tr>
-                 <td nowrap style="padding:2px">Author Name:</td>
-                 <td style="padding:2px"> <input class="input" name="author_name" size="50" {% if app.author_name %}value="{{app.author_name|escape}}"{% endif %}></input></div></td>
-               </tr>
-               <tr>
-                 <td nowrap style="padding:2px">Author URL:</td>
-                 <td style="padding:2px"> <input class="input" name="author_url" size="50" {% if app.author_url %}value="{{app.author_url|escape}}"{% endif %}></input></div></td>
-               </tr>
-                {% if is_admin %}
-               <tr>
-                 <td nowrap style="padding:2px">Author is Googler?:</td>
-                 <td style="padding:2px"> <input type="checkbox" name="author_googler" size="50" {% if app.author_googler %} checked="yes" {% endif %}></input></div></td>
-               </tr>
-                {% endif %}
-               <tr><td style="" colspan="2">&nbsp;</td></tr>
-               <tr>
                  <td nowrap style="padding:2px">Sample Name*:</td>
                  <td style="padding:2px"> <input class="input required" name="title" size="50" {% if app.title %}value="{{app.title|escape}}"{% endif %}></input></div></td>
                </tr>
