@@ -1,0 +1,113 @@
+{% extends "basegallery.html" %}
+{% block body %}
+<div id="container" class="middlecontent">
+<h1 class="page_title">Edit Your Profile</h1>
+  <div style="display:none;padding-top:10px;overflow:hidden;" id="cse_results"></div>
+<br/>
+
+  {% if author %}
+  <form action="/edit_profile.do" id="submit" enctype="multipart/form-data" method="post" name="createapp">
+      <div id="form" style="padding-top:10px;width:75%">
+             <table>
+               <tr>
+                 <td colspan="2" align="center">
+                   <div id="errmsg">{% if error %}{{error|escape}}{% endif %}</div>
+                 </td>
+               </tr>
+               <tr>
+                 <td nowrap style="padding:2px">Name:</td>
+                 <td style="padding:2px"> <input class="input required" name="name" size="50" {% if author.name %}value="{{author.name}}"{% endif %}></input></div></td>
+               </tr>
+               <tr>
+              <tr>
+                 <td nowrap style="padding:2px">Website:</td>
+                 <td style="padding:2px"> <input class="input" name="url" size="50" {% if author.url %}value="{{author.url}}"{% endif %}></input></div></td>
+               </tr>
+               {% if is_admin %}
+               <tr>
+                 <td nowrap style="padding:2px">Googler?:</td>
+                 <td style="padding:2px"> <input type="checkbox" name="googler" size="50" {% if author.googler %} checked="yes" {% endif %}></input></div></td>
+               </tr>
+               {% endif %}
+               <tr>
+                 <td nowrap style="padding:2px">Location:</td>
+                 <td style="padding:2px"> <input class="input" name="location" id="location" size="50" {% if author.location %}value="{{author.location}}"{% endif %}></input></div></td>
+                 <td><input type="button" value="Geocode" onclick="showAddress()"></td>
+               </tr>
+               <tr>
+                 <td></td>
+                 <td colspan="2">
+                  <div id="map_canvas" style="width:100%; height:300px"></div>
+                 </td>
+               </tr>
+               <div style="display:none">
+                <input type="text" name="latbox" id="latbox" value="{{author.latlng.lat}}"></input>
+                <input type="text" name="lonbox" id="lonbox" value="{{author.latlng.lon}}"></input>
+              </div>
+               <tr>
+                 <td colspan="2" style="padding-top:25px">
+                    <input type="submit" value="Save" />
+                 </td>
+               </tr>
+           </table>
+  </form>
+  {% else %}
+    <p>Please submit a sample if you would like to have a profile. Thanks!</p>
+  {% endif %}
+  <br>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA-O3c-Om9OcvXMOJXreXHAxRlOb26qSyU154aZeLwOrF4C7-DphSw7JoLuXrcDjUb_7h-S1txkSCY7A"
+      type="text/javascript"></script> 
+    <script type="text/javascript"> 
+
+    var geocoder;
+    var map;
+
+    function initMap() {
+      geocoder = new GClientGeocoder();
+      map = new GMap2(document.getElementById("map_canvas"));
+      map.setCenter(new GLatLng(37.4419, -122.1419), 2);
+      map.addControl(new GSmallMapControl());
+      map.addControl(new GMapTypeControl());
+      map.enableScrollWheelZoom();
+      var lat = document.getElementById("latbox").value;
+      var lon = document.getElementById("lonbox").value;
+      if (lat.length > 2) {
+        var latlng = new GLatLng(lat, lon);
+        createMarker(latlng);
+      }           
+    }
+
+    function showAddress() {
+      geocoder.getLatLng(
+        document.getElementById("location").value,
+        function(point) {
+          if (!point) {
+            alert(address + " not found");
+          } else {
+            map.clearOverlays();
+            createMarker(point);
+          }
+        }
+      );
+    }
+
+    function createMarker(latlng) {
+      map.setCenter(latlng, 13);
+      var marker = new GMarker(latlng, {draggable: true});
+      GEvent.addListener(marker, "dragend", function() {
+         var latlng = marker.getLatLng();
+         document.getElementById("latbox").value = latlng.lat();
+         document.getElementById("lonbox").value = latlng.lng();
+      });
+      var latlng = marker.getLatLng();
+      document.getElementById("latbox").value = latlng.lat();
+      document.getElementById("lonbox").value = latlng.lng();
+      map.addOverlay(marker);
+    }
+    initMap();
+    </script> 
+{% include "backto.html" %}
+  </div>
+
+{% endblock %}
+
