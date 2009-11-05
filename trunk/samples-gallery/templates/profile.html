@@ -1,0 +1,36 @@
+{% extends "basegallery.html" %}
+{% block body %}
+<div id="container" class="middlecontent">
+<h1 class="page_title">Sample Author: {{author.name}}</h1>
+  <div style="display:none;padding-top:10px;overflow:hidden;" id="cse_results"></div>
+<br/>
+
+  {% if author %}
+          <table>
+              {% if author.url %}
+              <tr>
+                 <td nowrap style="padding:2px">Website:</td>
+                 <td style="padding:2px">{{author.url|urlize}}</td>
+               </tr>
+              {% endif %}
+              {% if author.location %}
+               <tr>
+                 <td nowrap style="padding:2px">Location:</td>
+                 <td style="padding:2px">{{author.location}}</td>
+               </tr>
+              {% endif %}
+           </table>
+    {% for app in apps %}
+      {% include "result_small.html" %}
+    {% endfor %}
+
+  {% else %}
+    <p>No matching profile found.</p>
+  {% endif %}
+  <br>
+
+{% include "backto.html" %}
+  </div>
+
+{% endblock %}
+

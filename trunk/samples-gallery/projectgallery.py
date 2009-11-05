@@ -1128,6 +1128,15 @@ class ReportHandler(BaseHandler):
       counts.append(str(query.count()))
     return baseUrl + ','.join(counts)
 
+class AuthorsMapHandler(BaseHandler):
+  def get(self):
+    query = db.Query(db_models.ApplicationAuthor)
+    query.filter('location !=', None)
+    authors = query.fetch(500)
+    template_values = {
+      'authors': authors
+    }
+    self.generate('authorsmap.html', template_values)
 
 application = webapp.WSGIApplication ( 
   [('/submit', NewAppHandler),
@@ -1143,6 +1152,7 @@ application = webapp.WSGIApplication (
    ('/profile', ProfileHandler),
    ('/results', SearchResultsHandler),
    ('/recent', RecentAppsHandler),
+   ('/authors_map', AuthorsMapHandler),
    ('/feeds/apps/featured', FeaturedFeedHandler),
    ('/feeds/apps/editor_picks', EditorsPicksFeedHandler),
    ('/feeds/apps/all', RecentFeedHandler),
