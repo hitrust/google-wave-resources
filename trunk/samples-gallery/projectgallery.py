@@ -242,7 +242,7 @@ class AboutAppHandler(BaseHandler):
     is_admin = users.is_current_user_admin()
     app = db_models.GetApplicationById(key)
     if app: # If the app was found
-      if is_admin or users.get_current_user() == app.author:
+      if is_admin or users.get_current_user() == app.author_ref.user:
         can_edit = True
       else:
         can_edit = False
@@ -535,7 +535,7 @@ class EditAppHandler(BaseHandler):
     if not user:
       self.loginUser()
       return
-    if app and (user == app.author or is_admin):
+    if app and (user == app.author_ref.user or is_admin):
 
       template_values = {
         'title': 'Edit',
@@ -561,7 +561,7 @@ class EditAppActionHandler (BaseHandler):
     user = users.get_current_user()
     is_admin = users.is_current_user_admin()
     app = db_models.GetApplicationById(self.request.get('app_id'))
-    if app and (user == app.author or is_admin): 
+    if app and (user == app.author_ref.user or is_admin): 
       app.title=self.request.get('title')
       app.author_name = self.request.get('author_name')
       app.author_url = self.request.get('author_url')
@@ -855,7 +855,7 @@ class DeleteAppActionHandler (BaseHandler):
       self.redirect('/')
       return
     app = db_models.GetApplicationById(key)
-    if app and (user == app.author or users.is_current_user_admin()):
+    if app and (user == app.author_ref.user or users.is_current_user_admin()):
       for comment in app.comments:
         comment.delete()
       for image in app.images:
@@ -1131,7 +1131,7 @@ class ReportHandler(BaseHandler):
 class AuthorsMapHandler(BaseHandler):
   def get(self):
     query = db.Query(db_models.ApplicationAuthor)
-    query.filter('location !=', None)
+    query.filter('latlng !=', None)
     authors = query.fetch(500)
     template_values = {
       'authors': authors
