@@ -90,7 +90,7 @@
            {% for t in app.admin_tags %}
            <a href="/results?q={{t|escape}}">{{t|escape}}</a>
            {% endfor %}
-           <p>Author E-mail: {{ app.author.email|escape }}</p>
+           <p>Author E-mail: {{ app.author_ref.user.email|escape }}</p>
            <div style="color:gray;padding-top:3px" align="left">
            {% ifequal app.moderation_status 1 %}
            <p>Status - APPROVED</p>
