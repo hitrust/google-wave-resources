@@ -1,6 +1,14 @@
 #summary Release notes for API changes and developer-facing changes
 #labels Featured
 
+
+= Nov 13, 2009=
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov13 Resolved Issues]
+  * Issue 210: "your browser is not supported" - embedded wave redirecting to inbox
+  * Issue 378: Wave robot notification failure on empty image description
+  * Issue 389: Proxy email addresses (e.g. robot+debug@gmail.com) don't show participant's avatar image
+
+
 = Oct 30, 2009=
 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Oct30 Resolved Issues]
