@@ -2,14 +2,15 @@
 #labels Featured
 
 
-= Nov 13, 2009=
+== Nov 13, 2009 ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov13 Resolved Issues]
   * Issue 210: "your browser is not supported" - embedded wave redirecting to inbox
   * Issue 378: Wave robot notification failure on empty image description
   * Issue 389: Proxy email addresses (e.g. robot+debug@gmail.com) don't show participant's avatar image
 
 
-= Oct 30, 2009=
+
+== Oct 30, 2009 ==
 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Oct30 Resolved Issues]
   * Issue 212: insertInlineBlip Doesn't create blip
@@ -18,7 +19,7 @@
   * Issue 278: Robots not responding to events at old application identifiers
 
 
-= Oct 20, 2009=
+== Oct 20, 2009==
 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Oct20 Resolved Issues]
   * Issue 227: Contact storage
