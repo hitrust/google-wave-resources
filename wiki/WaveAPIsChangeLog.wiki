@@ -2,7 +2,7 @@
 #labels Featured
 
 
-== Nov 15, 2009 == (WaveSandbox.com only)
+== Nov 15, 2009 (WaveSandbox.com only) == 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov15 Resolved Issues]
   * Issue 158: Missing wavelet output from robot
 
