@@ -5,7 +5,7 @@
 == Nov 15, 2009 (WaveSandbox.com only) == 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov15 Resolved Issues]
   * Issue 158: Missing wavelet output from robot
-
+  * Issue 325: "Show debug log" no longer appears with "&ll=debug"
 
 
 == Nov 13, 2009 ==
