@@ -4,12 +4,12 @@
 == Nov 24, 2009 (All Servers) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov24 Resolved Issues]
   * Issue 158: Missing wavelet output from robot
-  * Issue 327: Uncaught TypeError: Illegal invocation
+  * Issue 327: Uncaught !TypeError: Illegal invocation
   * Issue 333: wave-preview not working as described on Google Chrome or Safari
   * Issue 367: Function to get current Wave ID
 
 
-== Nov 15, 2009 (WaveSandbox.com only) == 
+== Nov 15, 2009 (!WaveSandbox.com only) == 
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov15 Resolved Issues]
   * Issue 158: Missing wavelet output from robot
   * Issue 325: "Show debug log" no longer appears with "&ll=debug"
