@@ -1,6 +1,12 @@
 #summary Release notes for API changes and developer-facing changes
 #labels Featured
 
+
+== Nov 27, 2009 (All Servers) ==
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov27 Resolved Issues]
+  * Issue 278: Robots not responding to events at old application identifiers 
+
+
 == Nov 24, 2009 (All Servers) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Nov24 Resolved Issues]
   * Issue 158: Missing wavelet output from robot
