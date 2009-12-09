@@ -2,6 +2,20 @@
 #labels Featured
 
 
+== Dec 9, 2009 (!WaveSandbox.com only) ==
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec9 Resolved Issues]
+  * Issue 562: Regression - Robots can't insert images.
+  * Issue 566: Regression: Unable to access the Editor Debug
+
+
+== Dec 8, 2009 (Wave Preview only) ==
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec8 Resolved Issues]
+  * Issue 193: Gadget should be able to work inline without a line break 
+  * Issue 457: state.reset() does not trigger stateHandler	 
+  * Issue 494: Bot stops listening to events after some time	 
+  * Issue 500: Wave should propagate the language setting to gadgets getMsg
+
+
 == Dec 7, 2009 (!WaveSandbox.com only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec7 Resolved Issues]
   * Issue 193: Gadget should be able to work inline without a line break 
