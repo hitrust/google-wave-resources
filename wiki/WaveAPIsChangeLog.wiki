@@ -2,7 +2,7 @@
 #labels Featured
 
 == Dec 14, 2009 (Wave Preview only) ==
-[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec9 Resolved Issues]
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec14 Resolved Issues]
   * Issue 562: Regression - Robots can't insert images.
   * Issue 566: Regression: Unable to access the Editor Debug
 
