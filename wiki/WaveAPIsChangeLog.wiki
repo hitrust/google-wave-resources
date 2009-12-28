@@ -1,6 +1,14 @@
 #summary Release notes for API changes and developer-facing changes
 #labels Featured
 
+To be notified of changes to this wiki, subscribe to [http://code.google.com/feeds/p/google-wave-resources/svnchanges/basic?path=/wiki/WaveAPIsChangeLog.wiki this RSS feed].
+
+
+Current known regressions:
+  * Issue 562: Regression - Robots can't insert images
+  * Issue 568: Missing robot profiles
+
+
 == Dec 14, 2009 (Wave Preview only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Dec14 Resolved Issues]
   * Issue 562: Regression - Robots can't insert images.
