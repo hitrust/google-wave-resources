@@ -5,7 +5,7 @@ To be notified of changes to this wiki, subscribe to [http://code.google.com/fee
 
 
 Current known regressions:
-  * Issue 562: Regression - Robots can't insert images
+  * Issue 591: Bug: Robot unable to resize Image object.
   * Issue 568: Missing robot profiles
 
 
