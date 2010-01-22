@@ -9,6 +9,10 @@ Current known regressions:
   * Issue 568: Missing robot profiles
 
 
+== Jan 21, 2009 (!WaveSandbox.com only) ==
+[http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Jan21 Resolved Issues]
+  * Issue 591: Bug: Robot unable to resize Image object
+
 == Jan 6, 2009 (Wave Preview only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Jan6 Resolved Issues]
   * Issue 570: Unable to display profile photo in gadget
