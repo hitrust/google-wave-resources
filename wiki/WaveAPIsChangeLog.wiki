@@ -6,6 +6,8 @@ To be notified of changes to this wiki, subscribe to [http://code.google.com/fee
 
 Current known regressions:
   * Issue 568: Missing robot profiles
+  * Issue 636: sandbox: event.getButtonName() always returns null
+
 
 
 == Jan 28, 2009 (Wave Preview only) ==
