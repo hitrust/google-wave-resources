@@ -10,15 +10,18 @@ Current known regressions:
 
 
 
-== Jan 28, 2009 (Wave Preview only) ==
+== Feb 8, 2010 (Wave Preview & !WaveSandbox) ==
+  * No changed issues.
+
+== Jan 28, 2010 (Wave Preview only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Jan28 Resolved Issues]
   * Issue 591: Bug: Robot unable to resize Image object
 
-== Jan 21, 2009 (!WaveSandbox.com only) ==
+== Jan 21, 2010 (!WaveSandbox.com only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Jan21 Resolved Issues]
   * Issue 591: Bug: Robot unable to resize Image object
 
-== Jan 6, 2009 (Wave Preview only) ==
+== Jan 6, 2010 (Wave Preview only) ==
 [http://code.google.com/p/google-wave-resources/issues/list?can=1&q=Fixed-Jan6 Resolved Issues]
   * Issue 570: Unable to display profile photo in gadget
 
