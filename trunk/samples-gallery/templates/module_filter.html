@@ -2,10 +2,14 @@
     <h3> Filter {{app_name|lower}}s</h3>
     <div>
     <br>
-    By API: <br>
+    By API type: <br>
     {% for api in apis %}
      <a href="/results?api={{api|escape}}">{{api}}</a>
     {% endfor %}
+    <br><br>
+    By Robots API version: <br>
+     <a href="/results?api_v2=True">v2 (Suggested)</a>&nbsp;&nbsp;
+     <a href="/results?api_v2=False">v1 (Deprecated)</a>
     <br><br>
     By Language: <br>
     {% for language in languages%} 

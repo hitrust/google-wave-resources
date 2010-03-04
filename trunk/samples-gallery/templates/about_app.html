@@ -41,7 +41,7 @@
        <div style="clear:both"></div>
        {% endifequal %}
        <p>{{app.description|urlize}}</p>
-       <div {% if app.best_practice %}style="background-color:#f5f0b4; border: 1px dotted #a6822c; padding: 5px; margin-t    op:7px; margin-bottom:7px" {% endif %}>
+       <div {% if app.best_practice %}style="background-color:#f5f0b4; border: 1px dotted #a6822c; padding: 5px; margin-top:7px; margin-bottom:7px" {% endif %}>
        {% if app.best_practice %}<div style="font-weight:bold;"><img align="absmiddle" title="Best Practice" width="16" height="16" src="static/img/icon_check.gif">&nbsp;BEST PRACTICE</div> {% endif %}
          {% if app.api_usage %}<div>{{app.api_usage|urlize}}</div> {% endif %}
        </div>
@@ -61,6 +61,15 @@
         {% ifequal app.type "code" %}
           <pre class="prettyprint">{{app.code_snippet|escape}}</pre>
         {% endifequal %}
+        {% if Robots and not app.api_v2 %}
+        <p class="warning">
+        <img src="http://games.exetel.com.au/services/bans/images/warning.png"
+        align="left">
+        Note: This sample uses the old robots API. It may be useful
+        to you for learning architecture and API-independent techniques, but it
+        is not a good resource for learning API usage.</p>
+        <br clear="all">
+        {% endif %}
         <p><b>APIs</b>: {{app.apis|join:", "|escape}}</p>
         <p><b>Languages</b>: {{app.languages|join:", "|escape}}</p>
         <p> Tags:
