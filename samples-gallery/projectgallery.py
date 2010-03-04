@@ -289,7 +289,7 @@ class AboutAppHandler(BaseHandler):
         comments = comments[:-1]
 
       values = {
-        'title': GALLERY_APP_NAME + ' Details - ' + app.title,
+        'title': GALLERY_APP_NAME + ': ' + app.title,
         'app': app,
         'comments': comments,
         'num_comments': num_comments,
@@ -298,6 +298,8 @@ class AboutAppHandler(BaseHandler):
         'next':next,
         'prev':prev,
        }
+      for api in app.apis:
+        values[str(api)] = True
       if error: # If the user was redirected here with an error.
         values['error'] = 'You do not have permission to edit this entry'
       self.generate('about_app.html', values)
@@ -438,6 +440,10 @@ class NewAppActionHandler (BaseHandler):
       app = db_models.Application()
       if self.request.get('best_practice') == 'on':
         app.best_practice = True
+      if self.request.get('api_v2') == 'yes':
+        app.api_v2 = True
+      else:
+        app.api_v2 = False
       app.type = type
       app.code_snippet = code_snippet
       app.title = title
@@ -496,7 +502,8 @@ class ProfileHandler(BaseHandler):
     id = self.request.get('id')
     author = db_models.GetApplicationAuthorById(id)
     template_values = {
-      'author': author
+      'author': author,
+      'title': GALLERY_APP_NAME + ' Author: ' + author.name
     }
     if author:
       apps = author.application_set
@@ -570,6 +577,10 @@ class EditAppActionHandler (BaseHandler):
         app.author_googler = True
       if self.request.get('best_practice') == 'on':
         app.best_practice = True
+      if self.request.get('api_v2') == 'yes':
+        app.api_v2 = True
+      else:
+        app.api_v2 = False
       app.description = self.request.get('content')
       app.code_snippet = self.request.get('code_snippet').lstrip()
       app.tech_details = self.request.get('tech_details')
@@ -620,6 +631,7 @@ class SearchResultsHandler(BaseHandler):
 
     # Grab the args from the request
     api = self.request.get('api')
+    api_v2 = self.request.get('api_v2')
     language = self.request.get('language')
     tag = self.request.get('q')
     topapps = self.request.get('topapps')
@@ -699,7 +711,19 @@ class SearchResultsHandler(BaseHandler):
         q_type = "google"
         q = "google"
         label = "By Google"
-
+      elif api_v2:
+        b_dict = {'false': False, 'true': True}
+        api_v2 = b_dict[api_v2.lower()]
+        version = 'v1'
+        if api_v2 is True:
+          version = 'v2'
+        query.filter('api_v2 =', api_v2)
+        query.filter('apis =', 'Robots')
+        prev_query.filter('api_v2 =', api_v2)
+        prev_query.filter('apis =', 'Robots')
+        q_type = 'api_v2'
+        q = 'api_v2'
+        label = 'API version: %s' % version
       else: #default to most recent apps. 
         self.redirect('/recent')
         return
@@ -1076,19 +1100,14 @@ class UpgradeDatabaseHandler (BaseHandler):
   """Handler for database migrations."""
 
   def get(self):
-    if not users.is_current_user_admin():
-      self.redirect('/')
-      return
-
-    values = {}
     q = db_models.Application.all()
-    q.filter('SCHEMA_VERSION = ', 2)
-    models = q.fetch(limit=2)
-    models[0].Upgrade()
-    if len(models) == 2:
-      values['continue'] = True
+    q.filter('moderation_status = ', db_models.Application.REJECTED)
+    apps = q.fetch(200)
+    for app in apps:
+      app.api_v2 = False
+      app.put()
 
-    self.generate('upgrade_db.html', values)
+    self.response.out.write("Adding att to models")
 
 class UpgradeAuthorsHandler(BaseHandler):
   def get(self):

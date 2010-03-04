@@ -52,8 +52,9 @@ class Application(db.Model):
 
   APIS = ['Robots', 'Gadgets', 'Embed', 'Installer']
   LANGUAGES = ['Java', 'Python', 'JavaScript', 'ActionScript']
-  author = db.UserProperty() # deprecated
+  api_v2 = db.BooleanProperty(default = False)
   author_ref = db.ReferenceProperty(ApplicationAuthor)
+  author = db.UserProperty() # deprecated
   author_name = db.StringProperty() #deprecated
   author_url = db.StringProperty() #deprecated
   type = db.StringProperty()

@@ -54,6 +54,16 @@
                   </td>
                </tr>
                <tr>
+                 <td nowrap style="padding:2px">If you checked robots, does
+                   robot use API v2?</td>
+                 <td style="padding:2px">
+                   <input type="radio" name="api_v2" {% if app.api_v2 %}
+                   checked {% endif %} value="yes"></input>Yes
+                   <input type="radio" name="api_v2" {% if not app.api_v2 %}
+                   checked {% endif %} value="no"></input>No
+                 </td>
+               </tr>
+               <tr>
                   <td nowrap style="padding:2px">Languages Used:</td>
                   <td style="padding:2px;margin-left:5px">
                     <input type="checkbox" name="languages" {% if Java %} checked = true {% endif %} value="Java">Java
