@@ -1,0 +1,45 @@
+This is BibTeX, Version 0.99c (Web2C 7.5.6)
+The top-level auxiliary file: wave.aux
+The style file: abbrv.bst
+Database file #1: wave.bib
+You've used 5 entries,
+            2118 wiz_defined-function locations,
+            514 strings with 4212 characters,
+and the built_in function-call counts, 1032 in all, are:
+= -- 90
+> -- 35
+< -- 0
++ -- 16
+- -- 10
+* -- 27
+:= -- 174
+add.period$ -- 15
+call.type$ -- 5
+change.case$ -- 20
+chr.to.int$ -- 0
+cite$ -- 5
+duplicate$ -- 35
+empty$ -- 111
+format.name$ -- 10
+if$ -- 221
+int.to.chr$ -- 0
+int.to.str$ -- 5
+missing$ -- 0
+newline$ -- 28
+num.names$ -- 10
+pop$ -- 55
+preamble$ -- 1
+purify$ -- 15
+quote$ -- 0
+skip$ -- 30
+stack$ -- 0
+substring$ -- 26
+swap$ -- 5
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 20
+warning$ -- 0
+while$ -- 10
+width$ -- 6
+write$ -- 47

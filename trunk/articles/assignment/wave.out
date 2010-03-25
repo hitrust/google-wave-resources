@@ -1,0 +1,32 @@
+\BOOKMARK [1][-]{section*.1}{General Overview}{}
+\BOOKMARK [1][-]{section*.2}{Acknowledgement}{}
+\BOOKMARK [1][-]{section*.3}{Grading and Admin}{}
+\BOOKMARK [1][-]{section*.4}{Objectives}{}
+\BOOKMARK [1][-]{section*.5}{Introduction}{}
+\BOOKMARK [1][-]{section*.6}{Thinking hard about your Wave Application}{}
+\BOOKMARK [1][-]{section*.7}{Wave Gadget}{}
+\BOOKMARK [2][-]{section*.8}{Getting Started}{section*.7}
+\BOOKMARK [2][-]{section*.9}{Building your gadget}{section*.7}
+\BOOKMARK [3][-]{section*.10}{Presentation}{section*.9}
+\BOOKMARK [3][-]{section*.11}{Behaviour}{section*.9}
+\BOOKMARK [3][-]{section*.12}{Store your data}{section*.9}
+\BOOKMARK [3][-]{section*.13}{Callback functions}{section*.9}
+\BOOKMARK [3][-]{section*.14}{User experience}{section*.9}
+\BOOKMARK [3][-]{section*.15}{Google Analytics}{section*.9}
+\BOOKMARK [1][-]{section*.16}{Wave Robot}{}
+\BOOKMARK [2][-]{section*.17}{Getting started}{section*.16}
+\BOOKMARK [2][-]{section*.18}{Wave Robot API Library}{section*.16}
+\BOOKMARK [2][-]{section*.19}{Robot Identity}{section*.16}
+\BOOKMARK [2][-]{section*.20}{Hello world!}{section*.16}
+\BOOKMARK [3][-]{section*.21}{Python}{section*.20}
+\BOOKMARK [3][-]{section*.22}{Deploy to Google App Engine}{section*.20}
+\BOOKMARK [3][-]{section*.23}{And Java?}{section*.20}
+\BOOKMARK [1][-]{section*.24}{Common for Wave Gadget and Wave Robot}{}
+\BOOKMARK [2][-]{section*.25}{Extension Design Principles}{section*.24}
+\BOOKMARK [2][-]{section*.26}{Google Wave Extension Installers}{section*.24}
+\BOOKMARK [2][-]{section*.27}{Embedding API}{section*.24}
+\BOOKMARK [1][-]{section*.28}{Detailed Grading Scheme}{}
+\BOOKMARK [2][-]{section*.29}{Milestones common to both paths of development}{section*.28}
+\BOOKMARK [2][-]{section*.30}{Milestones for the wave gadget section}{section*.28}
+\BOOKMARK [2][-]{section*.31}{Milestones for the wave robot section}{section*.28}
+\BOOKMARK [1][-]{section*.32}{Mode of Submission}{}
