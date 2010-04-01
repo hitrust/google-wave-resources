@@ -1,0 +1,4 @@
+#summary Release notes for Java client library changes.
+
+
+<wiki:gadget url="http://hosting.gmodules.com/ig/gadgets/file/102816022445188405566/wave-embed.xml" up_waveID="googlewave.com!w+3djWsKA4A" up_wavePath="https://wave.google.com/wave/" up_bgcolor="white" width="600" height="800" border="0" /> 
