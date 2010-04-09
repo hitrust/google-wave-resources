@@ -44,13 +44,17 @@ def OnSelfAdded(event, wavelet):
   wave.wave_json = simplejson.dumps(wavelet.serialize())
   wave.creator = wavelet.creator
   wave.put()
+  num = random.randint(0, len(content.messages)-1)
+  wavelet.title = content.messages[num]['title']
+  wavelet.root_blip.append(content.messages[num]['body'])
   ProcessWavelet(wavelet)
 
 def ProcessWavelet(wavelet):
-  num = random.randint(0, len(content.messages)-1) 
-  wavelet.root_blip.all().delete()
-  wavelet.title = content.messages[num]['title']
-  wavelet.root_blip.append(content.messages[num]['body'])
+  #pos = len(wavelet.root_blip.text)-1
+  #wavelet.root_blip.at(pos).insert(' ')
+  #wavelet.root_blip.append(' ')
+  num = random.randint(0, 999)
+  wavelet.data_documents['robotupdated'] = str(num)
 
 
 class CronHandler(webapp.RequestHandler):
