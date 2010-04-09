@@ -1,99 +1,80 @@
 messages = [
-    {'title': 'Event Planning',
+    {'title': 'Regarding Wave api proxyfor()',
      'body':
-    """"Event planning is more than just the invite process - there's also the step
-    before that, planning, and the step after inviting, sharing media + feedback
-    from the event. Most apps only enable you to do one aspect of planning,
-    whereas Wave lets you do it all (and all in one wave). Also works well if
-    planning events with pre-existing groups. Since Wave lets you communicate
-    quickly or at a delayed pace, you can plan some aspects quickly, take more
-    time to discuss other aspects."""
+    """
+     I want to know how to use proxyfor() method?In my case the scenario is 
+     client app is submitting new blip to a wave using robot but this blip 
+     is submitted to wave server with robot as creator.but i want to change 
+     creator of blip to any other id? 
+     Actually there are 3 methods in client api..can u tell me which one to 
+     use and how.? 
+    """
     },
-    {'title': 'Language Learning',
+    {'title': 'How to get a participant\'s display name with the robot api v2',
      'body':
-    """Language learning involves a number of aspects - there's the vocabulary,
-    there's grammar/syntax, there's pronunciation, and there's what I find
-    hardest at all: actually being able to hold real-life conversations. There
-    are flashcard apps and online learning apps for the vocabulary, syntax, and
-    pronunciation bits, but there are few ways to easily practice real-life
-    conversations. 
+    """
+     I'm developing a sample robot who says hello to a new comer when s/he 
+     join the wave. Though I'd like for the robot to call not the new 
+     comer's id but her/his display name, I cannot find the api to get it. 
+     Is there a good api to get a display name from id? Or, should I get a 
+     participant's display name with gadget's assistance? 
+    """
+    },
+    {'title': 'Filtering events in API v2',
+     'body':
+    """
+     I'm a bit unsure how to implement the filtering of events with the new 
+     API in Java? 
+     http://code.google.com/apis/wave/extensions/robots/events.html
 
-    It turns out that Google Wave is fairly good for this, because of the
-    features of collaborative editing, replying, and extensions. You can find a
-    friend (or a stranger on Twitter- people love to teach others their
-    language), start a wave with them, and have them ask you questions in the
-    language of choice. After you respond, they can go back and edit your answer
-    to be correct (assuming it had errors, of course). Then you can see the
-    difference when you edit the wave, using the default diff-on-open feature
-    (edits in yellow, deletions crossed out). You can later use playback to
-    remind yourself how the sentence was changed, and remember what errors you
-    often make."""
+     Are there any examples of how to do this? 
+    """
     },
-    {'title': 'Writing',
+    {'title': 'ROBOT_SELF_REMOVED event not working',
      'body':
-    """There are various apps for drafting documents out there - Google Docs,
-    EtherPad, MS Word, etc. The problem I have with all of them is that they do
-    not make it easy to have true inline discussions about aspects of a writing
-    piece. You can insert comments and try to have discussions that way, but
-    they will be single threaded and hard to remove later. You can chat, but
-    it's hard to reference parts of the doc in a chat. That's why I love Wave- I
-    can write up a draft in a blip, add my editors, respond to their inline
-    comments, collapse them when they've approved, and then export my writing to
-    its final place (blogger, forum, etc)."""
+    """
+     The robot when added to the participants list invokes the ROBOT_SELF_ADDED 
+     event and is successfully handled by the handler method. But when the robot 
+     is removed from the participants list the respective handler is expeced to 
+     invoke, but it does not.
+    """
     },
-    {'title': 'Note Taking',
+    {'title': 'icon proportional to the zoom factor',
      'body':
-    """People like to hear talks and have discussions in person, but also record
-    those discussions in a written form to reference later. In meetings, there
-    is typically 1 person elected to take notes. In conferences, there is
-    sometimes 1 person elected (or volunteered), and sometimes no one is
-    elected, and a random set of delegates take their own personal notes in a
-    notepad or doc (and possibly blog them later). 
-    
-    There are issues with both these techniques, however. When only 1 person
-    takes notes, they often cannot edit fast enough to capture everything, or
-    they often get distracted for a few minutes, and then have no record for a
-    particular segment. When multiple people take their own notes, there is no
-    good, fast way to merge them together later."""
+    """
+     hello, 
+     I am looking for an elegant solution for drawing icons (man.jpg) on a 
+     map according to the zoom factor: I don't like to see man.jpg so large 
+     than my country ! 
+     Any ideas ? 
+    """
     },
-    {'title': 'Design Docs',
+    {'title': 'Ordering Locations',
      'body':
-    """This is a particular instance of writing a draft, but it is a useful
-    enough use case that I want to point it out in particular. Developers often
-    write design docs, and ask for comment on them, and I find it can be
-    intimidating to respond to those rather long documents. But if I can respond
-    to just one bit of it, then it becomes easier. 
-    
-    In addition, waves can contain more dynamic content, like gadgets and
-    iframes, so design doc waves can actually include the project being
-    designed, if it is web based.
-    
-    It also becomes easy to update the design doc as you make progress on the
-    project, and make it be a living, breathing representation of that project.
-    People who are curious about the evolution of the design can simply replay
-    the doc."""
+    """
+     Hi, 
+     I would like to know if it.s possible, or recommended, to order lat/ 
+     lon locations?  I.m planning an application that requires engineer 
+     locations to be ordered from south to north.  In this instance the 
+     application will deal with locations in Ireland (north and south) that 
+     are then divided into operational areas.  Within each area I would 
+     like to have engineer locations ordered.  Ideally I.d like to use lat/ 
+     lon, however I have considered converting these to Irish Grid 
+     References> 
+     Any advice would be greatly appreciated, 
+     Mark 
+    """
     },
-    {'title': 'Bug Tracking',
+    {'title': 'Status 620 for more than 36 hours',
      'body':
-    """One aspect of my job is triaging bugs with my colleagues - going through
-    newly reported issues in our issue tracker, figuring out which are valid,
-    and reporting them to the team. My colleague and I live on opposite sides of
-    the world, and figured the easiest way to triage would be using Wave. We
-    start by grabbing a linked list of the newly opened issues and paste that in
-    the wave. Then we each reply to the ones we're looking at to basically call
-    dibs on it ("Looking at it"), and when we have questions or want to discuss,
-    we have an inline conversation under the bug. It works really well, because
-    we are able to work separately but together - we work in parallel, and
-    converse about eachother's bugs on the side. It equates to triaging the new
-    issues in almost half the time."""
-    },
-    {'title': 'CMS',
-     'body':
-    """Many websites are built on some sort of content management system, where
-    articles can be created, moved into different sections, etc. Most (possibly
-    all) of these CMS systems do not allow for real-time collaborative editing
-    of content, however, a highly useful feature for rapidly changing
-    information. This is where Wave comes in - editors can use it to
-    collaboratively create the content, then export that to their website, and
-    present it however they'd like."""
+    """
+     I am aware that I may have passed the 2500/15000 limit. Now I 
+     corrected the problem but I keep getting the 620 error 48 hours after 
+     this event while trying to make only one request. It's the first time 
+     that I have this error and the domain is brand new so I dont think 
+     that their has been previous events. I've read in this group that 
+     GoDaddy may be a problem but it was not confirmed. Is their any way of 
+     seeing our IP status for the locations request on google? 
+     Thank you! 
+    """
     }]
