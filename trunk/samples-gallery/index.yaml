@@ -257,3 +257,10 @@ indexes:
   - name: application
   - name: index
     direction: desc
+
+- kind: Application
+  properties:
+  - name: api_v2
+  - name: apis
+  - name: moderation_status
+  - name: index
