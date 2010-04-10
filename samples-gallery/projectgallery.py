@@ -722,7 +722,7 @@ class SearchResultsHandler(BaseHandler):
         prev_query.filter('api_v2 =', api_v2)
         prev_query.filter('apis =', 'Robots')
         q_type = 'api_v2'
-        q = 'api_v2'
+        q = 'True'
         label = 'API version: %s' % version
       else: #default to most recent apps. 
         self.redirect('/recent')
