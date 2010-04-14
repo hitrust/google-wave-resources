@@ -36,9 +36,9 @@ function showStars(numStars) {
       continue;
     }
     if (numStars >= i) {
-      star_elem.src = img_rate_star_on;
+      star_elem.src = imgOnUrl;
     } else {
-      star_elem.src = img_rate_star_off;
+      star_elem.src = imgOffUrl;
     }
   }
   var star_name = _gel('star_name');
@@ -97,7 +97,7 @@ function updateStarVotes(star, starVotes, totalVotes) {
 }
 
 function main() {
-  var imgUrl = img.src = gadgets.io.getProxyUrl('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/img/star_off.png');
+  var imgUrl = gadgets.io.getProxyUrl('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/img/star_off.png');
   document.getElementById('star1').src = imgUrl;
   document.getElementById('star2').src = imgUrl;
   document.getElementById('star3').src = imgUrl;
