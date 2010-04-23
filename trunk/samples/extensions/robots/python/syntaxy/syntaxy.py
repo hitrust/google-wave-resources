@@ -16,7 +16,7 @@ You may obtain a copy of the License at
 
 from waveapi import events
 from waveapi import robot
-from waveapi.document import Range
+from waveapi import appengine_robot_runner
 
 from pygments import lexers
 from pygments import highlight
@@ -25,33 +25,40 @@ from pygments.token import Token
 
 COLORS = {
   Token.Keyword:("#335588", "bold"),
-  Token.Comment:("#7777FF", None),
-  Token.Literal.String:("#007000", None),
+  Token.Comment:("#7777FF", ""),
+  Token.Literal.String:("#007000", ""),
   Token.Operator:("#663388", "bold"),
-  Token.Punctuation:("#663388", None),
-  Token.Name.Function:("#550000", None),
-  Token.Name.Namespace:("#550000", None),
-  Token:(None, None) }
+  Token.Punctuation:("#663388", ""),
+  Token.Name.Function:("#550000", ""),
+  Token.Name.Namespace:("#550000", ""),
+  Token:("", "") }
 
-WELCOME_TEXT = "\nSyntaxy is being used in this wave, put #!<language> (e.g. #!python) at the start of a blip to enable syntax highlighting\n\n"
-
-def OnBlipSubmit(properties, context):
-  blip = context.GetBlipById(properties['blipId']).GetDocument()
-  HighlightBlip(blip)
+def OnBlipSubmit(event, wavelet):
+  HighlightBlip(event.blip)
 
 def HighlightBlip(blip):
-  """Given an blip document, if the blip contains a #! syntax highlight that blip"""
-  text = blip.GetText()
-  if text.lstrip()[:2] == "#!":
-    lang = text.lstrip()[2:20].split()
+  """Highlight a blip if we find a filename or #!Language"""
+  text = blip.text[:]
+  stripped_text = text.lstrip()
+  if stripped_text[:2] == "#!":
+    lang = stripped_text[2:20].split()
     if len(lang) > 0:
       lang = lang[0]
-      range = Range(text.find(lang) + len(lang), len(blip.GetText()))
-      # only highlight after the #!language 
-      HighlightRange(blip, range, lang)
+      # only highlight after the #!language
+      HighlightRange(blip, text.find(lang) + len(lang), len(blip.text), lang)
+  elif stripped_text.startswith("file:"):
+    idx = stripped_text.find('\n')
+    if idx >= 0:
+      lang = stripped_text[stripped_text.find(":")+1:idx]
+      HighlightRange(blip, len(text) - len(stripped_text) + idx+1,
+                     len(blip.text), lang)
 
 def GetLexer(lang):
-  """ Attempts to find a lexer according to the contents of the #! first by language name then by file extension """
+  """ Attempts to find a lexer according to lang.
+
+  This will attempt to interpret lang as a #!language and failover
+  to using lang as a filename.
+  """
   try:
     lex = lexers.get_lexer_by_name(lang)
     return lex
@@ -65,38 +72,48 @@ def GetLexer(lang):
     pass
   return None
 
-def HighlightRange(blip, range, lang):
+def HighlightRange(blip, start, end, lang):
   """ Highlight within a specific range within the text of a blip """
-  # Set the text to an unknown language so Spelly will (hopefully) leave it alone
-  blip.SetAnnotation(range, "lang", "xx")
-  otext = blip.GetText()[range.start:range.end]
-  text = otext.lstrip()
   # adjust range to cut leading whitespace
-  range.start = range.start + (len(otext) - len(text))
+  otext = blip.text[start:end]
+  text = otext.lstrip()
+  start = start + len(otext) - len(text)
+  range = blip.range(start, end)
 
+  # Set the text to an unknown language so Spelly will
+  # leave it alone
+  range.annotate("lang", "xx")
   # Change to a monospace font
-  blip.SetAnnotation(range, "style/fontFamily", "Courier New,monospace")
+  range.annotate("style/fontFamily", "Courier New,monospace")
+  # Change to a monospace font
+  range.annotate("style/color", "#000000")
+  # Change to a monospace font
+  range.annotate("style/fontWeight", "")
 
   # find the right lexer for this language
   lex = GetLexer(lang)
   if lex:
     formatter = WaveFormatter()
-    formatter.setBlipChunk(blip, range, text)
+    formatter.setBlipChunk(blip, start, text)
     highlight(text, lex, formatter)
 
 class WaveFormatter (Formatter):
   """ Formatter for Pygments library to apply syntax highlighting to a blip """
-  def setBlipChunk(self, blip, range, text):
+  def setBlipChunk(self, blip, end, text):
     self.blip = blip
-    self.end = range.start 
+    self.end = end
     self.text = text
 
   def annotateToken(self, tokenstring, color, bold=None):
-    start = self.end 
+    if not color and not bold:
+      return
+    start = self.end
     end = len(tokenstring) + self.end
-    range = Range(start, end)
-    self.blip.SetAnnotation(range, "style/color", color) 
-    self.blip.SetAnnotation(range, "style/fontWeight", bold)
+    therange = self.blip.range(start, end)
+    if color:
+      therange.annotate("style/color", color)
+    if bold:
+      therange.annotate("style/fontWeight", bold)
 
   def format(self, tokensource, outfile):
     for (tokentype, tokenstring) in tokensource:
@@ -111,30 +128,22 @@ class WaveFormatter (Formatter):
       self.end += len(tokenstring)
     return ""
 
-def OnLoad(properties, context):
-  """ When the robot first is added to a wave, add a welcome message to the title blip
-  and recursively check all blips for highlighting.
-  This does not work because only the root blip is sent here, this is a defect
-  of the wave robot api."""
-  root_blip_id = context.GetRootWavelet().GetRootBlipId()
-  blip = context.GetBlipById(root_blip_id)
-  blip.GetDocument().InsertText(1, WELCOME_TEXT)
-  RecAnnotateBlips(blip, context)
 
-def RecAnnotateBlips(blip, context):
+def OnLoad(event, wavelet):
+  RecAnnotateBlips(event.blip)
+
+def RecAnnotateBlips(blip):
   """ Recursively traverse the wavelet tree"""
-  HighlightBlip(blip.GetDocument())
-  for c in blip.GetChildBlipIds():
-    child_blip = context.GetBlipById(c)
+  HighlightBlip(blip)
+  for child_blip in blip.child_blips:
     if child_blip:
-      RecAnnotateBlips(child_blip, context)
+      RecAnnotateBlips(child_blip)
 
 if __name__ == '__main__':
   lexers.get_all_lexers()
-  myRobot = robot.Robot('kasyntaxy', 
-    image_url='http://kasyntaxy.appspot.com/assets/avatar.gif',
-    version='1.7',
-    profile_url='http://kasyntaxy.appspot.com/')
-  myRobot.RegisterHandler(events.DOCUMENT_CHANGED, OnBlipSubmit)
-  myRobot.RegisterHandler(events.WAVELET_SELF_ADDED, OnLoad)
-  myRobot.Run()
+  myRobot = robot.Robot('syntaxy2',
+    image_url='',
+    profile_url='')
+  myRobot.register_handler(events.DocumentChanged, OnBlipSubmit)
+  myRobot.register_handler(events.WaveletSelfAdded, OnLoad)
+  appengine_robot_runner.run(myRobot)
