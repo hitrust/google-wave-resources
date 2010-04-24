@@ -1,21 +1,33 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Youtube Wave Discussion</title>
-    <script src="http://wave-api.appspot.com/public/embed.js" type="text/javascript"></script>
+    <title>Google Wave Embed API Example: Specifying Wave UI Options</title>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
     <script type="text/javascript">
+
+    google.load("wave", "1");
+
     function initialize() {
-      var wavePanel = new WavePanel("http://wave.google.com/a/wavesandbox.com/");
-      wavePanel.setUIConfig("pink", "black", "Arial", "12pts");
-      wavePanel.loadWave("wavesandbox.com!w+pMTYlOw2%0");
-      wavePanel.init(document.getElementById('waveframe'));
+      var waveFrame = document.getElementById("waveframe");
+      var embedOptions = {
+        header: true,
+        toolbar: true,
+        target: waveFrame,
+      }
+      var wavePanel = new google.wave.WavePanel(embedOptions);
+      wavePanel.loadWave("googlewave.com!w+0K2QENSgA")
     }
+    google.setOnLoadCallback(initialize);
     </script>
   </head>
-  <body onload="initialize()">
-<object width="746" height="413"><param name="movie" value="http://www.youtube.com/cp/vjVQa1PpcFP844uRHTLcqkw-nrXoogYYh3YIGVU4xXw="></param><embed src="http://www.youtube.com/cp/vjVQa1PpcFP844uRHTLcqkw-nrXoogYYh3YIGVU4xXw=" type="application/x-shockwave-flash" width="746" height="413"></embed></object>
-    <div id="waveframe" style="border: 2px solid grey; width: 746px; height: 400px"></div>
+  <body >
+    <object width="746" height="413"><param name="movie"
+      value="http://www.youtube.com/cp/vjVQa1PpcFP844uRHTLcqtpSVHMwZmbkH1QTpVS20sw="></param><embed
+      src="http://www.youtube.com/cp/vjVQa1PpcFP844uRHTLcqtpSVHMwZmbkH1QTpVS20sw="
+      type="application/x-shockwave-flash" width="746"
+      height="413"></embed></object>
+    <div id="waveframe" style="width:746px; height:500px"></div>
   </body>
 </html>
