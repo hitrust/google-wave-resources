@@ -9,7 +9,7 @@
 <head>
   <script src="http://wave-api.appspot.com/public/wave.js"></script>
   <script type="text/javascript">
-    /* 
+    /*
     */
 
     var INTERESTS = [
@@ -22,35 +22,74 @@
 
     var search_responses = [];
 
-    function startAWaveResponse(obj) {
+    function chatWaveResponse(obj) {
       if (obj.rc == 200) {
         var results = document.getElementById('results');
         var response = obj.data;
         if (response.status == "error") {
-          alert("Couldn't create the conversation wave.");
+          alert("Sorry, there was an error in creating the chat wave.");
+        } else {
+          var waveId = response.wave_id;
+          var chatLink = document.createElement("a");
+          chatLink.href= "http://wave.google.com/wave/#restored:wave:" + waveId.replace("+", "%252B");
+          chatLink.target = "_blank";
+          chatLink.innerHTML = "Visit the new wave with those attendees."
+          document.getElementById("chatLinkDiv").innerHTML = "";
+          document.getElementById("chatLinkDiv").appendChild(chatLink);
         }
       }
     }
 
-
-    function startAWave() {
-      query = "users=" + encodeURIComponent(wave.getViewer().getId());
-      for (var i=0; i<search_responses.length; i++) {
-        if (document.getElementById("x" + i).checked) {
-          query = query + "," + encodeURIComponent(search_responses[i].id);
+    function profileWaveResponse(obj) {
+      if (obj.rc == 200) {
+        var results = document.getElementById('results');
+        var response = obj.data;
+        if (response.status == "error") {
+          alert("Sorry, there was an error in creating the profile wave.");
+        } else {
+          // replace button with link
+          var waveId = response.wave_id;
+          var profileLink = document.createElement("a");
+          profileLink.href= "http://wave.google.com/wave/#restored:wave:" + waveId.replace("+", "%252B");
+          profileLink.target = "_blank";
+          profileLink.innerHTML = "View/edit your profile wave."
+          document.getElementById("profileDiv").innerHTML = "";
+          document.getElementById("profileDiv").appendChild(profileLink);
         }
       }
-      if (query.length == 0) {
-        alert("Please select which attendees you want to start a wave with.");
+    }
+
+    function createChatWave() {
+      var foundUsers = 0;
+      query = "users=" + encodeURIComponent(wave.getViewer().getId());
+      for (var i = 0; i < search_responses.length; i++) {
+        if (document.getElementById("x" + i).checked) {
+          query = query + "," + encodeURIComponent(search_responses[i].id);
+          foundUsers++;
+        }
       }
-      alert(query);
-      var url = "http://io-2010-peoplefinder-bot.appspot.com/web/startawave?" 
-        + query;
+      if (foundUsers == 0) {
+        alert("Please select which attendees you want to start a wave with.");
+        return;
+      }
+      var path = "startawave?" + query;
+      makeJSONRequest(path, chatWaveResponse);
+    }
+
+    function createProfileWave() {
+      query = "user=" + wave.getViewer().getId();
+      var path = "profilewave?" + query;
+      makeJSONRequest(path, profileWaveResponse);
+    }
+
+    function makeJSONRequest(path, callback) {
+      var baseUrl = "http://io-2010-peoplefinder-bot.appspot.com/web/";
       var params = {};
       params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
       params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 1;
-      gadgets.io.makeRequest(url, startAWaveResponse, params);
+      gadgets.io.makeRequest(baseUrl + path, callback, params);
     }
+
 
     function searchResponse(obj) {
       if (obj.rc == 200) {
@@ -67,7 +106,7 @@
           for (var i=0; i<data.length; i++) {
             s += "<input type=checkbox id='x" + i +  "'> " + data[i].name + "<br>";
           }
-          s += '<br><a id="startLink" href="#" onClick="startAWave()">Wave Them</a>';
+          s += '<br><a id="startLink" href="javascript:void()" onClick="createChatWave()">Wave Them</a>';
         } else {
           document.getElementById('resultsHeader').style.display = 'none';
           s += "Sorry, there were no matches for your query."
@@ -77,8 +116,6 @@
         gadgets.window.adjustHeight();
       } else {
         /* Log error to App Engine? */
-        window.alert(obj.rc);
-        window.alert(obj.data);
       }
     }
 
@@ -119,7 +156,13 @@
 
 </head>
 <body>
-  <div id="mainDiv" style="float:left; width:100%;">
+  <div id="profileDiv" style="width:100%;">
+    <div>You haven't yet created a profile.</div>
+    <div>
+      <a id="profileLink" href="javascript:void(0)" onclick="createProfileWave()">Create a Profile</a>.
+    </div>
+  </div>
+  <div id="mainDiv" style="width:100%;">
     {% for interest in interests %}
       {% ifequal interest.id "--" %}
       <br/>
@@ -129,7 +172,7 @@
       {% endifequal %}
     {% endfor %}
     <p style="clear:both; padding: 1em 0 "> 
-      Within 
+      Within
       <select name="distance" id="distance">
         <option selected value=""></option>
         <option value=10>10</option>
@@ -144,16 +187,21 @@
       </select> of me.
     </p>
     <p style="clear:both; padding: 1em 0 "> 
-      <a id="searchLink" href="#" onClick="buttonClicked()">Search</a>
+      <a id="searchLink" href="javascript:void(0)" onClick="buttonClicked()">Search</a>
     </p>
     <br/>
     <h3 id="resultsHeader" style="display: none; clear:both; margin-top:0.5em">Results</h3>
+    <br/>
     <div id="results">
     </div>
+    <div id="chatLinkDiv"></div>
+    <br/><br/>
   </div>
   <script>
     function wavify() {
       gadgets.window.adjustHeight();
+      wave.ui.makeFrame(document.getElementById('profileDiv'));
+      wave.ui.makeButton(document.getElementById('profileLink'));
       wave.ui.makeFrame(document.getElementById('mainDiv'));
       wave.ui.makeButton(document.getElementById('searchLink'));
     }
