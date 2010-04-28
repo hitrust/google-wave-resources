@@ -714,15 +714,16 @@ class SearchResultsHandler(BaseHandler):
       elif api_v2:
         b_dict = {'false': False, 'true': True}
         api_v2 = b_dict[api_v2.lower()]
+        q_type = 'api_v2'
         version = 'v1'
+        q = 'False'
         if api_v2 is True:
           version = 'v2'
+          q = 'True'
         query.filter('api_v2 =', api_v2)
         query.filter('apis =', 'Robots')
         prev_query.filter('api_v2 =', api_v2)
         prev_query.filter('apis =', 'Robots')
-        q_type = 'api_v2'
-        q = 'True'
         label = 'API version: %s' % version
       else: #default to most recent apps. 
         self.redirect('/recent')
