@@ -56,15 +56,17 @@ def OnBlipSubmitted(event, wavelet):
   mapgadget = blip.all(element.Gadget).value()
   coord = None
   for key in mapgadget.keys():
-    if key.startswith('overlay-'):
       mapdata = simplejson.loads(getattr(mapgadget, key))
-      if mapdata['type'] == 'point':
-        coord = mapdata['coordinates'][0]
-
+      coord = mapdata['latlng']
+      address = mapdata['address']
   profile = Profile.get_or_insert(wavelet.wave_id)
   oldlocation = profile.location
   if coord:
-    profile.location = db.GeoPt(coord['lat'], coord['lng']) 
+    coord_list = coord.split(',')
+    lat = float(coord_list[0])
+    lng = float(coord_list[1])
+    profile.location = db.GeoPt(lat, lng)
+    profile.address = address
     profile.update_location()
     logging.debug(profile.location)
     if ( oldlocation is None ) or ( oldlocation != profile.location ):
@@ -77,7 +79,7 @@ def OnBlipSubmitted(event, wavelet):
           profile.location,
           max_results=5,
           max_distance=80467
-          ) 
+          )
       if results:
         gtugblip = blip.reply()
         gtugblip.append_markup("<p>Great news, we found a Google Technology User Group near you!</p>")
@@ -189,7 +191,7 @@ class CreateProfileHandler(webapp.RequestHandler):
     blip.append_markup('<h2>Location</h2>')
     blip.append(element.Line())
     blip.append('You may optionally add a marker to the following map to note where you are coming from:')
-    blip.append(element.Gadget('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/mappy.xml'))
+    blip.append(element.Gadget('http://io-2010-peoplefinder-bot.appspot.com/static/simplemap.xml'))
     wavelet.tags.append('io2010')
     wavelet.tags.append('google-profile')
     wavelet.participants.add('public@a.gwave.com')
