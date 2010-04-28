@@ -40,12 +40,6 @@ ROBOT_NAME = 'PeopleFinder'
 # don't require creating a profile page to do an interest search
 
 
-def OnParticipantsChanged(event, wavelet):
-  public = 'public@a.gwave.com'
-  if public in wavelet.participants:
-    wavelet.participants.set_role(public, wavelet_mod.Participants.ROLE_READ_ONLY)
-
-
 def OnBlipSubmitted(event, wavelet):
   """The map gadget can only be edited when the blip
   is in write mode, so we can safely handle updates
@@ -94,10 +88,6 @@ def OnBlipSubmitted(event, wavelet):
   profile.put()
 
 def OnDocumentChanged(event, wavelet):
-  public = 'public@a.gwave.com'
-  if public in wavelet.participants:
-    wavelet.participants.set_role(public, wavelet_mod.Participants.ROLE_READ_ONLY)
-
   blip = event.blip
 
   interests = []
@@ -173,27 +163,39 @@ class CreateProfileHandler(webapp.RequestHandler):
 
   def populateWavelet(self, wavelet):
     blip = wavelet.root_blip
-    wavelet.title = 'People-Finder Profile'
-    blip.append(element.Image('http://io-2010-peoplefinder-bot.appspot.com/static/io2010logo_originalblue.png'))
-    blip.append_markup('<h2>Full Name</h2>')
+    title = 'Google I/O 2010 Profile'
+    wavelet.title = title
+    blip.range(0, len(title)+1).annotate('style/fontSize', '1.5em')
+    blip.append('\n', bundled_annotations=[('style/fontSize', None)])
+    blip.append('To help other people find you and connect with you, please fill out your name, interests, and location:')
     blip.append(element.Line())
     blip.append(element.Input('fullname', 'Your Name'))
-    blip.append_markup('<h2>Interests</h2>')
     for (id, label) in INTERESTS:
       if id == '--':
-        blip.append_markup('<h3>%s</h3>' % label)
+        blip.append(element.Line())
+        blip.append(element.Line(line_type='h4'))
+        blip.append(label)
       else:
         blip.append(element.Line())
         blip.append(element.Check(id, 'false'))
         blip.append(element.Label(id, label))
 
     blip.append(element.Line())
-    blip.append_markup('<h2>Location</h2>')
+    blip.append(element.Line(line_type='h4'))
+    blip.append('Location')
     blip.append(element.Line())
-    blip.append('You may optionally add a marker to the following map to note where you are coming from:')
-    blip.append(element.Gadget('http://io-2010-peoplefinder-bot.appspot.com/static/simplemap.xml'))
+    blip.append('You may optionally add a marker to the map to note where you live:')
+    blip.append(element.Gadget('http://io-2010-peoplefinder-bot.appspot.com/static/mapgadget.xml'))
+    blip.append(element.Line())
+    blip.append(element.Line(line_type='h4'))
+    blip.append('Sessions')
+    blip.append(element.Line())
+    blip.append('As you browse the sessions on the ')
+    blip.append('Google I/O 2010 Main Wave', bundled_annotations=[('link/wave', 'googlewave.com!w+eRiTZrZkCcw')])
+    blip.append(', you can indicate which you\'re planning to attend -- and then handy links will be added here:', bundled_annotations=[('link/wave', None)])
+    blip.append(element.Line())
     wavelet.tags.append('io2010')
-    wavelet.tags.append('google-profile')
+    wavelet.tags.append('profile')
     wavelet.participants.add('public@a.gwave.com')
 
 class GetProfileHandler(webapp.RequestHandler):
@@ -229,6 +231,7 @@ class AddSession(webapp.RequestHandler):
   def get(self):
     user = self.request.get('user', '')
     desc = self.request.get('desc', '')
+    info = self.request.get('info', '')
     waveid = self.request.get('waveid', '')
     if user and desc and waveid:
       matches = Profile.all().filter('creator =', user).fetch(1)
@@ -238,7 +241,10 @@ class AddSession(webapp.RequestHandler):
         user = None
       profile_waveid = user.key().name()
       wavelet = self._robot.fetch_wavelet(profile_waveid, "googlewave.com!conv+root")
-      wavelet.reply().append(desc, bundled_annotations=[('link/wave', waveid)])
+      blip = wavelet.root_blip
+      blip.append(element.Line(line_type='li'))
+      blip.append(desc, bundled_annotations=[('link/wave', waveid)])
+      blip.append(" " + info, bundled_annotations=[('link/wave', None)])
       self._robot.submit(wavelet)
 
 if __name__ == '__main__':
@@ -254,7 +260,6 @@ if __name__ == '__main__':
   r.register_handler(events.DocumentChanged, OnDocumentChanged, 
      context = [events.Context.ALL])
   r.register_handler(events.BlipSubmitted, OnBlipSubmitted)
-  r.register_handler(events.WaveletParticipantsChanged, OnParticipantsChanged)
 
   appengine_robot_runner.run(r, debug=True, extra_handlers=[
       ('/web/getprofilewave', lambda: GetProfileHandler(r)),
