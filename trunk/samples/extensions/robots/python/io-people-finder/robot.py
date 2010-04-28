@@ -172,6 +172,7 @@ class CreateProfileHandler(webapp.RequestHandler):
   def populateWavelet(self, wavelet):
     blip = wavelet.root_blip
     wavelet.title = 'People-Finder Profile'
+    blip.append(element.Image('http://io-2010-peoplefinder-bot.appspot.com/static/io2010logo_originalblue.png'))
     blip.append_markup('<h2>Full Name</h2>')
     blip.append(element.Line())
     blip.append(element.Input('fullname', 'Your Name'))
@@ -214,6 +215,30 @@ class GetProfileHandler(webapp.RequestHandler):
       json = '{"status": "error"}'
     self.response.out.write(json)
 
+
+class AddSession(webapp.RequestHandler):
+  _robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self._robot  = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    user = self.request.get('user', '')
+    desc = self.request.get('desc', '')
+    waveid = self.request.get('waveid', '')
+    if user and desc and waveid:
+      matches = Profile.all().filter('creator =', user).fetch(1)
+      if matches:
+        user = matches[0]
+      else:
+        user = None
+      profile_waveid = user.key().name()
+      wavelet = self._robot.fetch_wavelet(profile_waveid, "googlewave.com!conv+root")
+      wavelet.reply().append(desc, bundled_annotations=[('link/wave', waveid)])
+      self._robot.submit(wavelet)
+
 if __name__ == '__main__':
   appid = os.environ['APPLICATION_ID']
   r = robot.Robot(ROBOT_NAME.capitalize(),
@@ -232,6 +257,7 @@ if __name__ == '__main__':
   appengine_robot_runner.run(r, debug=True, extra_handlers=[
       ('/web/getprofilewave', lambda: GetProfileHandler(r)),
       ('/web/startawave', lambda: CreateChatHandler(r)),
-      ('/web/profilewave', lambda: CreateProfileHandler(r))
+      ('/web/profilewave', lambda: CreateProfileHandler(r)),
+      ('/web/addsession', lambda: AddSession(r))
       ]
       )
