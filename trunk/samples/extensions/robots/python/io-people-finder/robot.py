@@ -110,7 +110,6 @@ def OnDocumentChanged(event, wavelet):
     fullname = nameinput.get('value','')
   profile = Profile.get_or_insert(wavelet.wave_id)
   profile.name = fullname
-  profile.creator = wavelet.creator
   profile.interests = interests
   profile.put()
 
