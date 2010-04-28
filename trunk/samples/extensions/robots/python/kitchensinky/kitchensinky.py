@@ -5,6 +5,8 @@
 This robot exercises our API by inserting a gadget that does embedding.
 """
 
+__author__ = 'douwe@google.com (Douwe Osinga)'
+
 import logging
 
 from waveapi import appengine_robot_runner
@@ -12,6 +14,7 @@ from waveapi import element
 from waveapi import events
 from waveapi import ops
 from waveapi import robot
+from waveapi import wavelet as wavelet_mod
 
 # the robot
 sinky = None
@@ -84,6 +87,8 @@ def OnSelfAdded(event, wavelet):
   new_wave = sinky.new_wave(wavelet.domain,
                             wavelet.participants,
                             message=wavelet.serialize())
+  new_wave.participants.set_role(wavelet.creator,
+                            wavelet_mod.Participants.ROLE_READ_ONLY)
   new_wave.root_blip.append('A new day and a new wave')
   new_wave.root_blip.append_markup(
       '<p>Some stuff!</p><p>Not the <b>beautiful</b></p>')
