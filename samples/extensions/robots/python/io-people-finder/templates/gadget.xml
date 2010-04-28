@@ -21,6 +21,7 @@
     ];
 
     var search_responses = [];
+    var gotProfile = false;
 
     function chatWaveResponse(obj) {
       if (obj.rc == 200) {
@@ -42,21 +43,40 @@
 
     function profileWaveResponse(obj) {
       if (obj.rc == 200) {
+        gotProfile = true;
         var results = document.getElementById('results');
         var response = obj.data;
         if (response.status == "error") {
           alert("Sorry, there was an error in creating the profile wave.");
         } else {
-          // replace button with link
-          var waveId = response.wave_id;
-          var profileLink = document.createElement("a");
-          profileLink.href= "http://wave.google.com/wave/#restored:wave:" + waveId.replace("+", "%252B");
-          profileLink.target = "_blank";
-          profileLink.innerHTML = "View/edit your profile wave."
-          document.getElementById("profileDiv").innerHTML = "";
-          document.getElementById("profileDiv").appendChild(profileLink);
+          document.getElementById("profileContentDiv").innerHTML = "You should see the wave pop up in your inbox.";
+          addProfileLink(response, "Otherwise, click here to edit it.");
         }
       }
+    }
+
+    function getProfileWaveResponse(obj) {
+      if (!getProfile && obj.rc == 200) {
+        gotProfile = true;
+        var results = document.getElementById('results');
+        var response = obj.data;
+        if (response.status == "success") {
+          document.getElementById("profileContentDiv").innerHTML = "";
+          addProfileLink(response);
+        }
+      }
+      document.getElementById("profileLoadingDiv").style.display = "none";
+      document.getElementById("profileContentDiv").style.display = "block";
+    }
+
+    function addProfileLink(response, message) {
+      // replace button with link
+      var waveId = response.wave_id;
+      var profileLink = document.createElement("a");
+      profileLink.href= "http://wave.google.com/wave/#restored:wave:" + waveId.replace("+", "%252B");
+      profileLink.target = "_blank";
+      profileLink.innerHTML = message || "Click here to view/edit your profile wave."
+      document.getElementById("profileContentDiv").appendChild(profileLink);
     }
 
     function createChatWave() {
@@ -144,9 +164,20 @@
       gadgets.io.makeRequest(url, searchResponse, params);
     }
 
-    function initGadget() {
-      // Check if they already have a profile wave.
+    function getProfileWave() {
+      if (!wave.getViewer()) return;
+      query = "user=" + wave.getViewer().getId();
+      var path = "getprofilewave?" + query;
+      makeJSONRequest(path, getProfileWaveResponse);
+    }
 
+    function initGadget() {
+      wave.setParticipantCallback(getProfileWave);
+      gadgets.window.adjustHeight();
+      wave.ui.makeFrame(document.getElementById('profileDiv'));
+      wave.ui.makeButton(document.getElementById('profileLink'));
+      wave.ui.makeFrame(document.getElementById('mainDiv'));
+      wave.ui.makeButton(document.getElementById('searchLink'));
     }
     gadgets.util.registerOnLoadHandler(initGadget);
     </script>
@@ -163,11 +194,14 @@
 </head>
 <body>
   <div id="profileDiv" style="width:100%;">
-    <div id="profileContentDiv" style="visibility:hidden">
-    <div>You haven't yet created a profile.</div>
-    <div>
-      <a id="profileLink" href="javascript:void(0)" onclick="createProfileWave()">Create a Profile</a>.
+    <div id="profileLoadingDiv" style="display:block">
+      Loading profile information...
     </div>
+    <div id="profileContentDiv" style="display:none">
+      <div>You haven't yet created a profile.</div>
+      <div>
+        <a id="profileLink" href="javascript:void(0)" onclick="createProfileWave()">Create a Profile</a>.
+      </div>
     </div>
   </div>
   <div id="mainDiv" style="width:100%;">
@@ -205,16 +239,6 @@
     <div id="chatLinkDiv"></div>
     <br/><br/>
   </div>
-  <script>
-    function wavify() {
-      gadgets.window.adjustHeight();
-      wave.ui.makeFrame(document.getElementById('profileDiv'));
-      wave.ui.makeButton(document.getElementById('profileLink'));
-      wave.ui.makeFrame(document.getElementById('mainDiv'));
-      wave.ui.makeButton(document.getElementById('searchLink'));
-    }
-    wavify();
-  </script>
 </body>
     ]]>
   </Content>
