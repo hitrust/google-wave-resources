@@ -7,7 +7,8 @@ from google.appengine.ext import webapp
 from model import Profile, GTUG
 from waveapi import robot
 from waveapi import events
-from waveapi import element 
+from waveapi import element
+from waveapi import wavelet as wavelet_mod
 from waveapi import appengine_robot_runner
 
 import credentials 
@@ -39,31 +40,11 @@ ROBOT_NAME = 'PeopleFinder'
 # don't require creating a profile page to do an interest search
 
 
-def OnSelfAdded(event, wavelet):
-  """Invoked when PeopleFinder is first added to the wave."""
-  blip = event.blip
+def OnParticipantsChanged(event, wavelet):
+  public = 'public@a.gwave.com'
+  if public in wavelet.participants:
+    wavelet.participants.set_role(public, wavelet_mod.Participants.ROLE_READ_ONLY)
 
-  wavelet.title = 'People-Finder Profile'
-  blip.append_markup('<h2>Full Name</h2>')
-  blip.append(element.Line())
-  blip.append(element.Input('fullname', 'Your Name'))
-  blip.append_markup('<h2>Interests</h2>')
-  for (id, label) in INTERESTS:
-    if id == '--':
-      blip.append_markup('<h3>%s</h3>' % label)
-    else:
-      blip.append(element.Line())
-      blip.append(element.Check(id, 'false'))
-      blip.append(element.Label(id, label))
-
-  blip.append(element.Line())
-  blip.append_markup('<h2>Location</h2>')
-  blip.append(element.Line())
-  blip.append('You may optionally add a marker to the following map to note where you are coming from:')
-  blip.append(element.Gadget('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/mappy.xml'))
-  wavelet.tags.append('io2010')
-  wavelet.tags.append('google-profile')
-  wavelet.participants.add('public@a.gwave.com')
 
 def OnBlipSubmitted(event, wavelet):
   """The map gadget can only be edited when the blip
@@ -111,6 +92,10 @@ def OnBlipSubmitted(event, wavelet):
   profile.put()
 
 def OnDocumentChanged(event, wavelet):
+  public = 'public@a.gwave.com'
+  if public in wavelet.participants:
+    wavelet.participants.set_role(public, wavelet_mod.Participants.ROLE_READ_ONLY)
+
   blip = event.blip
 
   interests = []
@@ -129,7 +114,7 @@ def OnDocumentChanged(event, wavelet):
   profile.interests = interests
   profile.put()
 
-class CreateHandler(webapp.RequestHandler):
+class CreateChatHandler(webapp.RequestHandler):
   _robot  = None
 
   # override the constructor
@@ -141,19 +126,68 @@ class CreateHandler(webapp.RequestHandler):
     users = self.request.get('users', '').split(',')
 
     # create a new wave, submit immediately
-    wavelet = self._robot.new_wave(domain     = 'googlewave.com',
-                                participants = ['public@a.gwave.com'],
+    wavelet = self._robot.new_wave(domain    = 'googlewave.com',
+                                participants = users,
                                 submit       = True)
     wavelet.title = ("Let's chat!")
-    wavelet.root_blip.append("Let's chat!")
+    wavelet.root_blip.append("I found you via the Google I/O 2010 People Finder.")
     self._robot.submit(wavelet)
-    
+
     if wavelet.wave_id:
       json = '{"status": "success", "wave_id": "%s"}' % wavelet.wave_id
     else:
       json = '{"status": "error"}'
     self.response.out.write(json)
 
+class CreateProfileHandler(webapp.RequestHandler):
+  _robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self._robot  = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    user = self.request.get('user')
+    public = 'public@a.gwave.com'
+    # create a new wave, submit immediately
+    wavelet = self._robot.new_wave(domain    = 'googlewave.com',
+                                participants = [user, public],
+                                submit       = True)
+    # Doesn't work yet, OSFE issue
+    # wavelet.participants.set_role(public, wavelet_mod.Participants.ROLE_READ_ONLY)
+    self.populateWavelet(wavelet)
+    self._robot.submit(wavelet)
+
+    if wavelet.wave_id:
+      json = '{"status": "success", "wave_id": "%s"}' % wavelet.wave_id
+    else:
+      json = '{"status": "error"}'
+    self.response.out.write(json)
+
+  def populateWavelet(self, wavelet):
+    blip = wavelet.root_blip
+    wavelet.title = 'People-Finder Profile'
+    blip.append_markup('<h2>Full Name</h2>')
+    blip.append(element.Line())
+    blip.append(element.Input('fullname', 'Your Name'))
+    blip.append_markup('<h2>Interests</h2>')
+    for (id, label) in INTERESTS:
+      if id == '--':
+        blip.append_markup('<h3>%s</h3>' % label)
+      else:
+        blip.append(element.Line())
+        blip.append(element.Check(id, 'false'))
+        blip.append(element.Label(id, label))
+
+    blip.append(element.Line())
+    blip.append_markup('<h2>Location</h2>')
+    blip.append(element.Line())
+    blip.append('You may optionally add a marker to the following map to note where you are coming from:')
+    blip.append(element.Gadget('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/mappy.xml'))
+    wavelet.tags.append('io2010')
+    wavelet.tags.append('google-profile')
+    wavelet.participants.add('public@a.gwave.com')
 
 if __name__ == '__main__':
   appid = os.environ['APPLICATION_ID']
@@ -163,14 +197,15 @@ if __name__ == '__main__':
 
   r.set_verification_token_info(credentials.VERIFICATION_TOKEN, credentials.ST)
   r.setup_oauth(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET,
-                  server_rpc_base='http://sandbox.gmodules.com/api/rpc')
+                  server_rpc_base='http://gmodules.com/api/rpc')
 
   r.register_handler(events.DocumentChanged, OnDocumentChanged, 
      context = [events.Context.ALL])
   r.register_handler(events.BlipSubmitted, OnBlipSubmitted)
-  r.register_handler(events.WaveletSelfAdded, OnSelfAdded)
+  r.register_handler(events.WaveletParticipantsChanged, OnParticipantsChanged)
 
   appengine_robot_runner.run(r, debug=True, extra_handlers=[
-      ('/web/startawave', lambda: CreateHandler(r))
+      ('/web/startawave', lambda: CreateChatHandler(r)),
+      ('/web/profilewave', lambda: CreateProfileHandler(r))
       ]
       )
