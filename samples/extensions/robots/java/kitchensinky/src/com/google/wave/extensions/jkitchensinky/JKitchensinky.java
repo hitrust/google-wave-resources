@@ -30,7 +30,6 @@ import com.google.wave.api.Gadget;
 import com.google.wave.api.Image;
 import com.google.wave.api.Installer;
 import com.google.wave.api.Line;
-import com.google.wave.api.Markup;
 import com.google.wave.api.OperationQueue;
 import com.google.wave.api.ParticipantProfile;
 import com.google.wave.api.Wavelet;
@@ -40,6 +39,7 @@ import com.google.wave.api.event.WaveletCreatedEvent;
 import com.google.wave.api.event.WaveletSelfAddedEvent;
 import com.google.wave.api.impl.GsonFactory;
 import com.google.wave.api.impl.WaveletData;
+import com.google.wave.api.Participants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,10 +50,10 @@ import java.util.logging.Logger;
  * Java client library. One of the exercise that this robot does is inserting a
  * gadget that does embedding.
  */
-public class JKitchensinky extends AbstractRobot {
+public class JKitchenSinky extends AbstractRobot {
 
   /** Logger. */
-  private static final Logger LOG = Logger.getLogger(JKitchensinky.class.getName());
+  private static final Logger LOG = Logger.getLogger(JKitchenSinky.class.getName());
 
   /** Serializer to serialize wavelet. */
   private static final Gson SERIALIZER = new GsonFactory().create();
@@ -132,11 +132,12 @@ public class JKitchensinky extends AbstractRobot {
     JsonObject json = new JsonObject();
     json.add("wavelet", waveletJson);
     json.add("blip", blipJson);
-
     Wavelet newWave = this.newWave(wavelet.getDomain(), wavelet.getParticipants(),
         SERIALIZER.toJson(json), null);
+    newWave.getParticipants().setParticipantRole(wavelet.getCreator(), Participants.Role.READ_ONLY);
+    
     newWave.getRootBlip().append("A new day and a new wave");
-    newWave.getRootBlip().append(Markup.of("<p>Some stuff!</p><p>Not the <b>beautiful</b></p>"));
+    newWave.getRootBlip().appendMarkup("<p>Some stuff!</p><p>Not the <b>beautiful</b></p>");
 
     // Since the new wave has its own operation queue, we need to submit it
     // explicitly through the active gateway, or, as in this case, submit it
