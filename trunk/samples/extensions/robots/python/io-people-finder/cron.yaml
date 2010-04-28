@@ -1,4 +1,4 @@
 cron:
 - description: refresh GTUG locations
   url: /refresh-gtugs
-  schedule: every 2 hours synchronized
+  schedule: every 2 hours

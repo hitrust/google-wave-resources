@@ -143,6 +143,12 @@
       params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 1;
       gadgets.io.makeRequest(url, searchResponse, params);
     }
+
+    function initGadget() {
+      // Check if they already have a profile wave.
+
+    }
+    gadgets.util.registerOnLoadHandler(initGadget);
     </script>
     <style type=text/css> 
       * {
@@ -157,9 +163,11 @@
 </head>
 <body>
   <div id="profileDiv" style="width:100%;">
+    <div id="profileContentDiv" style="visibility:hidden">
     <div>You haven't yet created a profile.</div>
     <div>
       <a id="profileLink" href="javascript:void(0)" onclick="createProfileWave()">Create a Profile</a>.
+    </div>
     </div>
   </div>
   <div id="mainDiv" style="width:100%;">

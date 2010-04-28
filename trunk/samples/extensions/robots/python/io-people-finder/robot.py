@@ -159,6 +159,11 @@ class CreateProfileHandler(webapp.RequestHandler):
     self.populateWavelet(wavelet)
     self._robot.submit(wavelet)
 
+    # Create new profile entry
+    profile = Profile.get_or_insert(wavelet.wave_id)
+    profile.creator = user
+    profile.put()
+
     if wavelet.wave_id:
       json = '{"status": "success", "wave_id": "%s"}' % wavelet.wave_id
     else:
@@ -189,6 +194,27 @@ class CreateProfileHandler(webapp.RequestHandler):
     wavelet.tags.append('google-profile')
     wavelet.participants.add('public@a.gwave.com')
 
+class GetProfileHandler(webapp.RequestHandler):
+  _robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self._robot  = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    user = self.request.get('user')
+
+    # Create new profile entry
+    query = Profile.all()
+    query.filter('creator =', user)
+    profile = query.get()
+    if profile:
+      json = '{"status": "success", "wave_id": "%s"}' % profile.key().name()
+    else:
+      json = '{"status": "error"}'
+    self.response.out.write(json)
+
 if __name__ == '__main__':
   appid = os.environ['APPLICATION_ID']
   r = robot.Robot(ROBOT_NAME.capitalize(),
@@ -205,6 +231,7 @@ if __name__ == '__main__':
   r.register_handler(events.WaveletParticipantsChanged, OnParticipantsChanged)
 
   appengine_robot_runner.run(r, debug=True, extra_handlers=[
+      ('/web/getprofilewave', lambda: GetProfileHandler(r)),
       ('/web/startawave', lambda: CreateChatHandler(r)),
       ('/web/profilewave', lambda: CreateProfileHandler(r))
       ]
