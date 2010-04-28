@@ -56,7 +56,7 @@
     }
 
     function getProfileWaveResponse(obj) {
-      if (!getProfile && obj.rc == 200) {
+      if (!gotProfile && obj.rc == 200) {
         gotProfile = true;
         var results = document.getElementById('results');
         var response = obj.data;
@@ -124,7 +124,12 @@
         if (data.length > 0) {
           document.getElementById('resultsHeader').style.display = 'block';
           for (var i=0; i<data.length; i++) {
-            s += "<input type=checkbox id='x" + i +  "'> " + data[i].name + "<br>";
+            s += "<input type=checkbox id='x" + i +  "'> " + data[i].name + " ("
+              + data[i].id + ")";
+            if (data[i].address) {
+              s += " - " + data[i].address;
+            }
+            s += "<br>";
           }
           s += '<br><a id="startLink" href="javascript:void()" onClick="createChatWave()">Wave Them</a>';
         } else {
