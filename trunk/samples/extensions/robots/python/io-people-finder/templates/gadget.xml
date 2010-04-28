@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="People Search" height="600"> 
+  <ModulePrefs title="People Search" height="200"> 
     <Require feature="dynamic-height" />
     <Require feature="wave" /> 
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
 <head>
+  <script src="http://wave-api.appspot.com/public/wave.js"></script>
   <script type="text/javascript">
     /* 
     */
@@ -62,14 +63,18 @@
         var data = response.results;
         search_responses = data;
         if (data.length > 0) {
+          document.getElementById('resultsHeader').style.display = 'block';
           for (var i=0; i<data.length; i++) {
             s += "<input type=checkbox id='x" + i +  "'> " + data[i].name + "<br>";
           }
-          s += "<br><input type=button value=startwave id=startwave onClick=\"startAWave()\" >";
+          s += '<br><a id="startLink" href="#" onClick="startAWave()">Wave Them</a>';
         } else {
+          document.getElementById('resultsHeader').style.display = 'none';
           s += "Sorry, there were no matches for your query."
         }
         results.innerHTML = s;
+        wave.ui.makeButton(document.getElementById('startLink'));
+        gadgets.window.adjustHeight();
       } else {
         /* Log error to App Engine? */
         window.alert(obj.rc);
@@ -92,7 +97,7 @@
       }
       query = query + "&distance=" + encodeURIComponent(document.getElementById("distance").value);
       query = query + "&units=" + encodeURIComponent(document.getElementById("units").value);
-        
+
       var url = "http://io-2010-peoplefinder-bot.appspot.com/search?creator=" 
         + encodeURIComponent(creator)
         + query;
@@ -101,27 +106,28 @@
       params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 1;
       gadgets.io.makeRequest(url, searchResponse, params);
     }
-
     </script>
     <style type=text/css> 
       * {
-      margin: 0;
-      padding: 0;
+        margin: 0;
+        padding: 0;
+      }
+      select {
+        font-size: small;
       }
     </style>
 
 </head>
 <body>
-  <div style="float:left; width:100%; height:100em; margin-top:10px;">
-    <h3>Search for Google I/O Attendees</h3>
+  <div id="mainDiv" style="float:left; width:100%;">
     {% for interest in interests %}
       {% ifequal interest.id "--" %}
+      <br/>
       <h4 style="clear:both; margin: 0.5em 0">{{ interest.label }}</h4>
       {% else %}
       <div style="float:left; padding-right: 1em;">  <input type=checkbox id={{ interest.id }} name={{ interest.id }}> <label for={{ interest.id }}>{{ interest.label }}</label></div>
       {% endifequal %}
     {% endfor %}
-    <br>
     <p style="clear:both; padding: 1em 0 "> 
       Within 
       <select name="distance" id="distance">
@@ -138,13 +144,21 @@
       </select> of me.
     </p>
     <p style="clear:both; padding: 1em 0 "> 
-      <input type=submit value=Search onClick="buttonClicked()">
+      <a id="searchLink" href="#" onClick="buttonClicked()">Search</a>
     </p>
-
-    <h3 style="clear:both; margin-top:0.5em">Results</h3>
-    <div id=results>
+    <br/>
+    <h3 id="resultsHeader" style="display: none; clear:both; margin-top:0.5em">Results</h3>
+    <div id="results">
     </div>
   </div>
+  <script>
+    function wavify() {
+      gadgets.window.adjustHeight();
+      wave.ui.makeFrame(document.getElementById('mainDiv'));
+      wave.ui.makeButton(document.getElementById('searchLink'));
+    }
+    wavify();
+  </script>
 </body>
     ]]>
   </Content>
