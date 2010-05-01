@@ -16,6 +16,9 @@ import model
 import wavecred
 import wavedata
 
+from bitly import BitLy
+import bitlycred
+
 myrobot = None
 
 BOLD = ('style/fontWeight', 'bold')
@@ -51,7 +54,8 @@ def AddTags(wave, session, collection):
     wave.tags.append(tag)
 
   # Add session hashtag
-  wave.tags.append(session.hashtag.strip('#'))
+  if session.hashtag:
+    wave.tags.append(session.hashtag.strip('#'))
 
   # Add global tags
   for tag in collection.tags:
@@ -93,13 +97,13 @@ def AddToTOC(session, collection_key, wave_id):
   blip.append(element.Line(line_type='li', indent=1))
   blip.append(session.name, [('link/wave', wave_id)])
   blip.append(element.Line(line_type='li', indent=2))
-  info_text = ' (%s, %s)' % (session.time, session.location)
+  info_text = ' (%s, %s)' % (session.day, session.time)
   ModBlip(blip, info_text, [('link/wave', None), (wavedata.SESSION_ID, session.id)])
   myrobot.submit(toc_wave)
 
 
 def AddSpeakers(blip, session):
-  ModBlip(blip, 'Speaker(s): ', [BOLD])
+  ModBlip(blip, 'Speaker(s): ')
   for i in range(len(session.speakers)):
     speaker = session.speakers[i]
     ModBlip(blip, speaker.name, [('link/manual', speaker.link)])
@@ -111,12 +115,29 @@ def AddDescription(blip, session):
   ModBlip(blip, session.description)
   ModBlip(blip, '\n')
 
+def AddShortLink(blip, wave_id):
+  wave_url = 'https://wave.google.com/wave/#restored:wave:%s' % wave_id
+  wave_url = wave_url.replace('#', '%23')
+  wave_url = wave_url.replace('+', '%252B')
+  bitly = BitLy(bitlycred.LOGIN, bitlycred.KEY)
+  short_url = bitly.shorten(wave_url)
+  ModBlip(blip, short_url, [('link/manual', short_url),
+                            ('style/fontSize', '1.5em')])
+  ModBlip(blip, '\n', [('link/manual', None), ('style/fontSize', None)])
+
+
+def AddLink(blip, session):
+  if not session.link:
+    return
+  ModBlip(blip, 'More info on the website', [('link/manual', session.link)])
+  ModBlip(blip, '\n', [('link/manual', None)])
+
 def AddShortInfo(blip, session):
   info = '%s, at %s' % (session.day, session.time)
   if session.location:
     info = '%s, %s' % (info, session.location)
-  ModBlip(blip, info, [ITALIC])
-  ModBlip(blip, '\n', [('style/fontStyle', None)])
+  ModBlip(blip, info)
+  ModBlip(blip, '\n')
 
 def AddSocialMedia(blip, session, wave_id):
   if not session.hashtag:
@@ -185,7 +206,13 @@ def MakeSessionWave(session, collection_key):
 
   # Blip mod
   blip = new_wave.root_blip
+  AddShortLink(blip, new_wave.wave_id)
+  ModBlip(blip, '\n')
   AddShortInfo(blip, session)
+  AddDescription(blip, session)
+  AddSpeakers(blip, session)
+  AddLink(blip, session)
+  ModBlip(blip, '\n')
   AddSocialMedia(blip, session, new_wave.wave_id)
   AddAttendees(blip)
   AddModerator(blip)

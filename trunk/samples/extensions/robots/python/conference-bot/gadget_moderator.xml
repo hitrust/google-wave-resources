@@ -1188,14 +1188,9 @@ function stateChanged() {
     _gel('logger-wrapper').style.display = '';
     gadgets.window.adjustHeight();
   } else {
-    if (wave.getHost().getId() == wave.getViewer().getId()) {
-      _gel('logger-wrapper').style.display = '';
-      gadgets.window.adjustHeight();
-      createTopic();
-    } else {
-      _gel('content').innerHTML = 'App host has not added any topic till yet.';
-      gadgets.window.adjustHeight();
-    }
+    _gel('logger-wrapper').style.display = '';
+    gadgets.window.adjustHeight();
+    createTopic();
   }
   showLogMessage();
 }

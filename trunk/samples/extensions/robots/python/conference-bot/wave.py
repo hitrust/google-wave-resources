@@ -55,7 +55,7 @@ def OnSelfAdded(event, wavelet):
     wavelet.participants.add('public@a.gwave.com')
   if IsBlankWave(wavelet):
     wavelet.title = collection.name + ' Wave: Topic'
-    event.blip.append_markup(text.session_html) 
+    event.blip.append_markup(text.session_html)
   if IsEventWave(wavelet):
     wavelet.title = collection.name + ' Event Wave: EventName'
     event.blip.append('\nWhen is it?\n\n')
@@ -158,7 +158,7 @@ def MakeSessionWaves(collection):
   if conf is None:
     logging.info('Error: Couldnt create conference object.')
     return
-  for session in conf.sessions:
+  for session in conf.sessions[0:2]:
     deferred.defer(wavemaker.MakeSessionWave, session, collection.key())
 
 def IsAdminWave(wavelet):
