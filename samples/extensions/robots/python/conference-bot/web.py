@@ -33,7 +33,7 @@ class InstallerHandler(webapp.RequestHandler):
   def get(self):
     id = self.request.get('id')
     collection = model.ConferenceCollection.get_by_id(int(id))
-    template_values = {'name': collection.name, 'id': collection.key().id()}
+    template_values = {'name': collection.name, 'icon': collection.icon, 'id': collection.key().id()}
     path = os.path.join(os.path.dirname(__file__), 'templates/installer.xml')
     self.response.headers['Content-Type'] = 'text/xml' 
     self.response.out.write(template.render(path, template_values))

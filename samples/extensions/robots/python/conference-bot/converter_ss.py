@@ -29,12 +29,21 @@ class SpreadsheetConverter(converter.SourceConverter):
     self._conference  = data.Conference()
     talks = self._json['feed']['entry']
     for talk in talks:
-      name = getSpreadsheetFieldValue(talk, 'talkname')
+      id = getSpreadsheetFieldValue(talk, 'id')
+      day = getSpreadsheetFieldValue(talk, 'day')
+      time = getSpreadsheetFieldValue(talk, 'time')
+      location = getSpreadsheetFieldValue(talk, 'location')
+      talk_name = getSpreadsheetFieldValue(talk, 'talkname')
       talk_link = getSpreadsheetFieldValue(talk, 'talklink')
+      talk_description = getSpreadsheetFieldValue(talk, 'talkdescription')
       speaker_name = getSpreadsheetFieldValue(talk, 'speakername')
       speaker_link = getSpreadsheetFieldValue(talk, 'speakerlink')
-      speaker = data.Speaker(speaker_name, link=speaker_link)
-      session = data.Session(name, link=talk_link, speakers=[speaker])
+      speaker_description = getSpreadsheetFieldValue(talk, 'speakerdescription')
+      speaker = data.Speaker(speaker_name, link=speaker_link,
+                             description=speaker_description)
+      session = data.Session(id=id, day=day, time=time, location=location,
+                             name=talk_name, link=talk_link, description=talk_description,
+                             speakers=[speaker])
       self._conference.sessions.append(session)
 
 def getSpreadsheetFieldValue(entry, field):
@@ -42,5 +51,4 @@ def getSpreadsheetFieldValue(entry, field):
   if field in entry:
     return entry[field]['$t']
   else:
-    logging.info('field %s not found' % field)
-    return ''
+    return None

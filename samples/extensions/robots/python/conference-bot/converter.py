@@ -9,7 +9,7 @@ class SourceConverter():
 
   def __init__(self):
     self._conference = None
-    pass
+    self.createConference()
 
   def createConference(self):
     pass

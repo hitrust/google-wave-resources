@@ -18,6 +18,14 @@ wadget.util.registerOnLoadHandler(init);
   </td>
  </tr>
  <tr>
+   <td>
+    <label for="icon">Icon URL</label>
+  </td>
+  <td>
+    <input type="text" name="icon">
+  </td>
+ </tr>
+ <tr>
   <td>
     <label for="groups">Group(s) to add</label><br>
     <span style="font-size:x-small">(comma separated)</span>
@@ -55,7 +63,10 @@ wadget.util.registerOnLoadHandler(init);
     <label for="template">Session Template</label>
   </td>
   <td>
-    <input type="text" name="template">
+    <select name="template">
+      <option value="default">Normal Conference</option>
+      <option value="jonsi">Jonsi Q&amp;A</option>
+    </select>
   </td>
  </tr>
  <tr><td colspan="2"><div class="divider"></div></td></tr></tr>
