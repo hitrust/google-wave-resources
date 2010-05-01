@@ -16,7 +16,8 @@ class Collection(db.Model):
   icon = db.StringProperty()
 
 class ConferenceCollection(Collection):
-  session_waves = db.StringListProperty()
+  all_session_waves = db.StringListProperty()
+  main_session_waves = db.StringListProperty()
   session_template = db.StringProperty()
   #spreadsheet, dapper, calendar
   datasource_type = db.StringProperty()

@@ -1,0 +1,1379 @@
+<Module>
+<ModulePrefs title="Google Wave Moderator"
+             description="Google Wave Moderator"
+             height="400"
+             author="Gadgetfactory"
+             screenshot=""
+             thumbnail=""
+             author_email="gadgetfactory@google.com">
+  <Require feature="wave" />
+  <Require feature="setprefs" />
+  <Require feature="dynamic-height" />
+  <Require feature="views" />
+  <Require feature="locked-domain"/>
+  <OAuth>
+    <Service name="google">
+      <Access url="https://www.google.com/accounts/OAuthGetAccessToken" method="GET" />
+      <Request url="https://www.google.com/accounts/OAuthGetRequestToken?scope=tag:google.com,2010:auth/moderator" method="GET" />
+      <Authorization url="https://www.google.com/accounts/OAuthAuthorizeToken?oauth_callback=http://oauth.gmodules.com/gadgets/oauthcallback" />
+    </Service>
+  </OAuth>
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+<style type="text/css">
+a,
+body,
+div,
+span,
+td {
+  font-family: arial, sans-serif;
+  font-size: 12px;
+}
+
+/* Style for headings. */
+.moderator-heading {
+  font-weight: bold;
+  padding-right: 2px;
+}
+
+.moderator-required { color: #f00; }
+
+/* Style for remaining charactors text. */
+.moderator-remaining-chars { color: #444; }
+
+/* Style for moderator sections. */
+.moderator-section { padding-top: 10px; }
+
+/* Style for question listing. */
+.moderator-list {
+  border-color: #5692D4;
+  border-style: solid;
+  border-width: 0 0 1px 0;
+  padding: 5px;
+}
+
+/* Style for question description. */
+.moderator-title {
+  font-size: 16px;
+  color: #666;
+}
+
+.moderator-desc {
+  font-size: 13px;
+  color: #666;
+  padding: 5px;
+}
+
+/* Style for the voting images. */
+.moderator-yes,
+.moderator-no,
+.moderator-yes-hover,
+.moderator-yes-click,
+.moderator-no-click,
+.moderator-no-hover {
+  background-color: transparent;
+  background-image: url(http://io2010-moderator.appspot.com/yes-no.png);
+  background-repeat: no-repeat;
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+}
+
+.moderator-yes { background-position: 0 0; }
+.moderator-yes-hover {background-position: -23px 0;}
+.moderator-yes-click {background-position: -46px 0;}
+.moderator-no {background-position: 0 -23px;}
+.moderator-no-hover {background-position: -23px -23px;}
+.moderator-no-click {background-position: -46px -23px;}
+
+/* Style for user hint text. */
+.moderator-hint {
+  color: #757575;
+  font-weight: normal;
+}
+
+/* Style for highlighted text. */
+.moderator-highlight-text {
+  color: #0276F7;
+  font-weight: bold;
+  padding: 5px 0;
+}
+
+.moderator-loading {
+  height: 100px;
+  text-align: center;
+  width: 100%;
+  padding-top: 15px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* Style for input for question submission. */
+.moderator-ask-question {
+  color: #333;
+  font-family: helvetica, arial;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.moderator-input {
+  width: 300px;
+}
+
+.moderator-data-section {
+  padding: 5px 0 5px 25;
+}
+
+.moderator-empty-vote {
+  background-color: #e9e9e9;
+  text-align: right;
+  vertical-align: top;
+}
+
+.moderator-like,
+.moderator-unlike {
+  float: right;
+  height: 16px;
+  padding-bottom: 7px;
+  vertical-align: top;
+}
+
+.moderator-like {
+  background-color: #5590d2;
+}
+
+.moderator-unlike {
+  background-color: #75b4e8;
+}
+
+.moderator-box {
+  border: 3px solid #5692d4;
+  width: 100%;
+}
+
+.moderator-notication {
+  background-color: #ff9;
+  font-size: 10px;
+  font-weight: bold;
+  height: 20px;
+  padding-top: 5px;
+  padding-left: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.moderator-box-head {
+  background-color: #5692d4;
+  padding: 3px;
+}
+
+.moderator-head-text {
+  color: #fff;
+  font-weight: bold;
+}
+
+.moderator-error {
+  color: #f00;
+  font-size: 11px;
+  padding-top: 10px;
+}
+
+.moderator-background {
+  background-color: #d6e9f8;
+  padding: 14px;
+}
+
+/* Classes for logger */
+.log-author {
+ font-size: 12px;
+ font-weight: bold;
+ color: #8b8682;
+}
+
+.log-message {
+ font-size: 12px;
+ font-weight: bold;
+ color: #8b8682;
+}
+
+.log-message {
+  color: #787470;
+}
+
+.log-vote-up {
+  color: #6242c1;
+  font-weight: bold;
+}
+
+.log-vote-down {
+  color: #d52f7d;
+  font-weight: bold;
+}
+
+.log-act-updated {
+  color: #ef9214;
+  font-weight: bold;
+}
+
+.log-act-created {
+  color: #43932f;
+  font-weight: bold;
+}
+.log-act-added {
+  color: #43932f;
+  font-weight: bold;
+}
+
+.moderator-text-hightlight { color: #9a9a9a; }
+.logger-item-border {
+  border-bottom: 1px solid #eee;
+}
+</style>
+<script src="http://trippywave.appspot.com/static/js/util.js"></script>
+
+<script type="text/javascript">
+/**
+ * Class JTopic defines topic object.
+ * @param {string} title Title of topic.
+ * @param {string} description Description of topic.
+ * @param {string} presentedBy Name of the topic presenter.
+ * @param {number} voteCount Topic vote count.
+ * @param {number} questionCount Topic questions count.
+ * @param {string} lastModified Topic last modified time.
+ * @param {number} participantsCount Topic participants count.
+ * @Constructor.
+ */
+function JTopic() {
+  this.title = '';
+  this.description = '';
+  this.presentedBy = '';
+  this.voteCount = 0;
+  this.questionCount = 0;
+  this.lastModified = '';
+  this.participantsCount= 1;
+};
+
+/**
+ * Class JQuestion defines question object.
+ * @param {string} id Id of question.
+ * @param {string} nickName Question user nick name.
+ * @param {string} location Question user location.
+ * @param {string} description Question description.
+ * @param {string} youtube Youtube video url.
+ * @param {number} thumbUp Thumbs up count for the question.
+ * @param {string} thumbDown Thumbs down count for the question.
+ * @param {string} thumbsUpUsers Thumbs up users ids for the question.
+ * @param {string} thumbsDownUsers Thumbs down users ids for the question.
+ * @param {string} lastModified Question last modified time.
+ * @Constructor.
+ */
+function JQuestion() {
+  this.id = '';
+  this.nickName = '';
+  this.location = '';
+  this.description = '';
+  this.youtube = '';
+  this.thumbUp = 0;
+  this.thumbDown = 0;
+  this.thumbsUpUsers = '';
+  this.thumbsDownUsers = '';
+  this.lastModified = '';
+};
+
+function JLogItem(action, msg) {
+  var owner = wave.getViewer();
+  this.ownerId = owner.getId();
+  this.ownerName = owner.getDisplayName();
+  this.action = action;
+  this.msg = msg;
+}
+var MODERATOR_SERIES = 27766;
+var currentWindow;
+var questionDesc;
+
+/**
+ * Array containing questions.
+ * @type {Array}
+ */
+var gQuestions = [];
+var currentIndex = 0;
+
+/**
+ * This method adds the new JLogItem object and returns the logs as array.
+ */
+function getLogObject(action, msg) {
+  var state = wave.getState();
+  var oldLogs = gadgets.json.parse(state.get('logs', '[]'));
+  oldLogs.unshift(new JLogItem(action, msg));
+  oldLogs.splice(20, 10);
+  return gadgets.json.stringify(oldLogs);
+}
+
+function getActivityClass(action) {
+  var actClass;
+  switch (action.toLowerCase()) {
+    case 'voted up' :
+      actClass = 'vote-up';
+      break;
+    case 'voted down' :
+      actClass = 'vote-down';
+      break;
+    case 'updated' :
+      actClass = 'act-updated';
+      break;
+    case 'created' :
+      actClass = 'act-created';
+      break;
+    case 'added' :
+      actClass = 'act-added';
+      break;
+    default:
+      actClass = '';
+      break;
+  }
+  return actClass;
+}
+
+/**
+ * Returns topic object from wave state.
+ * @return {Object} Object containing details of wave topic.
+ */
+function getTopicId() {
+  if (wave && wave.getState()) {
+    return gadgets.json.parse(wave.getState().get('topicId', ''));
+  }
+}
+
+/**
+ * Returns question object from wave state.
+ * @param {string} Id Question id.
+ * @return {Object} Question object.
+ */
+function getQuestionById(id) {
+  return gadgets.json.parse(wave.getState().get(id , '{}'));
+}
+
+/**
+ * Returns user information object from wave state.
+ * @param {string} userId User id.
+ * @return {Object} Object containing user name and location.
+ */
+function getUserInfo(userId) {
+  return gadgets.json.parse(wave.getState().get(userId ,'{}'));
+}
+
+/**
+ * For checking user id in a given list of users.
+ * @param {string} userId User id.
+ * @param {Array} userList List of user ids.
+ * @return {number} Returns 0 if user not found and 1 if found.
+ */
+function checkUser(userId, userList, countFlag) {
+  for (var i = 0; i < userList.length; i++) {
+    if (userId == userList[i]) {
+      if (countFlag) {
+        return i;
+      } else {
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+/**
+ * For checking user id in a given list of users.
+ * @param {string} containId Textbox element id.
+ * @param {string} countId Counter element id.
+ * @param {number} max Maximum number of characters.
+ */
+function checkLength(containId, countId, max) {
+  var contId = _gel(containId);
+  if (contId.value.length <= max) {
+    _gel(countId).innerHTML = max - contId.value.length;
+  } else {
+    contId.value = contId.value.substring(0, max);
+  }
+}
+
+function mouseOverClass(thumbType, isVoted, index) {
+  var voteImg = thumbType ? _gel('do-yes-' + index ) : _gel('do-no-' + index);
+  var hoverClass = thumbType ? 'moderator-yes-hover' : 'moderator-no-hover';
+  var votedClass = thumbType ? 'moderator-yes-click' : 'moderator-no-click';
+  voteImg.className = isVoted ? votedClass : hoverClass;
+}
+
+function mouseOutClass(thumbType, isVoted, index) {
+  var voteImg = thumbType ? _gel('do-yes-' + index ) : _gel('do-no-' + index);
+  var hoverClass = thumbType ? 'moderator-yes' : 'moderator-no';
+  var votedClass = thumbType ? 'moderator-yes-click' : 'moderator-no-click';
+  voteImg.className = isVoted ? votedClass : hoverClass;
+}
+
+/** For checking user id in a given list of users.
+ * @param {string} userId User id.
+ * @param {Array} userList List of user ids.
+ * @return {Array} Returns user list after deleting user.
+ */
+function removeUser(userId, userList) {
+  var index;
+  for (var i = 0; i < userList.length; i++) {
+    if (userId == userList[i]) {
+      index = i;
+      break;
+    }
+  }
+  userList.splice(index, 1);
+  return userList;
+}
+
+/**
+ * Function for displaying topic details.
+ */
+function topicDetails(response) {
+  currentWindow = 'topicDetails';
+  _gel('header-content').innerHTML = '';
+  var html = [];
+  var tplHtml = _gel('tpl-thanks').value;
+  var tplData;
+  var topic = new JTopic();
+  var info = response.data.data;
+  topic.title = info.name || '';
+  topic.description = info.description || '';
+  topic.presentedBy = info.presenter || '';
+  var totalVotes = parseInt((info.counters.plusVotes +
+      info.counters.minusVotes + info.counters.noneVotes), 10);
+  topic.voteCount = totalVotes || 0;
+  topic.questionCount = info.counters.submissions || 0;
+  topic.participantsCount= info.counters.users || 1;
+
+  tplData = {
+    topicName: topic.title,
+    voteCount: topic.voteCount,
+    questionCount: topic.questionCount,
+    description: topic.description,
+    participantsCount: topic.participantsCount
+  };
+  html.push(tplHtml.supplant(tplData));
+  _gel('content').innerHTML = html.join('');
+  _gel('content').style.display = 'block';
+  _gel('tpl-create-question').style.display = 'none';
+  gadgets.window.adjustHeight();
+
+  // Incase of no questions hiding view question button.
+  if (!topic.questionCount) {
+    _gel('viewQuestions').style.display = 'none';
+    _gel('no-questions').style.display = '';
+  } else {
+    _gel('topicDetails').style.display = '';
+  }
+  gadgets.window.adjustHeight();
+}
+
+/**
+* Response handler ,recieves the submissions obtained as response of JSON
+* data request.
+*/
+function jsonResponseForQues(obj) {
+  gQuestions.length = 0;
+  var jsondata = obj.data.data;
+  var length = jsondata.items.length;
+  var question;
+  var ele;
+
+  for (var i = 0; i < length; i++) {
+    ele = jsondata.items[i];
+
+    wave.log(i + ':' + ele.id.submissionId);
+    var id = ele.id.submissionId;
+    question = new JQuestion();
+    question.id = ele.id.submissionId;
+    if (ele.attribution) {
+      question.nickName = ele.attribution.displayName;
+      question.location = ele.attribution.location;
+    } else {
+      question.nickName = '';
+      question.location = '';
+    }
+    question.description = ele.text;
+    question.youtube = '';
+    question.thumbUp = ele.counters.plusVotes;
+    question.thumbDown = ele.counters.minusVotes;
+    question.thumbsUpUsers = '';
+    question.thumbsDownUsers = '';
+
+    question.lastModified = ele.created;
+    gQuestions.push(question);
+  }
+
+  if (length) {
+    topicInfo(displayTopicHeader);
+    if (!currentIndex) {
+      displayListing(0);
+    } else {
+      displayListing(currentIndex);
+    }
+  } else {
+    topicInfo(topicDetails);
+  }
+}
+
+/**
+ * For fetching moderator api's topic questions.
+ */
+function fetchQuestions() {
+  currentWindow = '';
+  _gel('tpl-create-topic').style.display = 'none';
+  gadgets.window.adjustHeight();
+  var url = 'https://www.googleapis.com/moderator/v1/series/' +
+            MODERATOR_SERIES + '/topics/' + getTopicId() + '/submissions';
+  wave.log('Submission fetching Url: ' + url);
+
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
+  makeRequest(url, params, jsonResponseForQues);
+}
+
+function topicInfo(handleFunction) {
+  var url = 'https://www.googleapis.com/moderator/v1/series/' +
+            MODERATOR_SERIES + '/topics/' + getTopicId();
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
+  makeRequest(url, params, handleFunction);
+}
+
+function displayTopicHeader(response) {
+  var topic = new JTopic();
+  var info = response.data.data;
+  topic.title = info.name || '';
+  topic.description = info.description || '';
+  topic.presentedBy = info.presenter || '';
+  var totalVotes = parseInt((info.counters.plusVotes +
+                   info.counters.minusVotes + info.counters.noneVotes), 10);
+  topic.voteCount = totalVotes || 0;
+  topic.questionCount = info.counters.submissions || 0;
+  topic.participantsCount= info.counters.users || 1;
+
+  var html = [
+    '<table cellspacing="0" cellpadding="10" ',
+    'class="moderator-box"><tr>',
+    '<td class="moderator-box-head">',
+    '<span class="moderator-head-text">', topic.title ,
+    '</span><span class="moderator-head-text" style="float:right;">',
+    topic.voteCount,' votes on ', gQuestions.length,' questions on from ',
+    topic.participantsCount,' people</span></td></tr></table>'
+  ];
+  _gel('header-content').innerHTML = html.join('');
+  gadgets.window.adjustHeight();
+}
+
+function getQuestionUsers(voteType, questionId) {
+  var userList;
+  var question = getQuestionById(questionId);
+
+  if (voteType == 'PLUS') {
+    userList = question.voteYes.split('|');
+  } else {
+    userList = question.voteNo.split('|');
+  }
+  return userList;
+}
+
+function getOwnerId(questionId) {
+  var question = getQuestionById(questionId);
+  return question.ownerId;
+}
+
+function getOwnerImg(userId) {
+  var participants = wave.getParticipants();
+  if (participants) {
+    for (var i = 0; i < participants.length; ++i) {
+      if (participants[i].getId() == userId) {
+        return participants[i].getThumbnailUrl();
+      }
+    }
+  }
+  return _IG_GetImage('http://io2010-moderator.appspot.com/unknown.jpg');
+}
+
+/**
+ * For displaying list of questions.
+ */
+function displayListing(startIndex) {
+  var participants = wave.getParticipants();
+  var partcipantsCount = participants.length;
+  var html = [
+    '<table cellspacing="0" cellpadding="10" class="moderator-box"><tr><td>'
+  ];
+
+  var tplHtml = _gel('tpl-question-listing').value;
+  var tplData, thumbsUpUsers, thumbsDownUsers, isVotedYes, isVotedNo;
+  var votedYes, votedNo, yesWidth, noWidth, imgThumbUrl;
+  var length = gQuestions.length;
+  var userId = wave.getViewer().getId();
+
+  currentIndex = startIndex;
+  wave.log('Index:' + startIndex);
+
+  // Start of pagination calculation.
+  // Holds the value of number of results to be shown on the page .In future
+  // this value will be user modifiable .
+  var MaxDisplayCount = 5;
+
+  // Starting index of next page's pagination.
+  var showNext = 0;
+
+  // Starting index of previous page's pagination.
+  var showPrevious = 0;
+
+  // This is needed only in case of previous index links.We do not have
+  // a similar variable for next page's link.
+  var isShowPrevious = 0;
+
+  // holds the index position till which we would be looping
+  var loopEndPoint = 0;
+  gQuestions.sort(sortHandler);
+
+  if (MaxDisplayCount < length) {
+    loopEndPoint = MaxDisplayCount + startIndex;
+    wave.log('startIndex' + startIndex);
+    wave.log('loopEndPoint : ' + loopEndPoint);
+    if (!(loopEndPoint < length)) {
+      wave.log('loopEndPoint is not less than length');
+      loopEndPoint = length;
+      showPrevious = startIndex - MaxDisplayCount;
+      isShowPrevious = 1;
+    } else {
+        showNext = loopEndPoint;
+        wave.log('showNext: ' + showNext);
+          if (startIndex >= MaxDisplayCount) {
+            showPrevious = startIndex - MaxDisplayCount;
+            isShowPrevious = 1;
+            wave.log('showPrevious: ' + showPrevious);
+          }
+    }
+  } else {
+      wave.log('the array length is less than pagination requirement');
+      // remove this later
+      // startIndex = 0;
+      loopEndPoint = length;
+  }
+  // End of the pagination calculation.
+
+  html.push('<div style="padding-top:10px;">');
+  if (isShowPrevious){
+    html.push('<a href="javascript:void(0);" style="text-decoration:none;" ',
+        'onclick="displayListing(', showPrevious, ');"><< Previous</a>&nbsp;',
+        '&nbsp;&nbsp;&nbsp;&nbsp;');
+  }
+  if (showNext){
+    html.push('<a href="javascript:void(0);" style="text-decoration:none;"',
+              ' onclick="displayListing(', showNext, ');">Next >></a>&nbsp;');
+  }
+
+  html.push('</div>');
+
+  for (var i = startIndex; i < loopEndPoint; i++) {
+    thumbsUpUsers = getQuestionUsers('PLUS', gQuestions[i].id);
+    thumbsDownUsers = getQuestionUsers('MINUS', gQuestions[i].id);
+    votedYes = thumbsUpUsers.length - 1;
+    votedNo = thumbsDownUsers.length - 1;
+
+    isVotedYes = checkUser(userId, thumbsUpUsers, false);
+    isVotedNo = checkUser(userId, thumbsDownUsers, false);
+
+    yesImgClass = isVotedYes ? 'moderator-yes-click' : 'moderator-yes';
+    noImgClass = isVotedNo ? 'moderator-no-click' : 'moderator-no';
+
+    yesWidth =  votedYes * 10;
+    noWidth =  votedNo * 10;
+
+    yesWidth = yesWidth > 100 ? 100 : yesWidth;
+    noWidth = noWidth > 100 ? 100 : noWidth;
+    ownerId = getOwnerId(gQuestions[i].id);
+
+    imgThumbUrl = getOwnerImg(ownerId);
+    tplData = {
+      index: i,
+      questionId: gQuestions[i].id,
+      nickName: gQuestions[i].nickName,
+      location: gQuestions[i].location ? (', ' + gQuestions[i].location) : '',
+      thumbUrl: imgThumbUrl,
+      descrption: wrapText(gQuestions[i].description),
+      thumbUpW: yesWidth,
+      thumbDownW: noWidth,
+      upClass: yesImgClass,
+      downClass: noImgClass,
+      votedYes: isVotedYes,
+      votedNo: isVotedNo,
+      thumbUp: votedYes,
+      thumbDown: votedNo,
+      param: _esc(gQuestions[i].description.replace("'", ".!."))
+    };
+    html.push(tplHtml.supplant(tplData));
+  }
+
+  html.push('</td></tr><tr><td>',
+      '<input type="button" value="Submit a question" ',
+      'onclick="createQuestion();">&nbsp;',
+      '<input type="button" value="View topic" ',
+      'onclick="topicInfo(topicDetails);"></td></tr></table>');
+  _gel('content').innerHTML = html.join('');
+  gadgets.window.adjustHeight();
+
+  _gel("content").style.display = '';
+  _gel("tpl-create-question").style.display = 'none';
+  gadgets.window.adjustHeight();
+}
+
+function handleResponseOfVoteUpdate(obj) {
+  var questionInfo = obj.data.data;
+  wave.log('question voted');
+  topicInfo(displayTopicHeader);
+}
+
+/**
+* This function would set the value of vote of a user for a question to 1 in
+* wave state.
+*/
+function vote(submissionId, voteType, index, desc) {
+  wave.log('Vote is called.....');
+
+  // Storing userId in wave delta for voted question.
+  var voteCheck = false;
+  var viewerId = wave.getViewer().getId();
+  var questionOwnerId = getOwnerId(submissionId);
+  //alert(questionOwnerId);
+  var thumbsUpUsers = getQuestionUsers('PLUS', submissionId);
+  var thumbsDownUsers = getQuestionUsers('MINUS', submissionId);
+
+  var isVotedYes = checkUser(viewerId, thumbsUpUsers, false);
+  var isVotedNo = checkUser(viewerId, thumbsDownUsers, false);
+
+  if (voteType == 'PLUS') {
+    var isUserThumbUp = checkUser(viewerId, thumbsUpUsers, false);
+    if (!isUserThumbUp) {
+      thumbsUpUsers.push(viewerId);
+      voteCheck = true;
+    }
+
+    var isUserThumbDown = checkUser(viewerId, thumbsDownUsers);
+    if (isUserThumbDown) {
+      var noIndex = checkUser(viewerId, thumbsDownUsers, true);
+      thumbsDownUsers.splice(noIndex, 1);
+      voteCheck = true;
+    }
+  } else {
+    var isUserThumbDown = checkUser(viewerId, thumbsDownUsers, false);
+    if (!isUserThumbDown) {
+      thumbsDownUsers.push(viewerId);
+      voteCheck = true;
+    }
+
+    var isUserThumbUp = checkUser(viewerId, thumbsUpUsers, false);
+    if (isUserThumbUp) {
+      var noIndex = checkUser(viewerId, thumbsUpUsers, true);
+      thumbsUpUsers.splice(noIndex, 1);
+      voteCheck = true;
+    }
+  }
+
+  var voteDetails = {
+    voteYes: thumbsUpUsers.join('|'),
+    voteNo: thumbsDownUsers.join('|'),
+    ownerId: questionOwnerId
+  }
+  var votekind = voteType == 'PLUS' ? 'voted up' : 'voted down';
+  var vote = gadgets.json.stringify(voteDetails);
+
+  if (voteCheck) {
+    updateDelta(submissionId, vote, '', ' cast a vote.');
+    questionDesc = '';
+  }
+
+  // Calling moderator api to store vote for question.
+  var url = 'http://www.googleapis.com/moderator/v1/series/' +
+            MODERATOR_SERIES + '/submissions/' + submissionId + '/votes/@me';
+
+  var payload = {
+    vote: voteType
+  };
+
+  var params = {};
+  var postBody = gadgets.json.stringify({"data": payload});
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  params[gadgets.io.RequestParameters.POST_DATA] = postBody;
+  makeRequest(url, params, handleResponseOfVoteUpdate);
+  wave.log('updateVote before sending request' + gadgets.json.stringify(params));
+}
+
+function makeRequest(url, params, functionHandler) {
+  var headers = {
+    'Content-type': 'application/json',
+  };
+
+  params[gadgets.io.RequestParameters.AUTHORIZATION] =
+      gadgets.io.AuthorizationType.OAUTH;
+  params[gadgets.io.RequestParameters.OAUTH_SERVICE_NAME] = "google";
+  params[gadgets.io.RequestParameters.OAUTH_USE_TOKEN] = "always";
+  params[gadgets.io.RequestParameters.HEADERS] = headers;
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] =
+      gadgets.io.ContentType.JSON;
+  gadgets.io.makeRequest(url, functionHandler, params);
+}
+
+/**
+ * Handler for sorting.
+ * @param {Object} Obj1 The first object.
+ * @param {Object} Obj2 The second object.
+ * @return {number} 1 if first record is greater or -1 if lesser.
+ */
+function sortHandler(Obj1, Obj2) {
+  var res1 = Obj1.lastModified;
+  var res2 = Obj2.lastModified;
+  return ((res1 < res2) ? 1 : ((res1 > res2) ? -1 : 0));
+}
+
+/**
+* Function to validate the fields in save topic method
+*/
+function validateSaveTopic(topic) {
+  if(!topic.title) {
+   alert("Please provide a Topic title");
+   _gel('topic-name').focus();
+   return true;
+  }else if(!topic.description){
+    alert("Please provide a Topic description");
+    _gel('topic-desc').focus();
+    return true;
+  }else if(!topic.presentedBy){
+    alert("Please provide a Topic presenter's name");
+    _gel('topic-presenter').focus();
+    return true;
+  }
+}
+
+/**
+ * Function to save topic information to wave state.
+ */
+function saveTopic() {
+  var url = 'https://www.googleapis.com/moderator/v1/series/' +
+            MODERATOR_SERIES + '/topics';
+  var topic = new JTopic();
+  topic.title = _gel('topic-name').value;
+  topic.description = _gel('topic-desc').value;
+  topic.presentedBy = _gel('topic-presenter').value;
+
+  var flag = validateSaveTopic(topic);
+
+  if(flag) {
+    return false;
+  }
+
+  var payload = {
+    'name': topic.title,
+    'description': topic.description,
+    'presenter': topic.presentedBy
+  };
+
+  var postBody = gadgets.json.stringify({"data": payload});
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  params[gadgets.io.RequestParameters.POST_DATA] = postBody;
+  makeRequest(url, params, handleResponseOfCreateTopic);
+}
+
+function handleQuestion(response) {
+  var info = response.data.data;
+  var user;
+  var submissionId = info.id.submissionId;
+  var submissionText = _hesc(info.text);
+  if (submissionText.length > 100) {
+    submissionText = submissionText.substring(0, 100) + '...';
+  }
+
+  if (submissionId != 0) {
+    _gel('tpl-create-question').style.display = 'none';
+    showNotification('Question saved successfully.');
+
+    var userId = wave.getViewer().getId();
+    var userInfo = getUserInfo(userId);
+
+    // Code for updating user details in case of first time question submission.
+    if (!userInfo.name || (userInfo.location != _gel('user-location').value) ||
+        (userInfo.name != _gel('user-nickname').value)) {
+
+      var user = {
+        name: _gel('user-nickname').value,
+        location: _gel('user-location').value
+      };
+
+      var userDetails = gadgets.json.stringify(user);
+      updateDelta(userId, userDetails, 'updated', 'his/her info.');
+    }
+
+    // Code for updating default yes vote by creator on question.
+    var voteDetails = {
+      voteYes: wave.getViewer().getId() + '|',
+      voteNo: '',
+      ownerId: wave.getViewer().getId()
+    }
+    var vote = gadgets.json.stringify(voteDetails);
+    updateDelta(submissionId, vote, 'added',
+                'the new question <b>"' + wrapText(submissionText) + '"</b>');
+  } else {
+    showNotification('Error in saving question. Please try again.');
+  }
+}
+
+/**
+* Funtion to validate the save question form.
+*/
+function validateSaveQuestion(userInfo) {
+  var userName = _gel('user-nickname').value;
+  var desc = _gel('question-desc').value;
+  if(!userName) {
+    alert('Please enter your nickname.');
+    _gel('user-nickname').focus();
+    return true;
+  } else if(!desc) {
+    alert('Please provide description');
+    _gel('question-desc').focus();
+    return true;
+  }
+}
+
+/**
+ * Function to save question information to wave state.
+ */
+function saveQuestion() {
+  _gel('save-question').disabled = true;
+  wave.log('SaveQuestion is called...');
+
+  var userId = wave.getViewer().getId();
+  var userInfo = getUserInfo(userId);
+  var userName, userLoc;
+
+  var flag = validateSaveQuestion(userInfo);
+  if(flag) {
+    return;
+  }
+
+  if (userInfo.name == _gel('user-nickname').value &&
+      userInfo.location == _gel('user-location').value) {
+    userName = userInfo.name;
+    userLoc = userInfo.location;
+  } else {
+    userName = _gel('user-nickname').value;
+    userLoc = _gel('user-location').value;
+  }
+
+  // When making REST insert calls, you POST to the collection URL.
+  var url = 'https://www.googleapis.com/moderator/v1/series/' +
+            MODERATOR_SERIES + '/topics/' + getTopicId() + '/submissions';
+
+  var payload = {
+    'text': _hesc(_gel('question-desc').value),
+    'attribution': {
+      'displayName': userName,
+      'location': userLoc
+    }
+  };
+
+  var postBody = gadgets.json.stringify({"data": payload});
+  var params = {};
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  params[gadgets.io.RequestParameters.POST_DATA] = postBody;
+  makeRequest(url, params, handleQuestion);
+}
+
+function updateDelta(key, value, action, msg) {
+  var delta = {};
+  delta[key] = value;
+  delta['logs'] = getLogObject(action, msg);
+  wave.getState().submitDelta(delta);
+  currentWindow = '';
+}
+
+function handleResponseOfCreateTopic(response) {
+  if (response && response.data) {
+    var topicId = response.data.data.id.topicId;
+    var topidName = response.data.data.name;
+    updateDelta('topicId', topicId, 'created', 'a topic - <b>' +
+                topidName + '</b>');
+    showNotification('Topic saved successfully.');
+  } else {
+    wave.log('Problem in saving topic to moderator.')
+  }
+
+}
+
+function showNotification(msg) {
+  _gel('notification').innerHTML = msg;
+  _gel('notification').style.display = 'block';
+  gadgets.window.adjustHeight();
+  setTimeout (hideNotification, 10000);
+}
+
+function hideNotification() {
+  _gel('notification').style.display = 'none';
+  gadgets.window.adjustHeight();
+}
+
+/**
+ * Function used to display form for submit a question.
+ */
+function createQuestion() {
+  currentWindow = 'insertQuestion';
+  _gel('content').innerHTML = '';
+  _gel('question-desc').value = '';
+  _gel('save-question').disabled = false;
+
+  var userId = wave.getViewer().getId();
+  var userInfo = getUserInfo(userId);
+
+  if (userInfo.name || userInfo.location) {
+    _gel('user-nickname').value = userInfo.name;
+    _gel('user-location').value= userInfo.location;
+  }
+
+  var tplCreate =_gel('tpl-create-question');
+  _gel('counter').innerHTML = 250;
+  tplCreate.style.display = '';
+
+  var listContainer = _gel('content');
+  _gel('topicName').innerHTML = 'New Question';
+
+  var userId = wave.getViewer().getId();
+  var userInfo = getUserInfo(userId);
+
+  if (userInfo.name) {
+    _gel('displayUserInfo').style.display = '';
+    _gel('userInfo').style.display = 'none';
+    gadgets.window.adjustHeight();
+    _gel('userName').innerHTML = userInfo.location ?
+                                 (userInfo.name + ', ') : userInfo.name;
+    _gel('userLocation').innerHTML = userInfo.location;
+  } else {
+    _gel('userInfo').style.display = '';
+    _gel('displayUserInfo').style.display = 'none';
+    gadgets.window.adjustHeight();
+    _gel('user-nickname').value = wave.getViewer().getDisplayName();
+    _gel('displayUserInfo').style.display = 'none';
+    _gel('user-location').value = '';
+  }
+
+  listContainer.style.display = 'none'
+  _gel('header-content').innerHTML = '';
+  gadgets.window.adjustHeight();
+}
+
+/**
+ * Function used to display edit user information.
+ */
+function editUserInfo() {
+  _gel('userInfo').style.display = '';
+  _gel('displayUserInfo').style.display = 'none';
+  gadgets.window.adjustHeight();
+}
+
+/**
+ * Function used to display add default information to create question gui.
+ */
+function createTopic() {
+  _gel('tpl-create-topic').style.display = '';
+  _gel('content').innerHTML = '';
+  gadgets.window.adjustHeight();
+ _gel('topic-presenter').value = wave.getHost().getDisplayName();
+}
+
+/**
+ * Used to break the long text with wbr tag.
+ * @param {string} name Input string.
+ * @return {string} Return the string with added spaces.
+ */
+function wrapText(text) {
+  var value = [];
+  var MAX_CHARS = 15;
+
+  // Add 'wbr' tag to the string so the string will have a line break if it
+  // exceeds the width given.
+  var spanSpacer = '<wbr/>';
+  if (text.length < MAX_CHARS) {
+    return text;
+  } else {
+    for (var k = 0, length = text.length; k < length; k += MAX_CHARS) {
+      var substr = text.substring(k, k + MAX_CHARS);
+      value.push(substr);
+    }
+  }
+  return value.join(spanSpacer);
+}
+
+function breakString(data) {
+  var dataLength = data.length;
+  return dataLength > 11 ?
+     data.substring(0, 11) + '<wbr>' + data.substring(11, dataLength) : data;
+ };
+
+function toggleLogger(loggerFlag) {
+  var logs = gadgets.json.parse(wave.getState().get('logs', '[]'));
+  var logLength = logs.length;
+  var element = _gel('logger').style;
+  if (element.display == 'none') {
+    element.display = '';
+    gadgets.window.adjustHeight();
+    _gel('hide_link').innerHTML = 'Collapse';
+  } else {
+    element.display = 'none';
+    _gel('hide_link').innerHTML = 'Expand';
+    gadgets.window.adjustHeight();
+  }
+  if (!logLength) {
+    _gel('logger').innerHTML =
+        '<div align="center">No recent activities available.</div>';
+  }
+  gadgets.window.adjustHeight();
+}
+
+function showLogMessage() {
+  var html = [];
+  var logs = gadgets.json.parse(wave.getState().get('logs', '[]'));
+  var tplHtml = _gel('tpl-log-message').value;
+  var tplData, log, actionClass, action;
+  var logLength = logs.length;
+  // Maximum words display.
+  var MAX_WORDS = 15;
+  for (var i = 0; i < logLength; i++) {
+    log = logs[i];
+    action = log.action;
+    actionClass = getActivityClass (action);
+    var desc = log.msg.split(' ');
+    var description = '';
+    var descLength = desc.length;
+
+    for (j = 0; j < descLength; j++) {
+      description = description + ' ' + desc[j];
+      if (j == MAX_WORDS) {
+        description = description + '...';
+        break;
+      }
+    }
+    tplData = {
+      author: log.ownerName,
+      action: action,
+      actionClass: actionClass,
+      borderBottom: (logLength - 1 != i) ? 'logger-item-border' : '',
+      message: description
+    };
+    html.push(tplHtml.supplant(tplData));
+  }
+  var logger = _gel('logger');
+  if (logger) {
+    logger.innerHTML = html.join('');
+    gadgets.window.adjustHeight();
+  }
+}
+
+/**
+ * Function to be run when the gadget's state object changes.
+ */
+function stateChanged() {
+  var topicId = getTopicId();
+  if (topicId) {
+    if (!currentWindow) {
+      fetchQuestions();
+    }
+    _gel('logger-wrapper').style.display = '';
+    gadgets.window.adjustHeight();
+  } else {
+    if (wave.getHost().getId() == wave.getViewer().getId()) {
+      _gel('logger-wrapper').style.display = '';
+      gadgets.window.adjustHeight();
+      createTopic();
+    } else {
+      _gel('content').innerHTML = 'App host has not added any topic till yet.';
+      gadgets.window.adjustHeight();
+    }
+  }
+  showLogMessage();
+}
+
+/**
+ * Function to be run when there is a change to the participants of the wave.
+ */
+function updateParticipants() {
+  var participants = wave.getParticipants();
+  var partcipantsCount = participants.length;
+}
+
+/**
+ * Function use to initialize moderator wave gadget.
+ */
+function init() {
+  if (!wave || !wave.isInWaveContainer()) {
+    return;
+  }
+  wave.setStateCallback(stateChanged);
+  wave.setParticipantCallback(updateParticipants);
+}
+
+gadgets.util.registerOnLoadHandler(init);
+</script>
+<img src="http://www.google.com/intl/default/images/logos/moderator_logo.gif" width="160"/>
+<div id="notification" class="moderator-notication" style="display:none;"></div>
+<div id="header-content" style="width:100%;"></div>
+<div id="content" style="width:100%;">
+<div class="moderator-loading"><img src="http://www.google.com/ig/images/spinner.gif"/> Loading...</div>
+</div>
+
+<div id="tpl-create-topic" style="display:none;">
+  <table cellspacing="0" cellpadding="10" class="moderator-box">
+    <tr>
+      <td class="moderator-box-head">
+        <span id="heading-title" class="moderator-head-text">Create Topic</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div id="moderator-title-section" class="moderator-section">
+          <span class="moderator-required">*</span>&nbsp;<span class="moderator-heading">Title :</span>
+          <br/>
+          <input id="topic-name" type="text" class="moderator-input" value="">
+        </div>
+        <div id="description-section" class="moderator-section">
+          <span class="moderator-required">*</span>&nbsp;<span class="moderator-heading">Description :</span>
+          <br/>
+          <textArea id="topic-desc" class="moderator-input" style="height:100px;" onKeyPress="checkLength('topic-desc', 'num-desc-chars', 500);" onKeyDown="checkLength('topic-desc', 'num-desc-chars', 500);" onkeyup="checkLength('topic-desc', 'num-desc-chars', 500);" maxlength=500></textArea><br/>
+          <span class="moderator-remaining-chars">
+            <span id="num-desc-chars" style="font-weight:bold;">500</span>
+            &nbsp;characters remaining
+          </span>
+        </div>
+        <div id="presented-by-section" class="moderator-section">
+          <span class="moderator-required">*</span>&nbsp;<span class="moderator-heading">Presented by :</span><br/>
+          <input id="topic-presenter" type="text" class="moderator-input">
+        </div>
+        <div style="padding-top:20px;">
+          <input type="button" value="Save" onclick="saveTopic();">&nbsp;
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div id="tpl-create-question" style="display:none;">
+  <table cellspacing="0" cellpadding="0" class="moderator-box">
+    <tr>
+      <td class="moderator-box-head">
+        <span id="topicName" class="moderator-head-text"></span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div id="userInfo" class="moderator-background" style="display:none;">
+          <div class="moderator-highlight-text"><span class="moderator-required">*</span>&nbsp;Nickname
+            <span class="moderator-hint" style="font-size:11px;">(Visible to all)</span></div>
+            <input id="user-nickname" type="text" class="moderator-input">
+            <br><br>
+            <span class="moderator-highlight-text">Location
+            <span class="moderator-hint" style="font-size:11px;">(Visible to all)</span></span><br/>
+            <input id="user-location" type="text" class="moderator-input">
+          </div>
+          <div id="displayUserInfo" class="moderator-background" style="display:none;">
+            <span id="userName" class="moderator-hint"></span>
+            <span id="userLocation" class="moderator-hint"></span>&nbsp;
+            <span><a href="javascript:void(0);" onclick="editUserInfo();">edit</a></span>
+          </div>
+          </div>
+          <div style="padding:14px;">
+            <span class="moderator-required">*</span>&nbsp;<span class="moderator-highlight-text">Write Your Question</span><br/>
+            <textarea id="question-desc" class="moderator-ask-question" class="moderator-input" style="height:100px;" onKeyPress="checkLength('question-desc', 'counter', 250);"
+             onkeyup="checkLength('question-desc', 'counter', 250);" onKeyDown="checkLength('question-desc', 'counter', 250);" maxlength=250></textarea>
+            <div class="moderator-hint"><span style="font-weight:bold;" id="counter">250</span> characters remaining</div>
+            <div style="padding-top:5px;">
+              <input type="button" id="save-question" value="Submit" onclick="saveQuestion();">&nbsp;
+              <input type="button" value="Cancel" onclick="fetchQuestions();">&nbsp;
+            </div>
+        </div>
+
+      </td>
+    </tr>
+  </table>
+</div>
+<div id="logger-wrapper" style="background-color:#fff;padding-top:10px;display:none;">
+  <div style="background-color:#468bcb;font-size:12px;color:#fff;padding:5px;">
+    <span id="hide_link" style="text-decoration:underline; float:right; line-height:15px;margin: 0 5px;cursor:pointer" onclick="toggleLogger(true);">Expand</span>
+    <span style="font-weight:bold;">&nbsp; Recent activity</span>
+  </div>
+  <div id="logger" style="border:1px solid #ccc;font-size:12px;padding:5px 10px;height:100px; overflow:auto;display:none;"></div>
+</div>
+
+<!-- HTML template for topic details. -->
+<textarea id="tpl-thanks" style="display:none;">
+  <table cellspacing="0" cellpadding="0" class="moderator-box">
+    <tr>
+      <td class="moderator-box-head">
+        <span class="moderator-head-text">{topicName}</span>&nbsp;&nbsp;&nbsp;
+        <span class="moderator-head-text" style="float:right;">{voteCount} votes on {questionCount} questions on from {participantsCount} people</span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="padding:14px;">
+          <div id="topicDetails" style="display:none">
+            <div style="padding-top:15px;">{description}</div>
+          </div>
+          <span id="no-questions" style="font-weight:bold;font-size:14px;display:none;">There are no submitted questions yet!</span>
+          <div style="padding-top:10px;">
+            <input type="button" value="Submit a question" onclick="createQuestion();">&nbsp;
+            <input id="viewQuestions" type="button" value="View questions" onclick="fetchQuestions();">&nbsp;
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</textarea>
+
+<textarea id="tpl-log-message" style="display:none">
+  <div style="padding:4px 0;" class="{borderBottom}"><span class="log-author">{author}</span> <span class="log-action log-{actionClass}">{action}</span> <span class="log-message">{message}</span></div>
+</textarea>
+
+<!-- HTML template for question listing row. -->
+<textarea id="tpl-question-listing" style="display:none">
+  <table width="100%" class="moderator-list">
+    <tr>
+      <td>
+        <span class="moderator-title">"{descrption}"</span>
+        <div style="padding: 5px 0 10px 0;">
+          <img src="{thumbUrl}" alt="{nickName}" title="{nickName}" height="20px" weight="20px" style="border:1px solid #ccc;float:left;"/>
+          <div class="moderator-hint" style="padding:3px 0 0 30px;">{nickName}{location}</div>
+        </div>
+      </td>
+      <td align="right" valign="top" width="100">
+        <table cellspacing="2" cellpadding="0" width="100%">
+          <tr>
+            <td class="moderator-empty-vote" title="{thumbUp} like this question.">
+              <div id="yes-count" class="moderator-like" style="width:{thumbUpW}%;" title="{thumbUp} like this question."></div>
+            </td>
+            <td width="25">
+              <img id="do-yes-{index}" src="http://www.google.com/c.gif" onMouseOver="mouseOverClass(true, {votedYes}, {index})" onMouseOut="mouseOutClass(true, {votedYes}, {index})" class="{upClass}" align="bottom" onclick="javascript:vote('{questionId}', 'PLUS', {index}, '{param}');"/>
+            </td>
+          </tr>
+          <tr>
+            <td class="moderator-empty-vote" title="{thumbDown} don't like this question.">
+              <div id="no-count" class="moderator-unlike" style="width:{thumbDownW}%;" title="{thumbDown} don't like this question."></div>
+            </td>
+            <td width="25">
+              <img id="do-no-{index}" src="http://www.google.com/c.gif" onMouseOver="mouseOverClass(false, {votedNo}, {index})" onMouseOut="mouseOutClass(false, {votedNo}, {index})" class="{downClass}" align="bottom" onclick="javascript:vote('{questionId}', 'MINUS', {index}, '{param}');"/>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</textarea>
+  ]]>
+  </Content>
+  </Module>

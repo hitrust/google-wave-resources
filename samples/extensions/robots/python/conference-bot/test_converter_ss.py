@@ -28,11 +28,11 @@ class UtilTest(unittest.TestCase):
     self.assertEquals('Scott Thomas', session.speakers[0].name)
 
   def testSpreadsheetConverterWebdu(self):
-    url = 'http://spreadsheets.google.com/feeds/list/tVQA1EbmPcWM2yZ_i0y315g/od6/public/values?alt=json'
+    url = 'http://spreadsheets.google.com/feeds/list/te9kWpriEXsbBQTleUHjT-g/od6/public/values?alt=json'
     spreadsheet_converter = converter_ss.SpreadsheetConverter(url)
     conf = spreadsheet_converter._conference
-    self.assertEquals(45, len(conf.sessions))
-    session = conf.sessions[0]
+    self.assertEquals(43, len(conf.sessions))
+    session = conf.sessions[1]
     self.assertEquals('Augmented Reality in Unity 3D using FLARToolkit', session.name)
     self.assertEquals('Ari Jacobs (Sydney, Australia)', session.speakers[0].name)
 

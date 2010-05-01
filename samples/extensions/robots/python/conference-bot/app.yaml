@@ -16,6 +16,16 @@ handlers:
 - url: /img
   static_dir: img
 
+- url: /gadget_attendees.xml.*
+  static_files: gadget_attendees.xml
+  upload: gadget_attendees.xml
+  mime_type: text/xml
+
+- url: /gadget_moderator.xml.*
+  static_files: gadget_moderator.xml
+  upload: gadget_moderator.xml
+  mime_type: text/xml
+
 - url: /installer.xml.*
   static_files: installer.xml
   upload: installer.xml
