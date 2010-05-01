@@ -25,14 +25,14 @@ session_html = """
 
 main_html = """
 \n
-Waves:\n
+<b>Waves</b>:\n
 When you create a new wave using the option in the New Wave menu, it will automatically be added here.\n
 \n\n
 """
 
 main_html_2 = """
 \n
-Extension:\n
+<b>Extension</b>:\n
 Install the extension below and you'll get a new option in your New Wave menu to add waves to this collection.
 \n
 """

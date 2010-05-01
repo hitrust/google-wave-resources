@@ -12,6 +12,8 @@ class Collection(db.Model):
   groups = db.StringListProperty()
   tags = db.StringListProperty()
   make_public = db.BooleanProperty()
+  # URL for installer and avatar
+  icon = db.StringProperty()
 
 class ConferenceCollection(Collection):
   session_waves = db.StringListProperty()

@@ -22,5 +22,5 @@ handlers:
   mime_type: text/xml
 
 - url: /_ah/queue/deferred
-  script: deferred.py
+  script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py
   login: admin
