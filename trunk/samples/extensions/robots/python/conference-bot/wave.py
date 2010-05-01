@@ -4,6 +4,7 @@
 
 import cgi
 import logging
+import random
 
 from waveapi import appengine_robot_runner
 from waveapi import element
@@ -12,28 +13,26 @@ from waveapi import ops
 from waveapi import robot
 from django.utils import simplejson
 from google.appengine.ext import deferred
+from google.appengine.ext import webapp
+from google.appengine.ext import db
 
-import credentials
 import util
 import text
 import model
-import wavemaker
 import converter_ss
+import wavemaker
+import wavedata
+import wavecred
 
 # the robot
 myrobot = None
-
-SESSION_WAVES = 'conference-bot/main-wave/sessions'
-EXTRA_WAVES = 'conference-bot/main-wave/extras'
-SESSION_ID = 'conference-bot/session-wave/id'
-LINK_ADDED = 'conference-bot/new-wave/linkadded'
 
 def MakeAdminWave(event, wavelet):
   wavelet.title = 'Admin Wave'
   gadget = element.Gadget(url=util.GetGadgetUrl())
   wavelet.root_blip.append(gadget)
   collection = model.ConferenceCollection()
-  collection.owner = wavelet.creator 
+  collection.owner = wavelet.creator
   collection.admin_wave = wavelet.wave_id
   collection.put()
 
@@ -66,8 +65,11 @@ def OnSelfAdded(event, wavelet):
     event.blip.append(element.Gadget(url='http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/mappy.xml'))
 
 def OnBlipSubmitted(event, wavelet):
+  #if WAVE_TYPE in wavelet.data_documents.keys() and wavelet.data_documents[WAVE_TYPE] == 'info':
+  #wavelet.participants.set_role(group, wavelet.participants.ROLE_READ_ONLY)
+
   if IsBlankWave(wavelet) or IsEventWave(wavelet):
-    if LINK_ADDED not in wavelet.data_documents.keys():
+    if wavedata.LINK_ADDED not in wavelet.data_documents.keys():
       SetupOauth(wavelet)
       id = GetWaveId(wavelet)
       # Get collection object
@@ -80,7 +82,7 @@ def OnBlipSubmitted(event, wavelet):
       blind_wave.root_blip.append(wavelet.title,
                                   bundled_annotations=[('link/wave', wavelet.wave_id)])
       myrobot.submit(blind_wave)
-      wavelet.data_documents[LINK_ADDED] = 'yes'
+      wavelet.data_documents[wavedata.LINK_ADDED] = 'yes'
 
 def OnGadgetChanged(event, wavelet):
   domain = wavelet.domain
@@ -156,7 +158,6 @@ def MakeSessionWaves(collection):
   if conf is None:
     logging.info('Error: Couldnt create conference object.')
     return
-  # Only do 2 now, for quota reasons
   for session in conf.sessions:
     deferred.defer(wavemaker.MakeSessionWave, session, collection.key())
 
@@ -190,14 +191,69 @@ def GetWaveId(wavelet):
     return id
 
 def SetupOauth(wavelet):
-  myrobot.setup_oauth(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET,
-    server_rpc_base=credentials.RPC_BASE[wavelet.domain])
+  myrobot.setup_oauth(wavecred.CONSUMER_KEY, wavecred.CONSUMER_SECRET,
+    server_rpc_base=wavecred.RPC_BASE[wavelet.domain])
 
+
+class CronHandler(webapp.RequestHandler):
+  robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self.robot = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    query = db.Query(model.ConferenceCollection)
+    wave = query.get()
+    self.UpdateWave(wave)
+
+  def UpdateWave(self, wave):
+    wavelet = self.robot.blind_wavelet(wave.toc_wave_ser)
+    self.robot.setup_oauth(wavecred.CONSUMER_KEY, wavecred.CONSUMER_SECRET, server_rpc_base=wavecred.RPC_BASE[wavelet.domain])
+    num = random.randint(0, 999)
+    wavelet.data_documents['robotupdated'] = str(num)
+    self.robot.submit(wavelet)
+
+
+class ProcessHandler(webapp.RequestHandler):
+  robot = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self.robot = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    query = db.Query(model.ConferenceCollection)
+    wave = query.get()
+    self.ProcessWave(wave)
+
+  def ProcessWave(self, wave):
+    root_wavelet = wavecred.DOMAIN + '!conv+root'
+    self.robot.setup_oauth(wavecred.CONSUMER_KEY,
+                           wavecred.CONSUMER_SECRET,
+                           server_rpc_base=wavecred.RPC_BASE[wavecred.DOMAIN])
+    wavelet = self.robot.fetch_wavelet('googlewave.com!w+eRiTZrZkCcw',
+                                       root_wavelet)
+    # iterate through the annotations, finding the links
+    blip = wavelet.root_blip
+    for annotation in blip.annotations:
+      if annotation.name == 'link/wave':
+        text = blip.text[annotation.start:annotation.end]
+        if text.find('Live') > -1:
+          pass
+          #deferred.defer(wavemaker.AddGroup, annotation.value, root_wavelet, group)
+ 
 if __name__ == '__main__':
 
-  myrobot = robot.Robot('Conference-bot',
+  myrobot = robot.Robot('Confrenzy',
                         image_url='http://dfki.de/~jameson/icon=conference.gif')
+  myrobot.set_verification_token_info(wavecred.VERIFICATION_TOKEN, wavecred.ST)
   myrobot.register_handler(events.WaveletSelfAdded, OnSelfAdded)
   myrobot.register_handler(events.GadgetStateChanged, OnGadgetChanged)
   myrobot.register_handler(events.BlipSubmitted, OnBlipSubmitted)
-  appengine_robot_runner.run(myrobot, debug=True)
+  appengine_robot_runner.run(myrobot, debug=True, extra_handlers=[
+      ('/_wave/cron', lambda: CronHandler(myrobot)),
+      ('/_wave/process', lambda: ProcessHandler(myrobot))
+      ])
