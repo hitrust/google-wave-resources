@@ -12,7 +12,8 @@
       var waveFrame = document.getElementById(frameId);
       var embedOptions = {
         rootUrl: 'http://wave.google.com/a/wavesandbox.com/',
-        target: waveFrame
+        target: waveFrame,
+        bgcolor: '#eee'
       }
       var wavePanel = new google.wave.WavePanel(embedOptions);
       wavePanel.loadWave(waveId)
@@ -26,7 +27,7 @@
     google.setOnLoadCallback(initialize);
     </script>
   </head>
-  <body>
+  <body style="background-color:black; color: white;">
     <p>Oooo, playing with magnets is fun!</p>
     <div id="waveframe" style="width:500px; height:400px"></div>
     <p>But talking about stocks is more fun! (NOT)</p>
