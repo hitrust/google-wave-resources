@@ -2,17 +2,16 @@ from geo.geomodel import GeoModel
 from google.appengine.ext import db
 
 
-class Profile(GeoModel):
-  """Storage for a single profile.
-  
-  key = wave_id, for the Profile Wave
-  
+class Person(GeoModel):
+  """Storage for a single person.
+
+  key = viewer_id
+
   location is inherited from GeoModel.
   """
   name = db.StringProperty()
-  address = db.StringProperty()
-  creator = db.StringProperty()
-  interests = db.StringListProperty()
+  thumbnail = db.StringProperty()
+  country = db.StringProperty()
 
 class GTUG(GeoModel):
   """
