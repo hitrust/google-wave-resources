@@ -1,5 +1,5 @@
-application: exporty-bot 
-version: 3
+application: exporty-bot
+version: 4
 runtime: python
 api_version: 1
 
@@ -13,6 +13,9 @@ handlers:
   static_files: avatar.png
   upload: avatar.png
   mime_type: image/png
+
+- url: /js
+  static_dir: js
 
 - url: /_wave/.*
   script: wave.py

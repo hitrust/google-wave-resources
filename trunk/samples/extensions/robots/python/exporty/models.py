@@ -2,7 +2,7 @@ from google.appengine.ext import db
 
 class WaveExport(db.Model):
   title = db.StringProperty()
-  body = db.TextProperty()
+  text = db.TextProperty()
   html = db.TextProperty()
   id = db.StringProperty()
   participants = db.StringListProperty()

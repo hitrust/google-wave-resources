@@ -1,56 +1,79 @@
-from waveapi import events
-from waveapi import model
-from waveapi import robot
-from waveapi import document
-from google.appengine.ext import db
 import logging
 import os
+import string
+
+from waveapi import events
+from waveapi import robot
+from waveapi import element
+from waveapi import appengine_robot_runner
+from google.appengine.ext import db
+
 import models
-import htmler
+import blipconverter
 
-def logString(context, string):
-  logging.info(string)
-  addBlip(context, string)
+# Events
 
-def addBlip(context, string):
-  context.GetRootWavelet().CreateBlip().GetDocument().SetText(string)
+def OnRobotAdded(event, wavelet):
+  ExportWavelet(wavelet)
 
-def OnBlipSubmitted(properties, context):
-  exportRootBlip(context)
+def OnBlipSubmitted(event, wavelet):
+  ExportWavelet(wavelet)
 
-def OnRobotAdded(properties, context):
-  exportRootBlip(context)
+# Operations
 
-def exportRootBlip(context):
-  rootWavelet = context.GetRootWavelet()
-  rootBlip = context.GetBlipById(rootWavelet.GetRootBlipId())
-  html = htmler.convert_to_html(rootBlip)
+def AddBlip(wavelet, string):
+  wavelet.reply('\n').append(string)
 
-  title = rootWavelet.GetTitle()
-  id = rootWavelet.GetWaveId()
-  body = rootBlip.GetDocument().GetText().split('\n', 1)[1]
+# Helper Functions
+
+def ExportWavelet(wavelet):
+  text = ExportWaveletToText(wavelet)
+  html = ExportWaveletToHTML(wavelet)
+  StoreExport(wavelet, text=text, html=html)
+  pass
+
+def ExportWaveletToHTML(wavelet):
+  html_list = []
+  for blip_id in wavelet.blips:
+    blip = wavelet.blips.get(blip_id)
+    html_list.append(blipconverter.ToHTML(blip))
+  return string.join(html_list, '<br><br>')
+
+def ExportWaveletToText(wavelet):
+  text_list = []
+  for blip_id in wavelet.blips:
+    blip = wavelet.blips.get(blip_id)
+    text_list.append(blipconverter.ToText(blip))
+  return string.join(text_list, '\n\n')
+
+def StoreExport(wavelet, html='', text=''):
+  id = wavelet.wave_id
   query = db.Query(models.WaveExport)
   query.filter('id =', id)
   waveExport = query.get()
   if waveExport is None:
     server = os.environ['SERVER_NAME']
     url = "http://" + server + "/export?waveId=" + id.replace("+", "%252B")
-    addBlip(context, "View exported Wave: \n HTML: " + url + "\n XML: " + url + "&template=xml")
+    url_text = '%s&format=text'
+    AddBlip(wavelet, "View export: \n%s\n%s\n" % (url, url_text))
     waveExport = models.WaveExport()
 
   waveExport.id = id
-  waveExport.title = title
-  waveExport.body = body
+  waveExport.title = wavelet.title
+  waveExport.text = text
   waveExport.html = html
-  waveExport.participants = [p for p in rootWavelet.GetParticipants()]
+  waveExport.participants = [p for p in wavelet.participants]
   waveExport.put()
 
 if __name__ == '__main__':
-  myRobot = robot.Robot('Exporty',
+  robotty = robot.Robot('Exporty',
       image_url='http://exporty-bot.appspot.com/avatar.png',
-      version='2',
-      profile_url='')
-  myRobot.RegisterHandler(events.BLIP_SUBMITTED, OnBlipSubmitted)
-  myRobot.RegisterHandler(events.WAVELET_SELF_ADDED, OnRobotAdded)
-  myRobot.RegisterHandler(events.WAVELET_PARTICIPANTS_CHANGED, OnRobotAdded)
-  myRobot.Run()
+      profile_url='') 
+  robot_context = [events.Context.ALL]
+  robotty.register_handler(events.BlipSubmitted, OnBlipSubmitted,
+                           context=robot_context)
+  robotty.register_handler(events.WaveletSelfAdded, OnRobotAdded,
+                           context=robot_context)
+  robotty.register_handler(events.WaveletParticipantsChanged, OnRobotAdded,
+                           context=robot_context)
+  appengine_robot_runner.run(robotty, debug=True)

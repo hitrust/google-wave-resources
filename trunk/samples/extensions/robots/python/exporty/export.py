@@ -44,7 +44,7 @@ class MainPage(webapp.RequestHandler):
         template_values = {
           'title': result.title,
           'html': result.html,
-          'body': result.body,
+          'text': result.text,
           'id': waveId,
           'dir': dir,
           'url': 'https://wave.google.com/' + dir + '#minimized:nav,minimized:contact,minimized:search,restored:wave:' + waveId.replace('+', '%252B')
@@ -56,11 +56,13 @@ class MainPage(webapp.RequestHandler):
           'id': waveId
         }
 
-    format = self.request.get('template')
-    if format and format == 'xml':
-      filename = 'export.xml'
+    format = self.request.get('format')
+    if format and format == 'text':
+      filename = 'export.text'
+      self.response.headers['Content-Type'] = "text/plain"
     else:
       filename = 'export.html'
+      self.response.headers['Content-Type'] = "text/html"
 
     path = os.path.join(os.path.dirname(__file__), filename)
     self.response.out.write(template.render(path, template_values))
