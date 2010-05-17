@@ -6,7 +6,7 @@
 <Content type="html">
 <![CDATA[<html><head>
 <script src="http://www.google.com/jsapi"></script>
-<script src="http://imagine-it.org/google/wave/markerclusterer.js"></script>
+<script src="http://io-2010-peoplefinder-bot.appspot.com/static/markerclusterer.js"></script>
 <script type="text/javascript">
 google.load('maps', '3', {
  other_params: 'sensor=false'
@@ -16,9 +16,9 @@ var map;
 var bounds;
 var markerClusterer;
 var markersAdded;
-var viewerMarker;
+var viewerPosition;
 var infoWindow;
-var ICON_URL = 'http://chart.apis.google.com/chart?cht=mm&chs=24x32&chco=FFFFFF,008CFF,000000&ext=.png';
+
 
 function makeJSONRequest(path, callback) {
   var baseUrl = "http://io-2010-peoplefinder-bot.appspot.com/web/";
@@ -28,23 +28,22 @@ function makeJSONRequest(path, callback) {
   gadgets.io.makeRequest(baseUrl + path, callback, params);
 }
 
+function removeMe() {
+  showLoading();
+  var viewer = wave.getViewer();
+  var path = "removelocation?viewer_id=" + viewer.getId();
+  makeJSONRequest(path, function(){ hideLoading();});
+}
+
+
 function showAddress(address) {
   var  country = '00';
   var geocoder = new google.maps.Geocoder();
   geocoder.geocode( { 'address': address}, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
       var result = results[0];
-      var position = results[0].geometry.location;
-      if (viewerMarker) {
-        viewerMarker.setPosition(position);
-      } else {
-        viewerMarker = new google.maps.Marker({
-           map: map,
-           position: position
-        });
-      }
-      infoWindow.setContent("Saving...");
-      infoWindow.open(map, viewerMarker);
+      viewerPosition = results[0].geometry.location;
+      //map.setCenter(viewerPosition);
       for (var i = 0; i < result.address_components.length; i++) {
         var address_component = result.address_components[i];
         for (var j = 0; j < address_component.types.length; j++) {
@@ -54,7 +53,10 @@ function showAddress(address) {
         }
       }
       var viewer = wave.getViewer();
-      var path = "savelocation?viewer_id=" + viewer.getId() + "&viewer_name=" + escape(viewer.getDisplayName()) + "&viewer_thumbnail=" + escape(viewer.getThumbnailUrl()) + "&latlng=" + position.toUrlValue(4) + "&country=" + country;
+      var path = "savelocation?viewer_id=" + viewer.getId() + "&viewer_name=" +
+      escape(viewer.getDisplayName()) + "&viewer_thumbnail=" +
+      escape(viewer.getThumbnailUrl()) + "&latlng=" + viewerPosition.toUrlValue(4) + "&country=" + country;
+      showLoading();
       makeJSONRequest(path, saveLocationCallback);
     } else {
       alert("Address not found");
@@ -63,28 +65,11 @@ function showAddress(address) {
 }
 
 function saveLocationCallback() {
+  hideLoading();
   infoWindow.close();
 }
 
-/**
- * Updates vote status information when the user clicks thumbs up or down.
- * @param {string} dir The direction the user pressed (plus or minus).
- */
-function saveLocation() {
-  var viewerId = wave.getViewer().getId();
-  var viewerData = {latlng: viewerMarker.getPosition().toUrlValue(6)};
-  var delta = {};
-  delta[viewerId] = JSON.stringify(viewerData);
-  wave.getState().submitDelta(delta);
-}
-
-/**
- * Updates the html of the page to reflect the vote status information.
- */
 function stateUpdated() {
-  if (viewerMarker) {
-    viewerMarker.setMap(null);
-  }
   var state = wave.getState();
   if (state) {
     var markers = [];
@@ -108,8 +93,9 @@ function stateUpdated() {
       var lng = parseFloat(location.split(",")[1]);
       var latlng = new google.maps.LatLng(lat, lng);
       bounds.extend(latlng);
-      var marker = new google.maps.Marker({icon: ICON_URL, position: latlng});
+      var marker = new google.maps.Marker({position: latlng});
       marker.clusterCount = participantKeys.length;
+      marker.setIcon(marker.iconUrl);
       markersAdded[key] = marker;
       attachInfoWindow(marker, participantKeys);
       markers.push(marker);
@@ -118,41 +104,90 @@ function stateUpdated() {
       markerClusterer.clearMarkers();
       markerClusterer.addMarkers(markers);
     } else {
-      markerClusterer = new MarkerClusterer(map, markers);         
+      markerClusterer = new MarkerClusterer(map, markers);
     }
     zoomToBounds();
   }
 }
 
 function attachInfoWindow(marker, participants) {
+
+  function openInfoWindow() {
+    var path = 'getpersoninfo?participant_ids=' + participants.join(',');
+    makeJSONRequest(path, getPersonInfoCallback);
+    infoWindow.setContent(('<div id="personinfo">Loading info..</div>'));
+    infoWindow.setPosition(marker.getPosition());
+    infoWindow.open(map);
+  }
+
   for (var i = 0; i < participants.length; i++) {
     // pop open info window if viewer
+    var participantId = participants[i];
+    if (participantId.indexOf('@') < 0) {
+      participantId = participantId + '@googlewave.com';
+    }
+    var viewerId = wave.getViewer() && wave.getViewer().getId();
+    if (participantId == viewerId) {
+       document.getElementById('addButton').value = 'Change Location';
+       document.getElementById('removeButton').disabled = false;
+    } else {
+       document.getElementById('addButton').value = 'Add Location';
+       document.getElementById('removeButton').disabled = true;
+    }
+    if (participantId == viewerId && viewerPosition) {
+      openInfoWindow();
+    }
   }
+
   google.maps.event.addListener(marker, 'click', function() {
-    var path = 'getpersoninfo?participant_ids=' + participants.join(',');
-    infoWindow.setContent(('<div id="personinfo">Loading info..</div>'));
-    infoWindow.open(map, marker);
-    makeJSONRequest(path, getPersonInfoCallback);
+    openInfoWindow();
   });
 }
 
 function getPersonInfoCallback(obj) {
   var personInfo = obj.data;
   var html = [];
+  html.push('<br><table>');
   for (var i = 0; i < personInfo.length; i++) {
-    html.push('<div><img style="float:left" src="' + personInfo[i].thumbnail + '" width="30" height="30"> ' + personInfo[i].name + '<br><span class="littletext">' + personInfo[i].address + '</span></div>');
+    html.push('<tr><td>');
+
+    if (!personInfo[i].thumbnail || personInfo[i].thumbnail.length < 10) {
+     personInfo[i].thumbnail = 'https://wave.google.com/wave/static/images/unknown.jpg';
+     html.push('<img src="https://wave.google.com/wave/static/images/unknown.jpg" width="30" height="30">');
+    } else {
+      html.push('<img src="' + personInfo[i].thumbnail + '" width="30" height="30">');
+    }
+
+    html.push('</td><td>' + personInfo[i].name + '<br>');
+
+    if (wave.getViewer() && wave.getViewer().getId() && wave.getViewer().getId() != personInfo[i].address) {
+      var url = 'http://io-2010-peoplefinder-bot.appspot.com/web/makewave';
+      var addresses = [personInfo[i].address, wave.getViewer().getId()]
+      url += '?addresses=' + addresses.join(',');
+      html.push('<span class="littletext"><a target="_blank" href="' + url + '">'
+        + personInfo[i].address + '</a></span>');
+    } else {
+      html.push('<span class="littletext">' + personInfo[i].address + '</span>');
+    }
+    html.push('</td></tr>');
   }
-  infoWindow.setContent(html.join('<br>'));
+  html.push('</table>');
+  infoWindow.setContent(html.join(''));
 }
 
 function zoomToBounds() {
   map.fitBounds(bounds);
 }
 
+function participantsUpdated() {
+  document.getElementById('addButton').disabled = false;
+}
+
 function init() {
   makeMap();
   if (wave && wave.isInWaveContainer()) {
     wave.setStateCallback(stateUpdated);
+    wave.setParticipantCallback(participantsUpdated);
   }
   stateUpdated();
 }
@@ -166,12 +201,22 @@ function makeMap() {
   });
   infoWindow = new google.maps.InfoWindow();
   markersAdded = {};
-  var iconUrl = "http://chart.apis.google.com/chart?cht=d&chdp=mapsapi&chl=pin'i\\'[10'-2'f\\hv'a\\]h\\]o\\008eff'fC\\000000'tC\\000000'eC\\Lauto'f\\&ext=.png";
+}
+
+function showLoading() {
+  document.getElementById('loadingImg').style.visibility = 'visible';
+}
+
+function hideLoading() {
+  document.getElementById('loadingImg').style.visibility = 'hidden';
 }
 
 gadgets.util.registerOnLoadHandler(init);
 </script>
 <style>
+body {
+  font-size: 12px;
+}
 .littletext {
   font-size: small;
 }
@@ -179,14 +224,21 @@ gadgets.util.registerOnLoadHandler(init);
 </head>
 <body>
 <div id="gadget-wrapper">
-<form action="#" onsubmit="showAddress(this.address.value); return false"> 
-   <p>
-     <input type="text" style="width:350px" name="address" value="" /> 
-     <input type="submit" value="Add Me!" />
-     <input type="button" value="View Everyone" onclick="zoomToBounds()"/>
+<form action="#" onsubmit="showAddress(this.address.value); return false">
+  <p>
+    Enter your city and/or country to place yourself on the map below:
+    <br>
+     <input type="text" style="width:350px" name="address" value="" />
+     <input id="addButton" type="submit" value="Add/Change" disabled/>
+     <input id="removeButton" type="button" value="Remove" onclick="removeMe()" disabled/>
+     <img id="loadingImg" style="visibility:hidden" src="http://io-2010-peoplefinder-bot.appspot.com/static/loading.gif">
+     <br>
+     <i>Note that your name, icon, Google Wave address, and the location
+    you enter will be visible to everyone.</i>
   </p>
 </form>
-<div id="map" style="width:600px;height:400px;"></div> 
+<!--<div id="dialog" style="position:absolute; top: 50px; left:300px;"></div>-->
+<div id="map" style="width:600px;height:400px;"></div>
 </div>
 </body>
 </html>
