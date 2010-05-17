@@ -13,7 +13,28 @@ from waveapi import appengine_robot_runner
 
 import credentials 
 # Globals
-ROBOT_NAME = 'PeopleFinder'
+ROBOT_NAME = 'Google I/O 2010'
+
+class RemoveLocation(webapp.RequestHandler):
+  _robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self._robot  = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    viewer_id = self.request.get('viewer_id', '')
+    if viewer_id.find('googlewave.com') > -1:
+      gadget_key = viewer_id.split('@')[0]
+    else:
+      gadget_key = viewer_id
+    wavelet = self._robot.fetch_wavelet('googlewave.com!w+0iIr7fEYA', "googlewave.com!conv+root")
+    delta = {}
+    delta[gadget_key] = None 
+    wavelet.root_blip.first(element.Gadget).update_element(delta)
+    self._robot.submit(wavelet)
+
 
 class SaveLocation(webapp.RequestHandler):
   _robot  = None
@@ -69,11 +90,31 @@ class GetPersonInfo(webapp.RequestHandler):
         info.append({'address': participant_id, 'name': person.name, 'thumbnail': thumbnail})
     self.response.out.write(simplejson.dumps(info))
 
+class MakeWave(webapp.RequestHandler):
+  _robot  = None
+
+  # override the constructor
+  def __init__(self, robot):
+    self._robot  = robot
+    webapp.RequestHandler.__init__(self)
+
+  def get(self):
+    domain = 'googlewave.com'
+    addresses = self.request.get('addresses').split(',')
+    wavelet = self._robot.new_wave(domain = domain,
+                                  participants  = addresses,
+                                  submit = True)
+    wavelet.title = ('I found you on the Google I/O Attendees map..')
+    self._robot.submit(wavelet)
+    url = 'https://wave.google.com/wave/#restored:wave:%s' % wavelet.wave_id
+    self.redirect(url);
+
+
 if __name__ == '__main__':
   appid = os.environ['APPLICATION_ID']
   r = robot.Robot(ROBOT_NAME.capitalize(),
-      image_url='http://%s.appspot.com/static/icon.png' % appid,
-      profile_url='http://%s.appspot.com/static/profile.html' % appid)
+                  image_url='http://io2010-bot.appspot.com/img/thumbnail.png',
+                  profile_url='http://code.google.com/events/io')
 
   r.set_verification_token_info(credentials.VERIFICATION_TOKEN, credentials.ST)
   r.setup_oauth(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET,
@@ -81,6 +122,8 @@ if __name__ == '__main__':
 
   appengine_robot_runner.run(r, debug=True, extra_handlers=[
       ('/web/savelocation', lambda: SaveLocation(r)),
-      ('/web/getpersoninfo', lambda: GetPersonInfo())
+      ('/web/removelocation', lambda: RemoveLocation(r)),
+      ('/web/getpersoninfo', lambda: GetPersonInfo()),
+      ('/web/makewave', lambda: MakeWave(r))
       ]
       )
