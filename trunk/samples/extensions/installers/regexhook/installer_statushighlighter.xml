@@ -1,0 +1,8 @@
+<extension 
+      name="Status Highlighter"
+      description="Highlights the status text"> 
+    <author name="AleZorro"/>
+    <regexHook pattern="In progress">
+     <annotateSelection key="style/backgroundColor" value="rgb(253,252,63)"/> 
+    </regexHook> 
+  </extension>  
