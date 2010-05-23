@@ -1,0 +1,11 @@
+<extension 
+      name="Skimmy"
+      thumbnailUrl="http://wave-skimmy.appspot.com/public/half.png"
+      description="Replaces text with emoticons"> 
+    <author name="Daniel Faust"/>
+    <regexHook pattern="\:\)|\:\("> 
+      <addParticipants> 
+        <participant id="wave-skimmy@appspot.com"/> 
+      </addParticipants> 
+    </regexHook> 
+  </extension>  
