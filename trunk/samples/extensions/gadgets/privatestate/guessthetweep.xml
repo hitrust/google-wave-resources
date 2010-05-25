@@ -1,0 +1,150 @@
+<Module> 
+<ModulePrefs 
+  title="Wave API Gadget Demo"
+  height="300"
+  width="300" > 
+  <Require feature="locked-domain" /> 
+  <Require feature="wave" /> 
+  <Require feature="dynamic-height" /> 
+</ModulePrefs> 
+<Content type="html"><![CDATA[
+<style type="text/css"> 
+.pic {
+  width: 40px;
+  height: 40px;
+}
+.cell {
+  float: left;
+  font-size: xx-small;
+  width: 50px;
+  overflow: hidden;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-bottom: 3px;
+  text-align: center;
+  border: 2px solid purple;
+  cursor: pointer;
+}
+</style> 
+<script type="text/javascript"> 
+var PEEPS = 'peeps';
+var PICKEDPEEPNUM = 'pickedpeepnum';
+ 
+function initialize() {
+  wave.setStateCallback(receiveState, this);
+  wave.setPrivateStateCallback(receivePrivateState, this);
+  //wave.setParticipantsCallback(receiveParticipants, this);
+};
+ 
+function receiveState(state) {
+  if (state.get(PEEPS)) {
+    displayPeeps();
+  } else {
+    getPeeps();
+  }
+}
+ 
+ 
+function getPeeps() {
+  var url = 'http://api.twitter.com/1/statuses/public_timeline.json';
+  var params = {};
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+  gadgets.io.makeRequest(url, receivePeeps, params);
+}
+ 
+function receivePeeps(obj) {
+  var results = obj.data;
+  var peeps = [];
+  for (var i = 0; i < results.length; i++) {
+    var pic = results[i].user.profile_image_url;
+    var name = results[i].user.screen_name;
+    peeps.push({'pic': pic, 'name': name});
+  }
+  var delta = {};
+  delta[PEEPS] = JSON.stringify(peeps);
+  wave.getState().submitDelta(delta);
+}
+ 
+function displayPeeps() {
+  var peeps = JSON.parse(wave.getState().get(PEEPS));
+  var html = [];
+  for (var i = 0; i < peeps.length; i++ ) {
+    html.push('<div id="cell' + i + '" class="cell"><img onclick="togglePeep(' + i + ')" class="pic" src="' + peeps[i].pic + '"><br>' + peeps[i].name + '</div>');
+  }
+  document.getElementById('board').innerHTML = html.join(' ');
+  gadgets.window.adjustHeight();
+}
+ 
+function togglePeep(num) {
+  var peep = document.getElementById('cell' + num);
+  if (peep.isDown) {
+    showPeep(peep);
+  } else {
+    hidePeep(peep);
+  }
+  var key = 'peep' + num;
+  var delta = {};
+  delta[key] = '' + peep.isDown;
+  wave.getPrivateState().submitDelta(delta);
+}
+ 
+function hidePeep(peep) {
+  peep.style.opacity = '.2';
+  peep.isDown = true;
+}
+ 
+function showPeep(peep) {
+  peep.style.opacity = '1.0';
+  peep.isDown = false;
+}
+ 
+function receivePrivateState(state) {
+  // Check if the who is selected yet
+  // Grey out the turned down ones
+  if (state.get(PICKEDPEEPNUM)) {
+    displayPickedPeep();
+  } else if (wave.getState().get(PEEPS)) {
+    pickPeep();
+  }
+  var keys = state.getKeys();
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (key.indexOf('peep') > -1) {
+      var index = parseInt(key.substring(4));
+      var peep = document.getElementById('cell' + index);
+      if (state.get(key) == 'true') hidePeep(peep);
+      if (state.get(key) == 'false') showPeep(peep);
+    }
+  }   
+};
+ 
+function displayPickedPeep() {
+  var peeps = JSON.parse(wave.getState().get(PEEPS));
+  var pickedPeepNum = wave.getPrivateState().get(PICKEDPEEPNUM);
+  var pickedPeep = peeps[pickedPeepNum];
+  
+  document.getElementById('pickedpeep').innerHTML = 
+    '<img class="pic" src="' + pickedPeep.pic + '"><br>' + pickedPeep.name;
+  gadgets.window.adjustHeight();
+}   
+ 
+function pickPeep() {
+  var randNum = Math.floor(Math.random()*20)
+  var delta = {};
+  delta[PICKEDPEEPNUM] = '' + randNum + '';
+  wave.log('setting num to ' + randNum);
+  wave.getPrivateState().submitDelta(delta);
+}
+ 
+gadgets.util.registerOnLoadHandler(initialize);
+</script> 
+<div id="board" style=""> 
+</div> 
+<div style="clear:both"></div> 
+<center> 
+<div id="pickedpeep" style="font-size: small; overflow: hidden; text-align: auto; border:2px solid green; width:60px"> 
+</div> 
+</center> 
+<br/> 
+]]></Content> 
+</Module> 
