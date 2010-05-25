@@ -20,7 +20,9 @@ function receivePrivateState(state) {
       
 function updateState() {
   var dropdown = document.getElementById('color_dropdown');
-  var backgroundColor = dropdown.options[dropdown.selectedIndex];
+  var backgroundColor = dropdown.options[dropdown.selectedIndex].value;
+  wave.log('Updating state to: ' + backgroundColor);
+  
   var privateState = wave.getPrivateState();
   var delta = {};
   delta[BACKGROUNDCOLOR] = backgroundColor;
