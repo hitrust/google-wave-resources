@@ -196,7 +196,7 @@ body {
 </style>
 </head>
 <body>
-<div id="gadget-wrapper" style="border:1px solid #5590D2">
+<div id="gadget-wrapper" style="padding:3px; border:1px solid #5590D2">
 <form action="#" onsubmit="showAddress(this.address.value); return false">
   <p>
     Enter your city and/or country to place yourself on the map below:
@@ -209,10 +209,10 @@ body {
   </p>
 </form>
 <!--<div id="dialog" style="position:absolute; top: 50px; left:300px;"></div>-->
-<div id="map" style="width:600px;height:400px;"></div>
-<a
+<div id="map" style="width:100%;height:400px;"></div>
+<a target="_blank"
   href="http://code.google.com/p/google-wave-resources/issues/entry?labels=Project-MapCluster&status=New&comment=">Feedback</a>
-| <a
+| <a target="_blank"
   href="https://wave.google.com/wave/waveref/googlewave.com/w+ld23OguTK">Install</a>
 </div>
 </body>
