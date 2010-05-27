@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="UpDown" height="500" width="100%">
+   <Require feature="wave"></Require>
+  </ModulePrefs>
+<Content type="html">
+<![CDATA[<html><head>
+<script src="http://www.google.com/jsapi"></script>
+<script
+  src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mapcluster/markerclusterer.js"></script>
+<script type="text/javascript">
+google.load('maps', '3', {
+ other_params: 'sensor=false'
+});
+
+var map;
+var bounds;
+var markerClusterer;
+var markersAdded;
+var viewerPosition;
+var infoWindow;
+
+
+function removeMe() {
+  var viewer = wave.getViewer();
+  var delta = {};
+  delta[viewer.getId()] = null;
+  wave.getState().submitDelta(delta);
+}
+
+
+function showAddress(address) {
+  var  country = '00';
+  var geocoder = new google.maps.Geocoder();
+  geocoder.geocode( { 'address': address}, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      var result = results[0];
+      viewerPosition = results[0].geometry.location;
+      //map.setCenter(viewerPosition);
+      for (var i = 0; i < result.address_components.length; i++) {
+        var address_component = result.address_components[i];
+        for (var j = 0; j < address_component.types.length; j++) {
+          if (address_component.types[j] == 'country') {
+            var country = address_component.short_name;
+          }
+        }
+      }
+      var viewer = wave.getViewer();
+      var delta = {};
+      delta[viewer.getId()] = viewerPosition.lat() + ',' + viewerPosition.lng() + ',' + country;
+      wave.getState().submitDelta(delta);
+      //showLoading();
+    } else {
+      alert("Address not found");
+    }
+  });
+}
+
+function saveLocationCallback() {
+  hideLoading();
+  infoWindow.close();
+}
+
+function stateUpdated() {
+  var state = wave.getState();
+  if (state) {
+    var markers = [];
+    var locationsAdded = {};
+    bounds = new google.maps.LatLngBounds();
+    var allKeys = state.getKeys();
+    if (allKeys.length == 0) { return; }
+    for (var i = 0; i < allKeys.length; i++) {
+      var key = allKeys[i];
+      var viewerData = state.get(key).split(',')
+      var latlngString = viewerData[0] + ',' + viewerData[1];
+      if (locationsAdded[latlngString]) {
+        locationsAdded[latlngString].push(key);
+      } else {
+        locationsAdded[latlngString] = [key];
+      }
+    }
+    for (var location in locationsAdded) {
+      var participantKeys = locationsAdded[location];
+      var lat = parseFloat(location.split(",")[0]);
+      var lng = parseFloat(location.split(",")[1]);
+      var latlng = new google.maps.LatLng(lat, lng);
+      bounds.extend(latlng);
+      var marker = new google.maps.Marker({position: latlng});
+      marker.clusterCount = participantKeys.length;
+      marker.setIcon(marker.iconUrl);
+      markersAdded[key] = marker;
+      attachInfoWindow(marker, participantKeys);
+      markers.push(marker);
+    }
+    if (markerClusterer) {
+      markerClusterer.clearMarkers();
+      markerClusterer.addMarkers(markers);
+    } else {
+      markerClusterer = new MarkerClusterer(map, markers);
+    }
+    zoomToBounds();
+  }
+}
+
+function attachInfoWindow(marker, participants) {
+
+  function openInfoWindow() {
+    var html = getInfoHtml(participants);
+    infoWindow.setContent(html.join(''));
+    infoWindow.setPosition(marker.getPosition());
+    infoWindow.open(map);
+  }
+
+  for (var i = 0; i < participants.length; i++) {
+    // pop open info window if viewer
+    var participantId = participants[i];
+    var viewerId = wave.getViewer() && wave.getViewer().getId();
+    if (participantId == viewerId) {
+       document.getElementById('addButton').value = 'Change Location';
+       document.getElementById('removeButton').disabled = false;
+    } else {
+       document.getElementById('addButton').value = 'Add Location';
+       document.getElementById('removeButton').disabled = true;
+    }
+    if (participantId == viewerId && viewerPosition) {
+      openInfoWindow();
+    }
+  }
+
+  google.maps.event.addListener(marker, 'click', function() {
+    openInfoWindow();
+  });
+}
+
+function getInfoHtml(participants) {
+  var html = [];
+  html.push('<br><table>');
+  for (var i = 0; i < participants.length; i++) {
+    html.push('<tr><td>');
+    var participant = wave.getParticipantById(participants[i]);
+    html.push('<img src="' + participant.getThumbnailUrl() + '" width="30" height="30">');
+    html.push('</td><td>' + participant.getDisplayName() + '<br>');
+    html.push('<span class="littletext">' + participant.getId() + '</span>');
+    html.push('</td></tr>');
+  }
+  html.push('</table>');
+  return html;
+  infoWindow.setContent(html.join(''));
+}
+
+function zoomToBounds() {
+  map.fitBounds(bounds);
+}
+
+function participantsUpdated() {
+  document.getElementById('addButton').disabled = false;
+}
+
+function init() {
+  makeMap();
+  if (wave && wave.isInWaveContainer()) {
+    wave.setStateCallback(stateUpdated);
+    wave.setParticipantCallback(participantsUpdated);
+  }
+  stateUpdated();
+}
+
+function makeMap() {
+  var center = new google.maps.LatLng(39.91, 116.38);
+  map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 3,
+        center: center,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+  infoWindow = new google.maps.InfoWindow();
+  markersAdded = {};
+}
+
+function showLoading() {
+  document.getElementById('loadingImg').style.visibility = 'visible';
+}
+
+function hideLoading() {
+  document.getElementById('loadingImg').style.visibility = 'hidden';
+}
+
+gadgets.util.registerOnLoadHandler(init);
+</script>
+<style>
+body {
+  font-size: 12px;
+}
+.littletext {
+  font-size: small;
+}
+</style>
+</head>
+<body>
+<div id="gadget-wrapper">
+<form action="#" onsubmit="showAddress(this.address.value); return false">
+  <p>
+    Enter your city and/or country to place yourself on the map below:
+    <br>
+     <input type="text" style="width:350px" name="address" value="" />
+     <input id="addButton" type="submit" value="Add/Change" disabled/>
+     <input id="removeButton" type="button" value="Remove" onclick="removeMe()" disabled/>
+     <img id="loadingImg" style="visibility:hidden" src="http://io-2010-peoplefinder-bot.appspot.com/static/loading.gif">
+     <br>
+     <i>Note that your name, icon, Google Wave address, and the location
+    you enter will be visible to everyone.</i>
+  </p>
+</form>
+<!--<div id="dialog" style="position:absolute; top: 50px; left:300px;"></div>-->
+<div id="map" style="width:600px;height:400px;"></div>
+</div>
+</body>
+</html>
+]]></Content>
+</Module>
