@@ -196,7 +196,7 @@ body {
 </style>
 </head>
 <body>
-<div id="gadget-wrapper">
+<div id="gadget-wrapper" style="border:1px solid #5590D2">
 <form action="#" onsubmit="showAddress(this.address.value); return false">
   <p>
     Enter your city and/or country to place yourself on the map below:
@@ -206,12 +206,14 @@ body {
      <input id="removeButton" type="button" value="Remove" onclick="removeMe()" disabled/>
      <img id="loadingImg" style="visibility:hidden" src="http://io-2010-peoplefinder-bot.appspot.com/static/loading.gif">
      <br>
-     <i>Note that your name, icon, Google Wave address, and the location
-    you enter will be visible to everyone.</i>
   </p>
 </form>
 <!--<div id="dialog" style="position:absolute; top: 50px; left:300px;"></div>-->
 <div id="map" style="width:600px;height:400px;"></div>
+<a
+  href="http://code.google.com/p/google-wave-resources/issues/entry?labels=Project-MapCluster&status=New&comment=">Feedback</a>
+| <a
+  href="https://wave.google.com/wave/waveref/googlewave.com/w+ld23OguTK">Install</a>
 </div>
 </body>
 </html>
