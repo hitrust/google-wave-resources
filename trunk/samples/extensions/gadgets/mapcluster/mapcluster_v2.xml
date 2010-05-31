@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="UpDown" height="500" width="100%">
+  <ModulePrefs title="Map Cluster" height="500" width="100%">
    <Require feature="wave"></Require>
   </ModulePrefs>
 <Content type="html">
@@ -36,7 +36,6 @@ function showAddress(address) {
     if (status == google.maps.GeocoderStatus.OK) {
       var result = results[0];
       viewerPosition = results[0].geometry.location;
-      //map.setCenter(viewerPosition);
       for (var i = 0; i < result.address_components.length; i++) {
         var address_component = result.address_components[i];
         for (var j = 0; j < address_component.types.length; j++) {
@@ -49,7 +48,6 @@ function showAddress(address) {
       var delta = {};
       delta[viewer.getId()] = viewerPosition.lat() + ',' + viewerPosition.lng() + ',' + country;
       wave.getState().submitDelta(delta);
-      //showLoading();
     } else {
       alert("Address not found");
     }
@@ -64,6 +62,9 @@ function saveLocationCallback() {
 function stateUpdated() {
   var state = wave.getState();
   if (state) {
+    for (var j = 0; j < markers.length; j++) {
+      markers[j].setMap(null);
+    }
     var markers = [];
     var locationsAdded = {};
     bounds = new google.maps.LatLngBounds();
