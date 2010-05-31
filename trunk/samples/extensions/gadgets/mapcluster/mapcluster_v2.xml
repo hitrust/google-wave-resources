@@ -59,13 +59,14 @@ function saveLocationCallback() {
   infoWindow.close();
 }
 
+var markers;
 function stateUpdated() {
   var state = wave.getState();
   if (state) {
     for (var j = 0; j < markers.length; j++) {
       markers[j].setMap(null);
     }
-    var markers = [];
+    markers = [];
     var locationsAdded = {};
     bounds = new google.maps.LatLngBounds();
     var allKeys = state.getKeys();
