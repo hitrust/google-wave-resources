@@ -19,7 +19,7 @@ var markerClusterer;
 var markersAdded;
 var viewerPosition;
 var infoWindow;
-
+var markers;
 
 function removeMe() {
   var viewer = wave.getViewer();
@@ -59,7 +59,6 @@ function saveLocationCallback() {
   infoWindow.close();
 }
 
-var markers;
 function stateUpdated() {
   var state = wave.getState();
   if (state) {
@@ -176,6 +175,7 @@ function makeMap() {
   });
   infoWindow = new google.maps.InfoWindow();
   markersAdded = {};
+  markers = [];
 }
 
 function showLoading() {
