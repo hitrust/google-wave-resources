@@ -26,6 +26,7 @@ function removeMe() {
   var delta = {};
   delta[viewer.getId()] = null;
   wave.getState().submitDelta(delta);
+  document.getElementById('removeButton').disabled = true;
 }
 
 
