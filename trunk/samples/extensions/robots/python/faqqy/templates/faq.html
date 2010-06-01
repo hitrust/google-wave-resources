@@ -1,0 +1,42 @@
+{% extends "basepage.html" %}
+{% block body %}
+  <h1 class="page_title">Google Wave API FAQ</h1>
+   <br/>
+   <ul>
+   {% for toc in data %}
+     <b><a href="#{{toc.shortId}}">{{toc.title}}</a></b>
+     {% for faq in toc.faqs %}
+     <li><a href="#{{faq.shortId}}">{{faq.title}}</a></li>
+     {% endfor %}
+     <br/>
+   {% endfor %}
+   </ul>
+   <br/><br/>
+   {% for toc in data %}
+     <h2 id="{{toc.shortId}}">{{toc.title}}</h2>
+     {% for faq in toc.faqs %}
+     <dt id="{{faq.shortId}}">{{faq.title}}</dt>
+     <dd>
+      <p>
+      {{faq.html}}
+      </p>
+     </dd>
+     {% endfor %}
+   {% endfor %}
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+{% endblock %}
