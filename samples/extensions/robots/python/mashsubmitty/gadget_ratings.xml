@@ -1,0 +1,97 @@
+<Module>
+  <ModulePrefs title="Wave Rating" height="200">
+    <Require feature="rpc"/>
+  </ModulePrefs>
+<Content type="html">
+  <![CDATA[
+  <script type="text/javascript"
+      src="http://wave-api.appspot.com/public/wave.js">
+  </script>
+  <script type="text/javascript"
+    src="http://mashable-submitty.appspot.com/js/ratings.js">
+  </script>
+  <style type="text/css">
+    #star1, #star2, #star3, #star4, #star5 {
+      cursor: pointer, hand;
+    }
+  </style>
+<div style="padding:3px; border: 1px solid #5590D2;
+  background-color:#C9E2FC; width:95%;">
+  <div id="rating_panel" style="font-size:small;">
+    <div><b><i>Rating is now closed!</i></b></div>
+    <div style="height:40px; margin-top:10px">
+      <img id="star1"
+        src="http://mashable-submitty.appspot.com/img/star_off.png"
+        onclick="setStars(1)"/>
+      <img id="star2"
+        src="http://mashable-submitty.appspot.com/img/star_off.png" 
+        onclick="seftStars(2)"/>
+      <img id="star3"
+        src="http://mashable-submitty.appspot.com/img/star_off.png"
+        onclick="setStars(3)"/>
+      <img id="star4"
+        src="http://mashable-submitty.appspot.com/img/star_off.png"
+        onclick="setStars(4)"/>
+      <img id="star5" 
+        src="http://mashable-submitty.appspot.com/img/star_off.png"
+        onclick="setStars(5)"/>
+      <span id="star_name" style="font-size:small;"></span>
+    </div>
+    <span id="error_msg" style="font-size:small;"></span>
+  </div>
+  <!--
+  <div style="display:block; padding-bottom: 5px; font-size:small">
+    <b><span id="total_votes"></span> Entries</b>
+  </div>
+  -->
+  <table border="0" cellspacing="1" cellpadding="0">
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      5 star:
+    </td>
+    <td id="td5" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div5" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent5" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren5" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      4 star:
+    </td>
+    <td id="td4" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div4" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent4" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren4" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      3 star:
+    </td>
+    <td id="td3" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div3" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent3" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren3" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      2 star:
+    </td>
+    <td id="td2" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div2" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent2" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren2" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      1 star:
+    </td>
+    <td id="td1" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div1" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent1" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren1" style="font-size:small;"></span></td>
+   </tr>
+  </table>
+</div>  
+]]>
+</Content>
+</Module>

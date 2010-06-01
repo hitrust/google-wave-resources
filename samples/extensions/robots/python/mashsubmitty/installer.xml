@@ -1,0 +1,9 @@
+<extension name="Mashable Submitty" description="Submit extensions to Mashable challenge."
+  thumbnailUrl="http://mashable-submitty.appspot.com/img/submitty_avatar.png">
+  <author name="Mashable/Google" email="google-wave-api@googlegroups.com"/>
+  <menuHook location="NEW_WAVE_MENU" text="New Mashable Submission">
+    <createNewWave>
+      <participant id="mashable-submitty@appspot.com"/>
+    </createNewWave>
+  </menuHook>
+</extension>
