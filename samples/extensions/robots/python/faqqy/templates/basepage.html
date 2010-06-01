@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<meta name="google-site-verification" content="qHF5ruQQp1eWXVkXD_B3Q4EzdoSstzZu6_thYkqPPLQ" />
+<title>{{ title }} - Google Code</title>
+<link rel="stylesheet" type="text/css" href="http://code.google.com/css/codesite.pack.04102009.css"/>
+<link href="/static/css/projectgallery.css" type="text/css" rel="stylesheet"></link>
+<script type="text/javascript">
+(function(){function a(){this.t={};this.tick=function(c){this.t[c]=(new Date).getTime()};this.tick("start")}var b=new a;window.jstiming={Timer:a,load:b};if(window.external&&window.external.pageT)window.jstiming.pt=window.external.pageT;})();
+</script>
+<script src="http://code.google.com/js/codesite.pack.01312008.js" type="text/javascript"></script>
+<!--[if IE]><link rel="stylesheet" type="text/css" href="http://code.google.com/css/iehacks.css" /><![endif]-->
+<link href="http://code.google.com/css/semantic_headers.css" type="text/css" rel="stylesheet" />
+
+<script type="text/javascript">
+  function executeGSearchMod(searchTerm) {
+    window.location = 'http://code.google.com/search/#p={{abbrev_name}}&q=' + searchTerm;
+  }
+</script>
+{% block head %}
+{% endblock %}
+  </head>
+
+  <body class="gc-documentation">
+
+<div class="dropdown" style="display:none"></div>
+<div id="gc-container" class="labs">
+<a name="top"></a>
+<div id="skipto">
+  <a href="#gc-pagecontent-anchor">Skip to page content</a>
+  <a href="#gc-toc-anchor">Skip to main navigation</a>
+</div>
+<div id="gc-header">
+  <div id="logo"><a href="http://code.google.com/">
+   <img src="http://code.google.com/images/code_labs_logo.gif" height="43" width="161" alt="Google Code Labs" style="border:0;"/> 
+   </a></div>
+  <div id="search">
+    <div id="searchForm" class="searchForm" style="display:none">
+      <form action="" accept-charset="utf-8" class="gsc-search-box" onsubmit="executeGSearch(document.getElementById('gsearchInput').value); return false;">
+        <table class="gsc-search-box" cellpadding="0" cellspacing="0">
+          <tbody>
+
+            <tr>
+              <td class="gsc-input">
+                <input id="gsearchInput" type="text" name="q" maxlength="2048" class="gsc-input" autocomplete="off" title="Google Code Search" style="width:345px"/>
+              </td>
+              <td class="gsc-search-button">
+                <div id='cs-searchresults' onclick='event.cancelBubble = true;'></div>
+                <input title="Search" id="gsearchButton" class="gsc-search-button" value="Search" type="submit"/>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="greytext">e.g. &quot;java guide&quot; or &quot;chromeless player&quot;</td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+
+    </div> <!-- end searchForm -->
+    <div id="searchForm2" class="searchForm2" style="display:block">
+      <form id="cse" action="http://www.google.com/cse">
+        <input type="hidden" name="cref" value="http://code.google.com/cse/googlecode-context.xml" />
+        <input type="text" name="q" maxlength="2048" autocomplete="off" title="Google Code Search" style="width:345px"/>
+        <input type="submit" name="sa" value="Search" title="Search"/><br/>
+        <div class="greytext">e.g. &quot;java guide&quot; or &quot;chromeless player&quot;</div>
+
+      </form>
+    </div> <!-- end searchForm2 -->
+  </div> <!-- end search -->
+</div> <!-- end gc-header -->
+
+<div id="codesiteContent">
+
+<a name="gc-topnav-anchor"></a>
+<div id="gc-topnav">
+  <h1>Google Wave APIs (<a href="http://code.google.com/labs/">Labs</a>)</h1>
+  <ul id="docs" class="gc-topnav-tabs">
+    <li id="home_link"> 
+      <a href="http://code.google.com/apis/wave/" title="Google Wave API home page">Home</a> 
+    </li> 
+  
+    <li id="docs_link"> 
+      <a href="http://code.google.com/apis/wave/guide.html" title="Official Google Wave API documentation">Docs</a> 
+    </li> 
+  
+    <li id="faq_link"> 
+      <a href="http://wave-api-faq.appspot.com/" title="Official Google Wave API FAQ">FAQ</a> 
+    </li> 
+
+    <li> 
+      <a href="http://googlewavedev.blogspot.com/" title="Official Google Wave API blog">Blog</a> 
+    </li> 
+  
+    <li> 
+      <a href="http://groups.google.com/group/google-wave-api" title="Google Wave API developer forum">Group</a> 
+    </li> 
+  
+    <li> 
+      <a href="http://code.google.com/apis/wave/terms.html" title="Google Wave API terms of service">Terms</a> 
+    </li> 
+  
+    <li>
+      <a href="http://wave.google.com/a/wavesandbox.com/" title="Developer Sandbox">Sandbox</a> 
+    </li>
+  
+  </ul>
+
+</div> <!-- end gc-topnav -->
+
+<div class="g-section g-tpl-170">
+
+<!-- start leftnav -->
+
+<a name="gc-toc-anchor"></a>
+<div class="g-unit g-first" id="gc-toc">
+{% include "_toc.html" %}
+</div>
+
+<a name="gc-pagecontent-anchor"></a>   
+<div class="g-unit" id="gc-pagecontent">
+{% block body %}
+{% endblock %}
+</div><!-- end gc-pagecontent -->
+
+</div><!-- end gooey wrapper -->
+</div> <!-- end codesite content-->
+
+<!--Footer -->
+<div id="gc-footer" dir="ltr">
+
+  <div>
+  <br/><br/>
+  <p class="center"><a href="http://www.google.com/intl/en/ads/">Advertising Programs</a> - 
+                    <a href="http://www.google.com/services/">Business Solutions</a> - 
+                    <a href="http://www.google.com/intl/en/help/privacy_fusionph.html">Privacy Policy</a> - 
+                    <a href="http://www.google.com/support/?ctx=web&amp;hl=">Help</a> - 
+                    <a href="http://www.google.com/intl/en/about.html">About Google</a>
+  <br/><br/><span class="copyr">©2008 Google</span>
+  </p>
+  </div>
+</div><!-- end gc-footer -->
+</div><!-- end gc-containter -->
+        <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-5079855-3");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+<style type="text/css">
+.gsc-tabsArea {
+  background:none;
+  border-top:none;
+}
+.gsc-tabHeader.gsc-tabhActive {
+  display: none;
+}
+</style>
+</body>
+</html>
+
