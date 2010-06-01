@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Share on Twitter" height="30">
+    <Require feature="wave" />
+  </ModulePrefs>
+  <Content type="html">
+  <![CDATA[
+  <style type="text/css">
+    .link {
+      color: rgb(85, 144, 210);
+      font-size: small;
+    }
+  </style>
+  <script src="http://submitty-bot.appspot.com/js/util.js"></script>
+  <script>
+var STATE_TITLE = 'wavetitle';
+var STATE_WAVEID = 'waveid';
+
+function getEl(id) {
+  return document.getElementById(id);
+}
+
+function renderState() {
+  var title = wave.getState().get(STATE_TITLE);
+  if (title.length > 23) title = title.substring(0, 23) + ' ...';
+
+  var id = wave.getWaveId();
+  var url = 'https://wave.google.com/wave/#restored:wave:' +
+  id.replace('+', '%252B');
+  var status = ''
+  if (title) {
+    status += 'Checking out "' + title + '": ';
+  } else {
+    status += 'Checking out this public wave: ';
+  }
+  status += url;
+  var shareLink = document.createElement('a');
+  shareLink.href = 'http://twitter.com/home?status=' + escape(status);
+  shareLink.innerHTML = 'Share on Twitter';
+  shareLink.className = 'link';
+  shareLink.target = '_blank';
+  getEl('twitter').appendChild(shareLink);
+
+  var wave_id = 'googlewave.com!w+DYz-iagTK';
+  var url = 'https://wave.google.com/wave/#restored:wave:' +
+    wave_id.replace('+', '%252B');
+  var waveLink = document.createElement('a');
+  waveLink.href = url;
+  waveLink.innerHTML = 'See all submissions';
+  waveLink.className = 'link';
+  waveLink.target = '_blank';
+  getEl('wave').appendChild(waveLink);
+}
+
+function init() {
+  wave.setStateCallback(renderState);
+}
+
+wrappy.util.registerOnLoad(init);
+</script>
+<div style="margin-top:5px; border-top: 1px solid rgb(85, 144, 210); padding: 3px; color: rgb(85, 144, 210); width: 95%; " id="main">
+  <span id="twitter">
+  <img src="http://mashable-submitty.appspot.com/img/twitter_logo.png"
+    style="width:20px;height:20px;vertical-align: middle">
+  </span>
+  ||
+  <span id="wave">
+    <img src="http://mashable-submitty.appspot.com/img/wave_logo.png"
+      style="width:20px; height:20px; vertical-align: middle">
+  </span>
+  ||
+  <span id="contest">
+    <img src="http://mashable-submitty.appspot.com/img/mashable_logo.png"
+      style="width:20px; height: 20px; vertical-align: middle">
+    <a href="http://mashable.com/2010/03/09/google-wave-api-challenge/" class="link">Learn more about the contest</a>
+  </span>
+</div>
+
+  ]]>
+  </Content>
+</Module>

@@ -1,0 +1,34 @@
+application: mashable-submitty 
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /js
+  static_dir: js
+
+- url: /img
+  static_dir: img
+
+- url: /gadget.xml.*
+  static_files: gadget.xml
+  upload: gadget.xml
+  mime_type: text/xml
+
+- url: /gadget_twitter.xml.*
+  static_files: gadget_twitter.xml
+  upload: gadget_twitter.xml
+  mime_type: text/xml
+
+- url: /gadget_ratings.xml.*
+  static_files: gadget_ratings.xml
+  upload: gadget_ratings.xml
+  mime_type: text/xml
+
+- url: /installer.xml.*
+  static_files: installer.xml
+  upload: installer.xml
+  mime_type: text/xml
+
+- url: /_wave/.*
+  script: submitty.py
