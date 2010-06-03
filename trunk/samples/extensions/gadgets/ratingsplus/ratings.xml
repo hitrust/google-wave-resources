@@ -125,7 +125,7 @@ gadgets.util.registerOnLoadHandler(main);
         onclick="setStars(1)" onmouseover="showStars(1)"
         onmouseout="showStars()" />
       <img id="star2"
-        onclick="seftStars(2)" onmouseover="showStars(2)"
+        onclick="setStars(2)" onmouseover="showStars(2)"
         onmouseout="showStars()" />
       <img id="star3"
         onclick="setStars(3)" onmouseover="showStars(3)"
