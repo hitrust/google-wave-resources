@@ -1,25 +1,32 @@
 <html>
   <head>
-    <title>WaveThis Tester</title>
+    <title>WaveThis Wizard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin-left: 20px;
     }
-    input, textarea {
+    input[type="text"], textarea {
       width: 200px;
       font-family: Arial, sans-serif;
+    }
+    .code {
+      width: 600px;
+      font-family: Courier, fixed-width;
+      border: 1px solid grey;
+      overflow: hidden;
+      font-size: 10px;
     }
   </style>
   </head>
   <body>
 
-<h2>WaveThis Tester</h2>
+<h2>WaveThis Wizard</h2>
 
 <p>
 WaveThis is a service that makes it easy for people to share content in Wave
 from outside websites. For more information, read the <a
-  href="http://code.google.com/apis/wavethis">Developer's Guide</a>.
+  href="http://code.google.com/apis/wave/wavethis">Developer's Guide</a>.
 </p>
 <p>
 Put whatever you want for these parameters, click the "WaveThis" button, and
@@ -28,35 +35,99 @@ check out the wave that results!
 
 <form name="wavethis" method="post"
   action="https://wave.google.com/wave/wavethis" target="_blank">
-  <table>
-    <tr><td>Title</td><td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="t" value="Title"/></td></tr>
-    <tr><td>Description</td><td><textarea onkeyup="updateURL()" onchange="updateURL()" name="c">Description.</textarea></td></tr>
-    <tr><td>Gadget</td><td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="g"
-        value="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/ratings.xml"></td></tr>
-    <tr><td>URL</td><td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="u" value="http://google-wave-resources.googlecode.com/svn/trunk/samples/wavethis/wavethis-form.html"></td></tr>
-  </table>
+ <table>
+   <tr>
+    <td>Parameter</td>
+    <td>Value</td>
+    <td>Enabled?</td>
+   </tr>
+   <tr>
+    <td>Title</td>
+   <td><input onkeyup="updateURL()"
+        onchange="updateURL()" type="text" name="t" value=""/></td>
+    <td><input id="t_on" type="checkbox" checked onchange="updateURL()"></td>
+  </tr>
+  <tr>
+   <td>Description</td><td><textarea onkeyup="updateURL()"
+       onchange="updateURL()" name="c"></textarea>
+   </td>
+    <td><input id="c_on" type="checkbox" checked onchange="updateURL()"></td>
+  </tr>
+  <tr>
+   <td>Gadget</td>
+   <td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="g"
+     value="">
+    <td><input id="g_on" type="checkbox" checked onchange="updateURL()"></td>
+   </td>
+  </tr>
+  <tr>
+   <td>URL</td>
+   <td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="u" value=""></td>
+    <td><input id="u_on" type="checkbox" checked onchange="updateURL()" ></td>
+  </tr>
+ </table>
 </form>
 
 <a href="javascript:document.wavethis.submit()">
 <img src="http://wave.google.com/wavethis/button32.png" alt="WaveThis">
 </a>
 
-<p>The URL equivalent for that WaveThis request would look like this:</p>
+<p>The URL equivalent for that WaveThis request looks like this:</p>
 
-<textarea style="height:100px; width:600px; border:1px solid grey" id="wavethisurl">
-</textarea>
+<div class="code" id="wavethisurl">
+</div>
+
+<p>The HTML for a WaveThis button looks like this:</p>
+
+<div class="code">
+&lt;a href="<span id="wavethisurl_html"></span>"
+target="_blank"&gt;
+&lt;img src="http://wave.google.com/wavethis/button32.png" /&gt;
+&lt;/a&gt;
+</div>
+
 <script>
 function updateURL() {
-  var url = 'https://wave.google.com/wave/wavethis?';
-  var params = {};
-  params['t'] = escape(document.wavethis.t.value);
-  params['c'] = escape(document.wavethis.c.value);
-  params['g'] = escape(document.wavethis.g.value);
-  params['u'] = escape(document.wavethis.u.value);
-  for (var param in params) {
-    url += param + '=' + params[param] + '&';
+  var defaults = {};
+  defaults['t'] = 'WaveThis Wizard';
+  defaults['c'] = 'This site lets you try out WaveThis.'
+  defaults['g'] = 'http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/ratings.xml';
+  defaults['u'] = 'http://google-wave-resources.googlecode.com/svn/trunk/samples/wavethis/wavethis-form.html';
+
+  var paramNames = ['t', 'c', 'g', 'u'];
+  for (var p = 0; p < paramNames.length; p++) {
+    var paramName = paramNames[p];
+    if (document.getElementById(paramName + '_on').checked) {
+      if (document.wavethis[paramName].value == '') {
+        document.wavethis[paramName].value = defaults[paramName];
+      }
+    } else {
+      document.wavethis[paramName].value = '';
+    }
   }
+
+  var baseUrl = 'https://wave.google.com/wave/wavethis?';
+  var params = [];
+  for (var p = 0; p < paramNames.length; p++) {
+    var paramName = paramNames[p];
+    if (document.getElementById(paramName + '_on').checked) {
+      value = document.wavethis[paramName].value;
+      params.push(paramName + '=' + encodeURIComponent(value));
+    }
+  }
+  var url = baseUrl + params.join('&')
   document.getElementById('wavethisurl').innerHTML = url;
+
+  var params = [];
+  for (var p = 0; p < paramNames.length; p++) {
+    var paramName = paramNames[p];
+    if (document.getElementById(paramName + '_on').checked) {
+      value = document.wavethis[paramName].value;
+      params.push(paramName + '=' + value);
+    }
+  }
+  var htmlUrl = baseUrl + params.join('&')
+  document.getElementById('wavethisurl_html').innerHTML = htmlUrl;
 }
 updateURL();
 </script>
