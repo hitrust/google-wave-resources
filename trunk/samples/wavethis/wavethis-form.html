@@ -49,10 +49,10 @@ check out the wave that results!
 function updateURL() {
   var url = 'https://wave.google.com/wave/wavethis?';
   var params = {};
-  params['t'] = document.wavethis.t.value;
-  params['c'] = document.wavethis.c.value;
-  params['g'] = document.wavethis.g.value;
-  params['u'] = document.wavethis.u.value;
+  params['t'] = escape(document.wavethis.t.value);
+  params['c'] = escape(document.wavethis.c.value);
+  params['g'] = escape(document.wavethis.g.value);
+  params['u'] = escape(document.wavethis.u.value);
   for (var param in params) {
     url += param + '=' + params[param] + '&';
   }
