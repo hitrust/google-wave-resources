@@ -1,17 +1,46 @@
 <html>
   <head>
-    <title>Using WaveThis via POST</title>
+    <title>WaveThis Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin-left: 20px;
+    }
+    input, textarea {
+      width: 200px;
+      font-family: Arial, sans-serif;
+    }
+  </style>
   </head>
   <body>
 
+<h2>WaveThis Tester</h2>
+
+<p>
+WaveThis is a service that makes it easy for people to share content in Wave
+from outside websites. For more information, read the <a
+  href="http://code.google.com/apis/wavethis">Developer's Guide</a>.
+</p>
+<p>
+Put whatever you want for these parameters, click the "WaveThis" button, and
+check out the wave that results!
+</p>
+
 <form name="wavethis" method="post"
   action="https://wave.google.com/wave/wavethis" target="_blank">
-  <input type="text" name="t" value="Testing"/>
-  <input type="text" name="t" value="Just seeing if this works!">
+  <table>
+    <tr><td>Title</td><td><input type="text" name="t" value="Title"/></td></tr>
+    <tr><td>Description</td><td><textarea name="c">Description.</textarea></td></tr>
+    <tr><td>Gadget</td><td><input type="text" name="g"
+        value="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/ratings.xml"></td></tr>
+    <tr><td>URL</td><td><input type="text" name="u" value="http://google-wave-resources.googlecode.com/svn/trunk/samples/wavethis/wavethis-form.html"></td></tr>
+  </table>
 </form>
 
 <a href="javascript:document.wavethis.submit()">
 <img src="http://wave.google.com/wavethis/button32.png" alt="WaveThis">
 </a>
+
+
 </body>
 </html>
