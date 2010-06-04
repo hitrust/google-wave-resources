@@ -7,7 +7,7 @@
       margin-left: 20px;
     }
     input[type="text"], textarea {
-      width: 200px;
+      width: 300px;
       font-family: Arial, sans-serif;
     }
     .code {
@@ -16,6 +16,12 @@
       border: 1px solid grey;
       overflow: hidden;
       font-size: 10px;
+    }
+    img {
+      border: none;
+    }
+    a .img {
+      border: none;
     }
   </style>
   </head>
@@ -43,26 +49,27 @@ check out the wave that results!
    </tr>
    <tr>
     <td>Title</td>
-   <td><input onkeyup="updateURL()"
+   <td><input id="t_input" onkeyup="updateURL()"
         onchange="updateURL()" type="text" name="t" value=""/></td>
     <td><input id="t_on" type="checkbox" checked onchange="updateURL()"></td>
   </tr>
   <tr>
-   <td>Description</td><td><textarea onkeyup="updateURL()"
+    <td>Description</td>
+    <td><textarea id="c_input" onkeyup="updateURL()"
        onchange="updateURL()" name="c"></textarea>
    </td>
     <td><input id="c_on" type="checkbox" checked onchange="updateURL()"></td>
   </tr>
   <tr>
    <td>Gadget</td>
-   <td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="g"
+   <td><input id="g_input" onkeyup="updateURL()" onchange="updateURL()" type="text" name="g"
      value="">
     <td><input id="g_on" type="checkbox" checked onchange="updateURL()"></td>
    </td>
   </tr>
   <tr>
    <td>URL</td>
-   <td><input onkeyup="updateURL()" onchange="updateURL()" type="text" name="u" value=""></td>
+   <td><input id="u_input" onkeyup="updateURL()" onchange="updateURL()" type="text" name="u" value=""></td>
     <td><input id="u_on" type="checkbox" checked onchange="updateURL()" ></td>
   </tr>
  </table>
@@ -87,22 +94,26 @@ target="_blank"&gt;
 </div>
 
 <script>
-function updateURL() {
+
+function setupDefaults() {
   var defaults = {};
   defaults['t'] = 'WaveThis Wizard';
   defaults['c'] = 'This site lets you try out WaveThis.'
   defaults['g'] = 'http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/ratings.xml';
   defaults['u'] = 'http://google-wave-resources.googlecode.com/svn/trunk/samples/wavethis/wavethis-form.html';
+  for (var paramName in defaults) {
+    document.wavethis[paramName].value = defaults[paramName];
+  }
+}
 
+function updateURL() {
   var paramNames = ['t', 'c', 'g', 'u'];
   for (var p = 0; p < paramNames.length; p++) {
     var paramName = paramNames[p];
     if (document.getElementById(paramName + '_on').checked) {
-      if (document.wavethis[paramName].value == '') {
-        document.wavethis[paramName].value = defaults[paramName];
-      }
+      document.wavethis[paramName].disabled = false;
     } else {
-      document.wavethis[paramName].value = '';
+      document.wavethis[paramName].disabled = true;
     }
   }
 
@@ -129,6 +140,7 @@ function updateURL() {
   var htmlUrl = baseUrl + params.join('&')
   document.getElementById('wavethisurl_html').innerHTML = htmlUrl;
 }
+setupDefaults();
 updateURL();
 </script>
 </body>
