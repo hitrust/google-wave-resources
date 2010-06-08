@@ -5,7 +5,7 @@ api_version: 1
 
 handlers:
 - url: /oauth(.*)
-  script: oauth.py
+  script: oauth_handler.py
 
-- url: /data(.*)
-  script: data.py
+- url: /app(.*)
+  script: app_handler.py
