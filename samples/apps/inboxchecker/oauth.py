@@ -30,6 +30,8 @@ class OAuthAccessToken(db.Model):
 class OAuthHandler(webapp.RequestHandler):
   CONSUMER_KEY = 'anonymous'
   CONSUMER_SECRET = 'anonymous'
+  #CONSUMER_KEY = 'wavesandbox.com'
+  #CONSUMER_SECRET = 'veBIDzuTYiJZsAeA/LCFGxgo'
   SIGNATURE_METHOD = gdata.auth.OAuthSignatureMethod.HMAC_SHA1
   SCOPE = 'http://wave.googleusercontent.com/api/rpc'
   OAUTH_INPUT_PARAMS = gdata.auth.OAuthInputParams(

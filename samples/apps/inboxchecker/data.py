@@ -2,6 +2,7 @@ import wsgiref.handlers
 import logging
 import pickle
 import uuid
+from time import gmtime, strftime
 
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -31,6 +32,7 @@ class DataRequestHandler(oauth.OAuthHandler):
 
   def make_request(self, data):
     url = 'https://www-opensocial.googleusercontent.com/api/rpc'
+    #url = 'http://www-opensocial-sandbox.googleusercontent.com/api/rpc'
     client = atom.http.ProxiedHttpClient()
     response = self._access_token.perform_request(client, 'POST',
                                               url, data,
@@ -59,14 +61,45 @@ def html_for_results(results):
     for digest in results.digests:
       url = 'http://wave.google.com/wave/#restored:wave:%s' % digest.wave_id
       html += '<a href="%s"><b>%s</b></a><br>%s' % (url, digest.title, digest.snippet)
+      date = strftime("%a, %d %b %Y %H:%M:%S", gmtime(digest.last_modified/1000))
+      html += '%s/%s:%s' % (str(digest.unread_count), str(digest.blip_count),
+                            date)
       participants = [p for p in digest.participants]
       html += '(%s)' % ','.join(participants)
       html += '<br><br>'
     return html
 
+class FetchWaveHandler(DataRequestHandler):
+
+  def get(self):
+    if not self.get_token():
+      return
+    wave_id = 'googlewave.com!w+_ZvqGPcnH'
+    # digest wave
+    #wave_id = 'googlewave.com!w+QH8ZW5LQt'
+    wavelet_id = 'googlewave.com!conv+root'
+    notify_op = "{'id':'0', 'method':'wave.robot.notifyCapabilitiesHash', 'params': {'protocolVersion': '0.21'}}"
+    fetch_op = "{'id':'op1', 'method':'wave.robot.fetchWave','params':{'waveId':'%s', 'waveletId': '%s'}}" % (wave_id, wavelet_id)
+    data = "[%s, %s]" % (notify_op, fetch_op)
+    response = self.make_request(data)
+    return self.response.out.write(response.read());
+
+class FolderHandler(DataRequestHandler):
+
+  def get(self):
+    if not self.get_token():
+      return
+    wave_id = 'googlewave.com!w+_ZvqGPcnH'
+    data = "{'id':'op1', 'method':'wave.robot.folderAction','params':{'modifyHow': 'markAsRead', 'waveId':'%s'}}" % (wave_id)
+    data = "{'id':'op1', 'method':'wave.robot.folderAction','params':{'waveId':'%s'}}" % (wave_id)
+    response = self.make_request(data)
+    return self.response.out.write(response.read());
+
 def main():
   application = webapp.WSGIApplication([
-                                        ('/data/inbox', InboxHandler)
+                                        ('/data/inbox', InboxHandler),
+                                        ('/data/fetchwave', FetchWaveHandler),
+                                        ('/data/folder', FolderHandler)
                                         ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)

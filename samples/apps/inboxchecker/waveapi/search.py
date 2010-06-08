@@ -35,30 +35,28 @@ class Results(object):
     self._query = json.get('query')
     self._num_results = json.get('numResults')
     self._digests = []
-    for digest_data in json['digests']:
-      digest = Digest(digest_data)
-      self._digests.append(digest)
-
+    self._digests = [Digest(digest_data) for digest_data in json['digests']]
 
   @property
   def query(self):
-    """Returns this wavelet's parent wave id."""
+    """Returns the query for this search."""
     return self._query
 
   @property
   def num_results(self):
-    """Returns this wavelet's parent wave id."""
+    """Returns the number of results for this search."""
     return self._num_results
 
   @property
   def digests(self):
-    """Returns this wavelet's parent wave id."""
+    """Returns a list of digests."""
     return self._digests
 
   def serialize(self):
-    """Return a dict of the wavelet properties."""
+    """Return a dict of the search results properties."""
     return {'query': self._query,
             'numResults': self._num_results,
+            'digests': [digest.serialize() for digest in self._digests]
            }
 
 
@@ -66,7 +64,7 @@ class Digest(object):
   """Models a single digest.
 
   A digest is composed of title, wave ID, snippet, and participants.
- """
+  """
 
   def __init__(self, json):
     """Inits this digest with JSON data.
@@ -77,6 +75,9 @@ class Digest(object):
     self._wave_id = json.get('waveId')
     self._title = json.get('title')
     self._snippet = json.get('snippet')
+    self._blip_count = int(json.get('blipCount'))
+    self._unread_count = int(json.get('unreadCount'))
+    self._last_modified = json.get('lastModified')
     self._participants = wavelet.Participants(json.get('participants', []),
                                       {},
                                       self._wave_id,
@@ -85,18 +86,33 @@ class Digest(object):
     self._raw_data = json
 
   @property
+  def blip_count(self):
+    """Returns the number of blips in this wave."""
+    return self._blip_count
+
+  @property
+  def unread_count(self):
+    """Returns the number of unread blips in this wave."""
+    return self._unread_count
+
+  @property
+  def last_modified(self):
+    """Returns the last modified date of the wave."""
+    return self._last_modified
+
+  @property
   def wave_id(self):
-    """Returns this wavelet's parent wave id."""
+    """Returns the digest wave id."""
     return self._wave_id
 
   @property
   def snippet(self):
-    """Returns the snippet."""
+    """Returns the snippet for the digest."""
     return self._snippet
 
   @property
   def domain(self):
-    """Return the domain that wavelet belongs to."""
+    """Return the domain that the wave belongs to."""
     p = self._wave_id.find('!')
     if p == -1:
       return None
@@ -105,7 +121,7 @@ class Digest(object):
 
   @property
   def participants(self):
-    """Returns a set of participants on this wavelet."""
+    """Returns a set of participants on this wave."""
     return self._participants
 
   @property
@@ -113,9 +129,12 @@ class Digest(object):
     return self._title
 
   def serialize(self):
-    """Return a dict of the wavelet properties."""
+    """Return a dict of the digest properties."""
     return {'waveId': self._wave_id,
             'participants': self._participants.serialize(),
             'title': self._title,
             'snippet': self._snippet,
+            'blipCount': self._blip_count,
+            'unreadCount': self._unread_count,
+            'lastModified': self._last_modified,
            }
