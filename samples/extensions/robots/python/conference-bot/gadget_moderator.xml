@@ -30,6 +30,14 @@ td {
   font-family: arial, sans-serif;
   font-size: 12px;
 }
+a:visited {color: #0000cf;}
+
+.moderator-pagination {
+  padding: 5px 10px;
+}
+
+.moderator-pagination a:hover {text-decoration: underline;}
+.moderator-pagination a {text-decoration: none;}
 
 /* Style for headings. */
 .moderator-heading {
@@ -230,9 +238,25 @@ td {
   border-bottom: 1px solid #eee;
 }
 </style>
-<script src="http://trippywave.appspot.com/static/js/util.js"></script>
 
 <script type="text/javascript">
+
+/**
+ * Pour the data in template string.
+ * @param {Object} datObject The data object to be filled in template string.
+ * @return {string} The new string created from template string and filled
+ *     with the given data.
+ */
+String.prototype.supplant = function(datObject) {
+  return this.replace(/{([^{}]*)}/g,
+    function(match, firstSubMatch) {
+      var replace = datObject[firstSubMatch];
+      return (typeof replace === 'string' || typeof replace === 'number') ?
+          replace : match;
+    }
+  );
+};
+
 /**
  * Class JTopic defines topic object.
  * @param {string} title Title of topic.
@@ -438,36 +462,47 @@ function topicDetails(response) {
   var tplHtml = _gel('tpl-thanks').value;
   var tplData;
   var topic = new JTopic();
-  var info = response.data.data;
-  topic.title = info.name || '';
-  topic.description = info.description || '';
-  topic.presentedBy = info.presenter || '';
-  var totalVotes = parseInt((info.counters.plusVotes +
-      info.counters.minusVotes + info.counters.noneVotes), 10);
-  topic.voteCount = totalVotes || 0;
-  topic.questionCount = info.counters.submissions || 0;
-  topic.participantsCount= info.counters.users || 1;
 
-  tplData = {
-    topicName: topic.title,
-    voteCount: topic.voteCount,
-    questionCount: topic.questionCount,
-    description: topic.description,
-    participantsCount: topic.participantsCount
-  };
-  html.push(tplHtml.supplant(tplData));
-  _gel('content').innerHTML = html.join('');
-  _gel('content').style.display = 'block';
-  _gel('tpl-create-question').style.display = 'none';
-  gadgets.window.adjustHeight();
+  try {
+    var info = response.data ? response.data.data : {};
 
-  // Incase of no questions hiding view question button.
-  if (!topic.questionCount) {
-    _gel('viewQuestions').style.display = 'none';
-    _gel('no-questions').style.display = '';
-  } else {
-    _gel('topicDetails').style.display = '';
-  }
+    topic.title = info.name || '';
+    topic.description = info.description || '';
+    topic.presentedBy = info.presenter || '';
+
+    var counter = info.counters ? info.counters : {};
+
+    var totalVotes = parseInt((counter.plusVotes || 0 +
+         counter.minusVotes || 0 + counter.noneVotes || 0), 10);
+      topic.voteCount = totalVotes || 0;
+      topic.questionCount = counter.submissions || 0;
+      topic.participantsCount= counter.users || 1;
+
+      tplData = {
+        topicName: topic.title,
+        voteCount: topic.voteCount,
+        questionCount: topic.questionCount,
+        description: topic.description,
+        participantsCount: topic.participantsCount
+      };
+      html.push(tplHtml.supplant(tplData));
+      _gel('content').innerHTML = html.join('');
+      _gel('content').style.display = 'block';
+      _gel('tpl-create-question').style.display = 'none';
+      gadgets.window.adjustHeight();
+
+      // Incase of no questions hiding view question button.
+      if (!topic.questionCount) {
+        _gel('viewQuestions').style.display = 'none';
+        _gel('no-questions').style.display = '';
+      } else {
+        _gel('topicDetails').style.display = '';
+      }
+    } catch (e) {
+      _gel('content').innerHTML = 'Data May not be available.' +
+        ' Please <a href="javascript:void(0);" onclick="stateChanged();">Try again.</a>';
+      wave.log("ERROR" + e);
+    }
   gadgets.window.adjustHeight();
 }
 
@@ -477,36 +512,42 @@ function topicDetails(response) {
 */
 function jsonResponseForQues(obj) {
   gQuestions.length = 0;
-  var jsondata = obj.data.data;
-  var length = jsondata.items.length;
-  var question;
-  var ele;
+  try {
+      var jsondata = obj.data ? obj.data.data : {};
+      var items = jsondata.items ? jsondata.items : [];
+      var length = jsondata ? items.length : 0;
+      var question;
+      var ele;
 
-  for (var i = 0; i < length; i++) {
-    ele = jsondata.items[i];
+      for (var i = 0; i < length; i++) {
+        ele = items[i];
 
-    wave.log(i + ':' + ele.id.submissionId);
-    var id = ele.id.submissionId;
-    question = new JQuestion();
-    question.id = ele.id.submissionId;
-    if (ele.attribution) {
-      question.nickName = ele.attribution.displayName;
-      question.location = ele.attribution.location;
-    } else {
-      question.nickName = '';
-      question.location = '';
-    }
-    question.description = ele.text;
-    question.youtube = '';
-    question.thumbUp = ele.counters.plusVotes;
-    question.thumbDown = ele.counters.minusVotes;
-    question.thumbsUpUsers = '';
-    question.thumbsDownUsers = '';
+        wave.log(i + ':' + ele.id.submissionId);
+        var id = ele.id.submissionId;
+        question = new JQuestion();
+        question.id = ele.id.submissionId;
+        if (ele.attribution) {
+          question.nickName = ele.attribution.displayName;
+          question.location = ele.attribution.location;
+        } else {
+          question.nickName = '';
+          question.location = '';
+        }
+        question.description = ele.text;
+        question.youtube = '';
+        question.thumbUp = ele.counters.plusVotes;
+        question.thumbDown = ele.counters.minusVotes;
+        question.thumbsUpUsers = '';
+        question.thumbsDownUsers = '';
 
-    question.lastModified = ele.created;
-    gQuestions.push(question);
+        question.lastModified = ele.created;
+        gQuestions.push(question);
+      }
+  } catch (e) {
+      _gel('content').innerHTML = 'Data May not be available.' +
+        ' Please <a href="javascript:void(0);" onclick="stateChanged();">Try again.</a>';
+      wave.log("ERROR" + e);
   }
-
   if (length) {
     topicInfo(displayTopicHeader);
     if (!currentIndex) {
@@ -545,27 +586,42 @@ function topicInfo(handleFunction) {
 
 function displayTopicHeader(response) {
   var topic = new JTopic();
-  var info = response.data.data;
-  topic.title = info.name || '';
-  topic.description = info.description || '';
-  topic.presentedBy = info.presenter || '';
-  var totalVotes = parseInt((info.counters.plusVotes +
-                   info.counters.minusVotes + info.counters.noneVotes), 10);
-  topic.voteCount = totalVotes || 0;
-  topic.questionCount = info.counters.submissions || 0;
-  topic.participantsCount= info.counters.users || 1;
+  var info = response.data ? response.data.data : {};
+  try {
+    topic.title = info.name || '';
+    topic.description = info.description || '';
+    topic.presentedBy = info.presenter || '';
+    var totalVotes;
+    if (info.counters) {
+      totalVotes = parseInt((info.counters.plusVotes +
+                       info.counters.minusVotes + info.counters.noneVotes), 10);
+      topic.voteCount = totalVotes || 0;
+      topic.questionCount = info.counters.submissions || 0;
+      topic.participantsCount= info.counters.users || 1;
+    } else {
+      totalVotes = 0;
+      topic.voteCount = 0;
+      topic.questionCount = 0;
+      topic.participantsCount= 1;
+    }
 
-  var html = [
-    '<table cellspacing="0" cellpadding="10" ',
-    'class="moderator-box"><tr>',
-    '<td class="moderator-box-head">',
-    '<span class="moderator-head-text">', topic.title ,
-    '</span><span class="moderator-head-text" style="float:right;">',
-    topic.voteCount,' votes on ', gQuestions.length,' questions on from ',
-    topic.participantsCount,' people</span></td></tr></table>'
-  ];
-  _gel('header-content').innerHTML = html.join('');
-  gadgets.window.adjustHeight();
+
+    var html = [
+      '<table cellspacing="0" cellpadding="10" ',
+      'class="moderator-box"><tr>',
+      '<td class="moderator-box-head">',
+      '<span class="moderator-head-text">', topic.title ,
+      '</span><span class="moderator-head-text" style="float:right;">',
+      topic.voteCount,' votes on ', gQuestions.length,' questions from ',
+      topic.participantsCount,' people</span></td></tr></table>'
+    ];
+    _gel('header-content').innerHTML = html.join('');
+    gadgets.window.adjustHeight();
+  } catch (e) {
+    _gel('content').innerHTML = 'Data May not be available.' +
+      ' Please <a href="javascript:void(0);" onclick="stateChanged();">Try again.</a>';
+    wave.log("ERROR" + e);
+  }
 }
 
 function getQuestionUsers(voteType, questionId) {
@@ -603,8 +659,17 @@ function getOwnerImg(userId) {
 function displayListing(startIndex) {
   var participants = wave.getParticipants();
   var partcipantsCount = participants.length;
+  var topicId = parseInt(getTopicId(), 10);
+  var moderatorUrl = 'http://www.google.com/moderator/#15/e=' +
+      MODERATOR_SERIES.toString(16) + '&t=' + MODERATOR_SERIES.toString(16) +
+      '.' + topicId.toString(16);
+
+  wave.log('Moderator url:' + moderatorUrl);
+
   var html = [
-    '<table cellspacing="0" cellpadding="10" class="moderator-box"><tr><td>'
+    '<table cellspacing="0" cellpadding="10" class="moderator-box"><tr><td>',
+    '<div style="float:right;padding:5px 15px 5px 0;"><a href="', moderatorUrl,
+    '" target="_blank">View in Moderator</a></div>'
   ];
 
   var tplHtml = _gel('tpl-question-listing').value;
@@ -661,15 +726,20 @@ function displayListing(startIndex) {
   }
   // End of the pagination calculation.
 
-  html.push('<div style="padding-top:10px;">');
+  html.push('<div class="moderator-pagination">');
   if (isShowPrevious){
-    html.push('<a href="javascript:void(0);" style="text-decoration:none;" ',
-        'onclick="displayListing(', showPrevious, ');"><< Previous</a>&nbsp;',
-        '&nbsp;&nbsp;&nbsp;&nbsp;');
+    html.push('<span style="line-height:10px;vertical-align:text-top;cursor:hand;color:#0000cf;" ',
+        'onclick="displayListing(', showPrevious, ');">',
+        '&laquo;</span><a href="javascript:void(0);"',
+        'onclick="displayListing(', showPrevious,
+        ');"> Prev</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
   }
   if (showNext){
-    html.push('<a href="javascript:void(0);" style="text-decoration:none;"',
-              ' onclick="displayListing(', showNext, ');">Next >></a>&nbsp;');
+    html.push('<a href="javascript:void(0);" ',
+        ' onclick="displayListing(', showNext, ');">Next ',
+        '</a><span style="line-height:10px;vertical-align:text-top;cursor:hand;color:#0000cf;" ',
+        'onclick="displayListing(', showNext, ');">',
+        '&raquo;</span>&nbsp;');
   }
 
   html.push('</div>');
@@ -727,8 +797,8 @@ function displayListing(startIndex) {
   gadgets.window.adjustHeight();
 }
 
-function handleResponseOfVoteUpdate(obj) {
-  var questionInfo = obj.data.data;
+function handleResponseOfVoteUpdate(response) {
+  var questionInfo = response.data ? response.data.data : {};
   wave.log('question voted');
   topicInfo(displayTopicHeader);
 }
@@ -885,45 +955,51 @@ function saveTopic() {
 }
 
 function handleQuestion(response) {
-  var info = response.data.data;
-  var user;
-  var submissionId = info.id.submissionId;
-  var submissionText = _hesc(info.text);
-  if (submissionText.length > 100) {
-    submissionText = submissionText.substring(0, 100) + '...';
-  }
-
-  if (submissionId != 0) {
-    _gel('tpl-create-question').style.display = 'none';
-    showNotification('Question saved successfully.');
-
-    var userId = wave.getViewer().getId();
-    var userInfo = getUserInfo(userId);
-
-    // Code for updating user details in case of first time question submission.
-    if (!userInfo.name || (userInfo.location != _gel('user-location').value) ||
-        (userInfo.name != _gel('user-nickname').value)) {
-
-      var user = {
-        name: _gel('user-nickname').value,
-        location: _gel('user-location').value
-      };
-
-      var userDetails = gadgets.json.stringify(user);
-      updateDelta(userId, userDetails, 'updated', 'his/her info.');
+  var info = response.data ? response.data.data : {};
+  try {
+    var user;
+    var submissionId = info.id.submissionId;
+    var submissionText = _hesc(info.text);
+    if (submissionText.length > 100) {
+      submissionText = submissionText.substring(0, 100) + '...';
     }
 
-    // Code for updating default yes vote by creator on question.
-    var voteDetails = {
-      voteYes: wave.getViewer().getId() + '|',
-      voteNo: '',
-      ownerId: wave.getViewer().getId()
+    if (submissionId != 0) {
+      _gel('tpl-create-question').style.display = 'none';
+      showNotification('Question saved successfully.');
+
+      var userId = wave.getViewer().getId();
+      var userInfo = getUserInfo(userId);
+
+      // Code for updating user details in case of first time question submission.
+      if (!userInfo.name || (userInfo.location != _gel('user-location').value) ||
+          (userInfo.name != _gel('user-nickname').value)) {
+
+        var user = {
+          name: _gel('user-nickname').value,
+          location: _gel('user-location').value
+        };
+
+        var userDetails = gadgets.json.stringify(user);
+        updateDelta(userId, userDetails, 'updated', 'his/her info.');
+      }
+
+      // Code for updating default yes vote by creator on question.
+      var voteDetails = {
+        voteYes: wave.getViewer().getId() + '|',
+        voteNo: '',
+        ownerId: wave.getViewer().getId()
+      }
+      var vote = gadgets.json.stringify(voteDetails);
+      updateDelta(submissionId, vote, 'added',
+                  'the new question <b>"' + wrapText(submissionText) + '"</b>');
+    } else {
+      showNotification('Error in saving question. Please try again.');
     }
-    var vote = gadgets.json.stringify(voteDetails);
-    updateDelta(submissionId, vote, 'added',
-                'the new question <b>"' + wrapText(submissionText) + '"</b>');
-  } else {
-    showNotification('Error in saving question. Please try again.');
+  } catch (e) {
+    _gel('content').innerHTML = 'Data May not be available.' +
+      ' Please <a href="javascript:void(0);" onclick="stateChanged();">Try again.</a>';
+    wave.log("ERROR" + e);
   }
 }
 
@@ -1183,6 +1259,7 @@ function stateChanged() {
   var topicId = getTopicId();
   if (topicId) {
     if (!currentWindow) {
+      console.log('fetching questions');
       fetchQuestions();
     }
     _gel('logger-wrapper').style.display = '';
@@ -1311,7 +1388,7 @@ gadgets.util.registerOnLoadHandler(init);
     <tr>
       <td class="moderator-box-head">
         <span class="moderator-head-text">{topicName}</span>&nbsp;&nbsp;&nbsp;
-        <span class="moderator-head-text" style="float:right;">{voteCount} votes on {questionCount} questions on from {participantsCount} people</span>
+        <span class="moderator-head-text" style="float:right;">{voteCount} votes on {questionCount} questions from {participantsCount} people</span>
       </td>
     </tr>
     <tr>

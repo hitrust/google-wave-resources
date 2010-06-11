@@ -1,38 +1,43 @@
-#!/usr/bin/python2.4
-#
+SESSIONWAVE_TIME_HEADER = 'Time:'
 
-session_html = """
-<b>Time:</b> 
-<b>Location:</b> 
+SESSIONWAVE_LOCATION_HEADER = 'Location:'
 
-<b>Description:</b>
+SESSIONWAVE_DESCRIPTION_HEADER = 'Description:'
 
-<b>Speaker(s):</b> 
+SESSIONWAVE_SPEAKERS_HEADER = 'Speaker(s):'
 
-<b>Session Materials:</b>
-<i>Link to any slides, URLs, etc.</i>
+SESSIONWAVE_QUESTIONS_HEADER = 'Questions:'
 
+SESSIONWAVE_ATTENDEES_HEADER = 'Attendees:'
 
-<b>Session Notes:</b>
+SESSIONWAVE_NOTES_HEADER = 'Live Notes:'
+
+SESSIONWAVE_NOTES_TEXT = """
 <i>It usually works best if a few people self-elect themselves as note-takers, and edit this bit with running notes.</i>
+"""
 
+SESSIONWAVE_TIPS_HEADER = 'Wave Tips:'
 
-<b>Wave Tips:</b>
-- To edit this blip, select it and press CTRL+E, or click 'Edit' on the editing toolbar.
-- To reply inline to a particular part of a blip, double click + select 'Reply' in the doodad that appears.
+SESSIONWAVE_TIPS_TEXT = """
+- To edit this blip, select it and press CTRL+E, or click 'Edit' on the editing toolbar.\n
+- To reply inline to a particular part of a blip, double click + select 'Reply' in the doodad that appears.\n
 - To have a general discussion, reply below this root blip.
 """
 
-main_html = """
-\n
-<b>Waves</b>:\n
+EVENTWAVE_WHEN_HEADER = 'When is it?'
+
+EVENTWAVE_WHO_HEADER = 'Who\'s coming?'
+
+EVENTWAVE_WHERE_HEADER = 'Where is it?'
+
+MAINWAVE_WAVES_HEADER = 'Waves:'
+
+MAINWAVE_WAVES_TEXT = """
 When you create a new wave using the option in the New Wave menu, it will automatically be added here.\n
-\n\n
 """
 
-main_html_2 = """
-\n
-<b>Extension</b>:\n
-Install the extension below and you'll get a new option in your New Wave menu to add waves to this collection.
-\n
+MAINWAVE_EXTENSION_HEADER = 'Extension:'
+
+MAINWAVE_EXTENSION_TEXT = """
+Install the extension below and you'll get a new option in your New Wave menu to add waves to this collection.\n
 """

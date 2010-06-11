@@ -32,10 +32,27 @@ class AdminHandler(webapp.RequestHandler):
 class InstallerHandler(webapp.RequestHandler):
   def get(self):
     id = self.request.get('id')
-    collection = model.ConferenceCollection.get_by_id(int(id))
-    template_values = {'name': collection.name, 'icon': collection.icon, 'id': collection.key().id()}
+    collection = model.Conference.get_by_id(int(id))
+    template_values = {'name': collection.name, 'icon': collection.icon,
+                       'id': collection.key().id(), 'newwave': False,
+                       'savedsearch': collection.saved_search}
     path = os.path.join(os.path.dirname(__file__), 'templates/installer.xml')
     self.response.headers['Content-Type'] = 'text/xml' 
+    self.response.out.write(template.render(path, template_values))
+
+
+class InfoHandler(webapp.RequestHandler):
+  def get(self):
+    format = self.request.get('format', 'html')
+    sessions_query = model.SessionInfo.all().order('-id')
+    sessions = sessions_query.fetch(500)
+    template_values = {'sessions': sessions}
+    if format == 'html':
+      path = os.path.join(os.path.dirname(__file__), 'templates/info.html')
+      self.response.headers['Content-Type'] = 'text/html' 
+    else:
+      path = os.path.join(os.path.dirname(__file__), 'templates/info.csv')
+      self.response.headers['Content-Type'] = 'text/plain' 
     self.response.out.write(template.render(path, template_values))
 
 
@@ -43,6 +60,7 @@ application = webapp.WSGIApplication(
                                      [
                                      ('/web/admin', AdminHandler),
                                      ('/web/installer', InstallerHandler),
+                                     ('/web/info', InfoHandler)
                                      ],
                                      debug=True)
 

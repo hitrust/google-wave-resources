@@ -1,20 +1,21 @@
 <extension 
-    name="{{ name }} Wave Maker"
+    name="{{ name }} Bot"
     {% if icon %}
     thumbnailUrl="{{ icon }}"
     {% else %}
     thumbnailUrl="http://chart.apis.google.com/chart?chst=d_bubble_texts_big&amp;chld=bbT|5590D2|FFFFFF|{{ name }}|Wave+Maker||"
     {% endif %}
-    description="Makes it easy to create new {{ name }} waves."> 
-  <author name="Google"/> 
-  <menuHook location="newwavemenu" text="New {{ name }} Wave (blank)"> 
+    description="Makes it easy to find {{ name }} waves.">
+  {% if savedsearch %}<savedSearchHook name="{{ name }}" query="{{ savedsearch }}"></savedSearchHook>{% endif %}
+  <author name="Google"/>
+  {% if newwave %}<menuHook location="newwavemenu" text="{{ name }} Wave - Notes Taking">
       <createNewWave> 
-        <participant id="confrenzy+{{ id }}-newwave-blank@appspot.com" /> 
+        <participant id="confrenzy+{{ id }}-newwave-blank@appspot.com" />
       </createNewWave> 
   </menuHook> 
-  <menuHook location="newwavemenu" text="New {{ name }}  Wave (event)"> 
+  <menuHook location="newwavemenu" text="{{ name }} Wave - Event Planning">
       <createNewWave> 
-        <participant id="confrenzy+{{ id }}-newwave-event@appspot.com" /> 
+        <participant id="confrenzy+{{ id }}-newwave-event@appspot.com" />
       </createNewWave>
-  </menuHook>
+  </menuHook>{% endif %}
 </extension>

@@ -15,6 +15,9 @@ from django.utils import simplejson
 import model
 import wavecred
 import wavedata
+import text
+import converter_ss
+import util
 
 from bitly import BitLy
 import bitlycred
@@ -31,13 +34,24 @@ def SetupRobot():
   myrobot.setup_oauth(wavecred.CONSUMER_KEY, wavecred.CONSUMER_SECRET,
     server_rpc_base=wavecred.RPC_BASE[wavecred.DOMAIN])
 
+def SaveSessionInfo(wave_id, wavelet_id, toc_wave_id):
+  SetupRobot()
+  wave = myrobot.fetch_wavelet(wave_id, wavelet_id)
+  session_id = wave.data_documents[wavedata.SESSION_ID]
+  unique_id = toc_wave_id + session_id
+  session_info = model.SessionInfo.get_or_insert(unique_id)
+  session_info.id = session_id
+  session_info.toc_wave = toc_wave_id
+  session_info.title = wave.title
+  session_info.wave_id = wave_id
+  session_info.put()
+
+
 # Post-creation operations
 def AddGroup(wave_id, wavelet_id, group):
   SetupRobot()
   wave = myrobot.fetch_wavelet(wave_id, wavelet_id)
   wave.participants.add(group)
-  # Doesn't yet work with active API
-  # wave.participants.set_role(group, wavelet.participants.ROLE_READ_ONLY)
   myrobot.submit(wave)
 
 def ReplaceText(wave_id, wavelet_id, target, dest):
@@ -47,8 +61,7 @@ def ReplaceText(wave_id, wavelet_id, target, dest):
   myrobot.submit(wave)
 
 # Creation operations
-
-def AddTags(wave, session, collection):
+def AddSessionTags(wave, session, conference):
   # Add session tags:
   for tag in session.tags:
     wave.tags.append(tag)
@@ -57,19 +70,14 @@ def AddTags(wave, session, collection):
   if session.hashtag:
     wave.tags.append(session.hashtag.strip('#'))
 
+def AddConferenceTags(wave, conference):
   # Add global tags
-  for tag in collection.tags:
+  for tag in conference.tags:
     wave.tags.append(tag)
 
 def AddId(wave, session):
   if session.id:
     wave.data_documents[wavedata.SESSION_ID] = session.id
-
-def AddTitle(wave, title):
-  wave.title = title
-  wave.root_blip.range(0, len(title)+1).annotate('style/fontSize', '1.5em')
-
-  ModBlip(wave.root_blip, '\n', [('style/fontSize', None)])
 
 def ModBlip(blip, text, annotations=None):
   if not annotations:
@@ -77,43 +85,55 @@ def ModBlip(blip, text, annotations=None):
   else:
     blip.append(text, bundled_annotations=annotations)
 
-def AddBackLink(wave, collection):
+def AddHeader(blip, text):
+  ModBlip(blip, text + '\n', [BOLD])
+
+def AddNewLine(blip):
+  ModBlip(blip, '\n')
+
+def AddTitle(wave, title):
+  wave.title = title
+  wave.root_blip.range(0, len(title)+1).annotate('style/fontSize', '1.5em')
+
+  ModBlip(wave.root_blip, '\n', [('style/fontSize', None)])
+
+def AddBackLink(wave, conference):
   # Add link back to main wave
-  wave.root_blip.append('\n')
-  text = 'Back to %s Main Wave' % collection.name
-  ModBlip(wave.root_blip, text, [('link/wave', collection.toc_wave)])
+  ModBlip(wave.root_blip, '\n')
+  text = 'Back to %s Main Wave' % conference.name
+  ModBlip(wave.root_blip, text, [('link/wave', conference.toc_wave)])
 
 def AddInfoLine(blip, name, value):
   ModBlip(blip, name + ': ', [BOLD])
   ModBlip(blip, value  + '\n', [('style/fontWeight', None)])
 
-def AddToTOC(session, collection_key, wave_id):
+def AddToTOC(session, conference_key, wave_id):
   SetupRobot()
-  collection = model.Collection.get(collection_key)
+  conference = model.Conference.get(conference_key)
   # Re-create TOC wave
-  toc_wave = myrobot.blind_wavelet(collection.toc_wave_ser)
+  toc_wave = myrobot.blind_wavelet(conference.toc_wave_ser)
   blip = toc_wave.root_blip
   # Add link to main wave
-  blip.append(element.Line(line_type='li', indent=1))
-  blip.append(session.name, [('link/wave', wave_id)])
-  blip.append(element.Line(line_type='li', indent=2))
+  ModBlip(blip, element.Line(line_type='li', indent=1))
+  ModBlip(blip, session.name, [('link/wave', wave_id)])
+  ModBlip(blip, element.Line(line_type='li', indent=2))
   info_text = ' (%s, %s)' % (session.day, session.time)
   ModBlip(blip, info_text, [('link/wave', None), (wavedata.SESSION_ID, session.id)])
   myrobot.submit(toc_wave)
 
 
 def AddSpeakers(blip, session):
-  ModBlip(blip, 'Speaker(s): ')
+  AddHeader(blip, text.SESSIONWAVE_SPEAKERS_HEADER)
   for i in range(len(session.speakers)):
     speaker = session.speakers[i]
     ModBlip(blip, speaker.name, [('link/manual', speaker.link)])
     if i != len(session.speakers)-1:
       ModBlip(blip, ', ', [('link/manual', None)])
-  ModBlip(blip, '\n')
+  AddNewLine(blip)
 
 def AddDescription(blip, session):
   ModBlip(blip, session.description)
-  ModBlip(blip, '\n')
+  AddNewLine(blip)
 
 def AddShortLink(blip, wave_id):
   wave_url = 'https://wave.google.com/wave/#restored:wave:%s' % wave_id
@@ -137,7 +157,7 @@ def AddShortInfo(blip, session):
   if session.location:
     info = '%s, %s' % (info, session.location)
   ModBlip(blip, info)
-  ModBlip(blip, '\n')
+  AddNewLine(blip)
 
 def AddSocialMedia(blip, session, wave_id):
   if not session.hashtag:
@@ -158,66 +178,161 @@ def AddSocialMedia(blip, session, wave_id):
   ModBlip(blip, '\n\n', [('link/manual', None)])
 
 def AddAttendees(blip):
-  ModBlip(blip, 'Attendees:\n', [BOLD])
-  blip.append(element.Gadget(url='http://confrenzy.appspot.com/gadget_attendees.xml'))
-  ModBlip(blip, '\n')
+  AddHeader(blip, text.SESSIONWAVE_ATTENDEES_HEADER)
+  ModBlip(blip, element.Gadget(url='http://confrenzy.appspot.com/gadget_attendees.xml'))
+  AddNewLine(blip)
 
 def AddModerator(blip):
-  ModBlip(blip, '\nQuestions:\n', [BOLD])
-  gadget_url = 'http://confrenzy.appspot.com/gadget_moderator.xml'
-  blip.append(element.Gadget(url=gadget_url))
-  ModBlip(blip, '\n')
+  AddHeader(blip, text.SESSIONWAVE_QUESTIONS_HEADER)
+  ModBlip(blip, element.Gadget(url='http://confrenzy.appspot.com/gadget_moderator.xml'))
+  AddNewLine(blip)
 
 def AddLiveNotes(blip):
-  ModBlip(blip, '\nLive Notes:\n', [BOLD])
-  live_notes_text = 'It usually works best if a few people self-elect themselves as note-takers, and edit this bit with running notes.'
-  ModBlip(blip, live_notes_text, [('style/fontWeight', None)])
-  ModBlip(blip, '\n')
+  AddHeader(blip, text.SESSIONWAVE_NOTES_HEADER)
+  ModBlip(blip, text.SESSIONWAVE_NOTES_TEXT, [('style/fontWeight', None)])
+  AddNewLine(blip)
 
-def MakeNewWave(collection):
+
+def AddLinkToMain(wave):
+  if wavedata.LINK_ADDED not in wave.data_documents.keys():
+    SetupRobot()
+    conference = GetConferenceForNewWave(wave)
+
+    # Add link to main wave
+    blind_wave = myrobot.blind_wavelet(conference.toc_wave_ser)
+    line = element.Line(line_type='li', indent=1)
+    blind_wave.root_blip.append(line)
+    blind_wave.root_blip.append(wave.title,
+                                bundled_annotations=[('link/wave', wave.wave_id)])
+    myrobot.submit(blind_wave)
+    wave.data_documents[wavedata.LINK_ADDED] = 'yes'
+
+
+def MakeSessionWaves(conference):
+  conf = None
+  if conference.datasource_type == 'Spreadsheet':
+    converter = converter_ss.SpreadsheetConverter(conference.datasource_url)
+    conf = converter._conference
+  if conf is None:
+    logging.info('Error: Couldnt create conference object.')
+    return
+  for session in conf.sessions:
+    deferred.defer(MakeSessionWave, session, conference.key())
+
+def MakeMainWave(wavelet, conference):
+  SetupRobot()
+  new_wave = myrobot.new_wave(domain=wavelet.domain, submit=True,
+                              participants=[conference.owner])
+  AddTitle(new_wave, conference.name + 'Main Wave')
+  blip = new_wave.root_blip
+  AddHeader(blip, text.MAINWAVE_EXTENSION_HEADER)
+  ModBlip(blip, text.MAINWAVE_EXTENSION_TEXT)
+  installer = element.Installer(manifest=util.GetInstallerUrl(conference.key().id()))
+  ModBlip(blip, installer)
+  AddHeader(blip, text.MAINWAVE_WAVES_HEADER)
+  ModBlip(blip, text.MAINWAVE_WAVES_TEXT)
+  myrobot.submit(new_wave)
+
+  conference.toc_wave = new_wave.wave_id
+  conference.toc_wave_ser = simplejson.dumps(new_wave.serialize())
+  conference.put()
+
+def MakeAdminWave(wave):
+  AddTitle(wave, 'Admin Wave')
+  gadget = element.Gadget(url=util.GetGadgetUrl())
+  ModBlip(wave.root_blip, gadget)
+  conference = model.Conference()
+  conference.owner = wave.creator
+  conference.admin_wave = wave.wave_id
+  conference.put()
+
+def MakeTemplateWave(wave):
+  conference = GetConferenceForNewWave(wave)
+  blip = wave.root_blip
+
+  AddConferenceTags(wave, conference)
+  if conference.groups:
+    wave.participants.add(conference.groups[0])
+  if conference.make_public:
+    wave.participants.add('public@a.gwave.com')
+
+  if IsBlankWave(wave):
+    MakeSessionTemplateWave(wave, conference)
+  if IsEventWave(wave):
+    MakeEventTemplateWave(wave, conference)
+
+def MakeSessionTemplateWave(wave, conference):
+  AddTitle(wave, conference.name + ' Wave: Topic')
+  blip = wave.root_blip
+  AddShortLink(blip, wave.wave_id)
+  AddNewLine(blip)
+  AddHeader(blip, text.SESSIONWAVE_TIME_HEADER)
+  AddNewLine(blip)
+  AddHeader(blip, text.SESSIONWAVE_LOCATION_HEADER)
+  AddNewLine(blip)
+  AddHeader(blip, text.SESSIONWAVE_DESCRIPTION_HEADER)
+  AddNewLine(blip)
+  AddHeader(blip, text.SESSIONWAVE_SPEAKERS_HEADER)
+  AddNewLine(blip)
+  AddAttendees(blip)
+  AddLiveNotes(blip)
+
+def MakeEventTemplateWave(wave, conference):
+  AddTitle(wave, conference.name + ' Event Wave: Event Name')
+  blip = wave.root_blip
+  AddHeader(blip, text.EVENTWAVE_WHEN_HEADER)
+  AddNewLine(blip)
+  AddHeader(blip, text.EVENTWAVE_WHO_HEADER)
+  ModBlip(blip, element.Gadget(url='http://wave-api.appspot.com/public/gadgets/areyouin/gadget.xml'))
+  AddNewLine(blip)
+  AddHeader(blip, text.EVENTWAVE_WHERE_HEADER)
+  ModBlip(blip, element.Gadget(url='http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/mappy.xml'))
+
+def MakeNewWave(conference):
   # Create session wave
   try:
-    participants = [collection.owner] + collection.groups
+    participants = [conference.owner] + conference.groups
     new_wave = myrobot.new_wave(wavecred.DOMAIN, submit=True,
                                 participants=participants)
-    collection.all_session_waves.append(new_wave.wave_id)
-    collection.main_session_waves.append(new_wave.wave_id)
-    collection.put()
+    conference.all_session_waves.append(new_wave.wave_id)
+    conference.main_session_waves.append(new_wave.wave_id)
+    conference.put()
   except Exception, e:
     logging.info('Error creating new wave: %s' % str(e))
     return None
   return new_wave
 
 
-def MakeSessionWave(session, collection_key):
+def MakeSessionWave(session, conference_key):
   if not session.name:
     logging.info('Error: No name. Not making wave')
     return
 
   SetupRobot()
-  collection = model.Collection.get(collection_key)
+  conference = model.Conference.get(conference_key)
 
   # Wave mod
-  new_wave = MakeNewWave(collection)
+  new_wave = MakeNewWave(conference)
   new_wave.data_documents[wavedata.WAVE_TYPE] = 'live'
   AddId(new_wave, session)
-  AddTags(new_wave, session, collection)
+  AddSessionTags(new_wave, session)
+  AddConferenceTags(new_wave, conference)
   AddTitle(new_wave, 'Live Wave: ' + session.name)
 
   # Blip mod
   blip = new_wave.root_blip
   AddShortLink(blip, new_wave.wave_id)
-  ModBlip(blip, '\n')
+  AddNewLine(blip)
   AddShortInfo(blip, session)
   AddDescription(blip, session)
   AddSpeakers(blip, session)
   AddLink(blip, session)
-  ModBlip(blip, '\n')
+  AddNewLine(blip)
   AddSocialMedia(blip, session, new_wave.wave_id)
   AddAttendees(blip)
   AddModerator(blip)
   AddLiveNotes(blip)
-  AddBackLink(new_wave, collection)
+  AddBackLink(new_wave, conference)
 
   # Discuss Blip
   reply_blip = new_wave.reply('\n')
@@ -227,4 +342,29 @@ def MakeSessionWave(session, collection_key):
   myrobot.submit(new_wave)
 
   # Add links to TOC wave
-  deferred.defer(AddToTOC, session, collection.key(), new_wave.wave_id)
+  deferred.defer(AddToTOC, session, conference.key(), new_wave.wave_id)
+
+def IsAdminWave(wavelet):
+  return GetWaveType(wavelet).find('admin') > -1
+
+def IsBlankWave(wavelet):
+  return GetWaveType(wavelet).find('newwave-blank') > -1
+
+def IsEventWave(wavelet):
+  return GetWaveType(wavelet).find('newwave-event') > -1
+
+def GetConferenceForNewWave(wavelet):
+  proxy_for = GetWaveType(wavelet)
+  id = proxy_for.split('-')[0]
+  collection = model.Conference.get_by_id(int(id))
+  return collection
+
+def GetWaveType(wavelet):
+  robot_address = wavelet.robot_address.split('@')[0]
+  split_addy = robot_address.split('+')
+  if len(split_addy) > 1:
+    wave_type = split_addy[1]
+  else:
+    wave_type = ''
+  logging.info('wave_type %s' % wave_type)
+  return wave_type

@@ -5,6 +5,7 @@
   </ModulePrefs>
 <Content type="html">
   <![CDATA[
+<script src="http://wave-api.appspot.com/public/wave.js"></script>
 <script>
 
 function addSessionResponse() {}
@@ -20,11 +21,15 @@ function removeViewer() {
 }
 
 function stateChanged() {
-  var viewerId = wave.getViewer().getId()
+
+  var viewerId = wave.getViewer() && wave.getViewer().getId()
   var viewerKey = wave.getState().get(viewerId)
   if (viewerKey) {
     document.getElementById('removeButton').style.display = 'block';
     document.getElementById('addButton').style.display = 'none';
+  } else if (viewerId == 'anonymous@a.gwave.com') {
+    document.getElementById('addButton').style.display = 'none';
+    document.getElementById('removeButton').style.display = 'none';
   } else {
     document.getElementById('addButton').style.display = 'block';
     document.getElementById('removeButton').style.display = 'none';
@@ -46,11 +51,22 @@ function stateChanged() {
   gadgets.window.adjustHeight();
 }
 
+function participantsChanged() {
+  var viewerId = wave.getViewer().getId();
+  if (viewerId == 'anonymous@a.gwave.com') {
+    document.getElementById('addButton').style.display = 'none';
+    document.getElementById('removeButton').style.display = 'none';
+    document.getElementById('loginMessage').style.display = 'block';
+  }
+}
+
 function main() {
   if (wave && wave.isInWaveContainer()) {
     wave.setStateCallback(stateChanged);
-    //wave.ui.makeButton(document.getElementById('addButton'))
-    //wave.ui.makeButton(document.getElementById('removeButton'))
+    wave.setParticipantCallback(participantsChanged);
+    wave.ui.makeButton(document.getElementById('addButton'))
+    wave.ui.makeButton(document.getElementById('removeButton'))
+    gadgets.window.adjustHeight();
   }
 }
 gadgets.util.registerOnLoadHandler(main);
@@ -58,6 +74,8 @@ gadgets.util.registerOnLoadHandler(main);
   <style type="text/css">
   body {
     font-size: 12px;
+    border: 2px solid #5590D2;
+    padding: 3px;
   }
   img {
     margin-right: 3px;
@@ -81,13 +99,16 @@ gadgets.util.registerOnLoadHandler(main);
     border-top: 1px solid #5590D2;
   }
   </style>
-<div style="padding:3px; border: 1px solid #5590D2; width:95%;">
+<div style="width:95%;">
  <div id="attendees">Loading attendees...</div>
- <div id="buttons">
-  <div class="button" id="addButton" style="display:none"><a onclick="addViewer()">Add Yourself</a></div>
-  <div class="button" id="removeButton" style="display:none"><a onclick="removeViewer()">Remove Yourself</a></div>
+ <div id="buttons" style="height:30px">
+   <a id="addButton" style="display:none;cursor:pointer" onclick="addViewer()">Add Yourself</a>
+   <a id="removeButton" style="display:none;cursor:pointer" onclick="removeViewer()">Remove Yourself</a>
+   <div id="loginMessage" style="display:none; font-style: italic">Log in to add
+     yourself.</div>
+   </div>
  </div>
-</div>  
+</div>
 ]]>
 </Content>
 </Module>

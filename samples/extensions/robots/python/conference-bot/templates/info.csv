@@ -1,0 +1,2 @@
+{% for session in sessions %}{{session.id}},{{session.wave_id}}
+{% endfor %}
