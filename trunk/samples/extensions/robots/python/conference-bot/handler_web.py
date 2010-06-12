@@ -13,18 +13,14 @@ from django.utils import simplejson
 import util
 import model
 
-collection_type = 'Conference'
-
 class AdminHandler(webapp.RequestHandler):
   def get(self):
     is_gadget = self.request.get('gadget')
-    if len(is_gadget) > 0:
-      filename = 'admin.xml'
-      content_type = 'text/xml'
-    else:
-      filename = 'admin.html'
-      content_type = 'text/html'
-    template_values = {'server': util.GetServer(), 'type': collection_type}
+    type = self.request.get('type')
+    filename = 'admin.xml'
+    content_type = 'text/xml'
+    template_values = {'server': util.GetServer(),
+                       'conference_type': type}
     path = os.path.join(os.path.dirname(__file__), 'templates/' + filename)
     self.response.headers['Content-Type'] = content_type
     self.response.out.write(template.render(path, template_values))
@@ -32,12 +28,19 @@ class AdminHandler(webapp.RequestHandler):
 class InstallerHandler(webapp.RequestHandler):
   def get(self):
     id = self.request.get('id')
-    collection = model.Conference.get_by_id(int(id))
-    template_values = {'name': collection.name, 'icon': collection.icon,
-                       'id': collection.key().id(), 'newwave': False,
-                       'savedsearch': collection.saved_search}
+    conference = model.Conference.get_by_id(int(id))
+    if conference is None:
+      self.response.out.write('Error: Couldnt find conference')
+      return
+    savedsearch = 'group:conference-waves@googlegroups.com tag:%s' % conference.hashtag
+    template_values = {'name': conference.name,
+                       'icon': conference.icon,
+                       'id': conference.key().id(),
+                       'include_savedsearch': conference.include_savedsearch,
+                       'savedsearch': savedsearch,
+                       'include_newwave': conference.include_newwave}
     path = os.path.join(os.path.dirname(__file__), 'templates/installer.xml')
-    self.response.headers['Content-Type'] = 'text/xml' 
+    self.response.headers['Content-Type'] = 'text/xml'
     self.response.out.write(template.render(path, template_values))
 
 
@@ -49,10 +52,10 @@ class InfoHandler(webapp.RequestHandler):
     template_values = {'sessions': sessions}
     if format == 'html':
       path = os.path.join(os.path.dirname(__file__), 'templates/info.html')
-      self.response.headers['Content-Type'] = 'text/html' 
+      self.response.headers['Content-Type'] = 'text/html'
     else:
       path = os.path.join(os.path.dirname(__file__), 'templates/info.csv')
-      self.response.headers['Content-Type'] = 'text/plain' 
+      self.response.headers['Content-Type'] = 'text/plain'
     self.response.out.write(template.render(path, template_values))
 
 

@@ -10,12 +10,15 @@ class Conference(db.Model):
   toc_wave = db.StringProperty()
   toc_wave_ser = db.TextProperty()
   participants = db.StringListProperty()
+  hashtag = db.StringProperty()
   tags = db.StringListProperty()
   make_public = db.BooleanProperty()
+  # unconference or conference
+  type = db.StringProperty()
   # URL for installer and avatar
   icon = db.StringProperty()
-  include_savedsearch = db.BooleanProperty()
-  include_newwave = db.BooleanProperty()
+  include_savedsearch = db.BooleanProperty(default=True)
+  include_newwave = db.BooleanProperty(default=True)
   session_waves = db.StringListProperty()
   #spreadsheet, dapper, calendar
   datasource_type = db.StringProperty()

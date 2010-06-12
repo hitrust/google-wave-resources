@@ -5,10 +5,12 @@
     {% else %}
     thumbnailUrl="http://chart.apis.google.com/chart?chst=d_bubble_texts_big&amp;chld=bbT|5590D2|FFFFFF|{{ name }}|Wave+Maker||"
     {% endif %}
-    description="Makes it easy to find {{ name }} waves.">
-  {% if savedsearch %}<savedSearchHook name="{{ name }}" query="{{ savedsearch }}"></savedSearchHook>{% endif %}
+    description="Makes it easy to make and find {{ name }} waves.">
+  {% if include_savedsearch %}<savedSearchHook name="{{ name }}"
+    query="{{savedsearch}}"/>{% endif %}
   <author name="Google"/>
-  {% if newwave %}<menuHook location="newwavemenu" text="{{ name }} Wave - Notes Taking">
+  {% if include_newwave %}
+  <menuHook location="newwavemenu" text="{{ name }} Wave - Notes Taking">
       <createNewWave> 
         <participant id="confrenzy+{{ id }}-newwave-blank@appspot.com" />
       </createNewWave> 
@@ -17,5 +19,6 @@
       <createNewWave> 
         <participant id="confrenzy+{{ id }}-newwave-event@appspot.com" />
       </createNewWave>
-  </menuHook>{% endif %}
+  </menuHook>
+  {% endif %}
 </extension>

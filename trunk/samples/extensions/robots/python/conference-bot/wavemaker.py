@@ -70,7 +70,16 @@ def AddSessionTags(wave, session, conference):
   if session.hashtag:
     wave.tags.append(session.hashtag.strip('#'))
 
+def AddPublic(wave, conference):
+  if conference.make_public:
+    wave.participants.add('conference-waves@googlegroups.com')
+
+def AddConferenceParticipants(wave, conference):
+  for participant in conference.participants:
+    wave.participants.add(participant)
+
 def AddConferenceTags(wave, conference):
+  wave.tags.append(conference.hashtag)
   # Add global tags
   for tag in conference.tags:
     wave.tags.append(tag)
@@ -193,17 +202,19 @@ def AddLiveNotes(blip):
   AddNewLine(blip)
 
 
-def AddLinkToMain(wave):
+def AddLinkToTOC(wave):
   if wavedata.LINK_ADDED not in wave.data_documents.keys():
     SetupRobot()
     conference = GetConferenceForNewWave(wave)
-
     # Add link to main wave
-    blind_wave = myrobot.blind_wavelet(conference.toc_wave_ser)
+    blind_wave = myrobot.blind_wavelet(conference.toc_wave_ser,
+                                       proxy_for_id=wavedata.MAIN_PROXY(conference))
     line = element.Line(line_type='li', indent=1)
-    blind_wave.root_blip.append(line)
-    blind_wave.root_blip.append(wave.title,
-                                bundled_annotations=[('link/wave', wave.wave_id)])
+    ModBlip(blind_wave.root_blip, line)
+    ModBlip(blind_wave.root_blip, wave.title, [('link/wave', wave.wave_id),
+                                               (wavedata.TOC_LINK(wave), '')])
+    ModBlip(blind_wave.root_blip, element.Line(), [('link/wave', None)])
+
     myrobot.submit(blind_wave)
     wave.data_documents[wavedata.LINK_ADDED] = 'yes'
 
@@ -219,50 +230,68 @@ def MakeSessionWaves(conference):
   for session in conf.sessions:
     deferred.defer(MakeSessionWave, session, conference.key())
 
-def MakeMainWave(wavelet, conference):
+def MakeTOCWave(admin_wave, conference):
   SetupRobot()
-  new_wave = myrobot.new_wave(domain=wavelet.domain, submit=True,
-                              participants=[conference.owner])
-  AddTitle(new_wave, conference.name + 'Main Wave')
-  blip = new_wave.root_blip
+  conference_id = conference.key().id()
+  toc_wave = myrobot.new_wave(domain=admin_wave.domain, submit=True,
+                              participants=[conference.owner],
+                              proxy_for_id=wavedata.MAIN_PROXY(conference))
+  admin_wave.root_blip.first(element.Gadget).update_element({'wave_id':
+                                                          toc_wave.wave_id})
+  AddConferenceTags(toc_wave, conference)
+  AddConferenceParticipants(toc_wave, conference)
+  AddPublic(toc_wave, conference)
+
+  AddTitle(toc_wave, conference.name + ' ' + text.MAINWAVE_TITLE)
+  blip = toc_wave.root_blip
   AddHeader(blip, text.MAINWAVE_EXTENSION_HEADER)
   ModBlip(blip, text.MAINWAVE_EXTENSION_TEXT)
   installer = element.Installer(manifest=util.GetInstallerUrl(conference.key().id()))
   ModBlip(blip, installer)
   AddHeader(blip, text.MAINWAVE_WAVES_HEADER)
   ModBlip(blip, text.MAINWAVE_WAVES_TEXT)
-  myrobot.submit(new_wave)
+  myrobot.submit(toc_wave)
 
-  conference.toc_wave = new_wave.wave_id
-  conference.toc_wave_ser = simplejson.dumps(new_wave.serialize())
+  conference.toc_wave = toc_wave.wave_id
+  conference.toc_wave_ser = simplejson.dumps(toc_wave.serialize())
   conference.put()
 
-def MakeAdminWave(wave):
-  AddTitle(wave, 'Admin Wave')
-  gadget = element.Gadget(url=util.GetGadgetUrl())
-  ModBlip(wave.root_blip, gadget)
+def MakeAdminWave(admin_wave, type='conference'):
+  title = text.ADMINWAVE_TITLE
+  if type == 'unconference':
+    title = text.ADMINWAVE_UNTITLE
+  AddTitle(admin_wave, title)
+  gadget_url = '%s&type=%s' % (util.GetGadgetUrl(), type)
+  gadget = element.Gadget(gadget_url)
+  ModBlip(admin_wave.root_blip, gadget)
+
   conference = model.Conference()
-  conference.owner = wave.creator
-  conference.admin_wave = wave.wave_id
+  conference.owner = admin_wave.creator
+  conference.type = type
+  conference.admin_wave = admin_wave.wave_id
   conference.put()
 
 def MakeTemplateWave(wave):
   conference = GetConferenceForNewWave(wave)
   blip = wave.root_blip
 
+  wave.data_documents[wavedata.CONFERENCE_ID] = str(conference.key().id())
+
   AddConferenceTags(wave, conference)
-  if conference.groups:
-    wave.participants.add(conference.groups[0])
-  if conference.make_public:
-    wave.participants.add('public@a.gwave.com')
+  AddConferenceParticipants(wave, conference)
+  AddPublic(wave, conference)
 
   if IsBlankWave(wave):
     MakeSessionTemplateWave(wave, conference)
   if IsEventWave(wave):
     MakeEventTemplateWave(wave, conference)
 
+  AddBackLink(wave, conference)
+
+  AddLinkToTOC(wave)
+
 def MakeSessionTemplateWave(wave, conference):
-  AddTitle(wave, conference.name + ' Wave: Topic')
+  AddTitle(wave, conference.name + ' ' + text.SESSIONWAVE_TITLE)
   blip = wave.root_blip
   AddShortLink(blip, wave.wave_id)
   AddNewLine(blip)
@@ -278,7 +307,7 @@ def MakeSessionTemplateWave(wave, conference):
   AddLiveNotes(blip)
 
 def MakeEventTemplateWave(wave, conference):
-  AddTitle(wave, conference.name + ' Event Wave: Event Name')
+  AddTitle(wave, conference.name + ' ' + text.EVENTWAVE_TITLE)
   blip = wave.root_blip
   AddHeader(blip, text.EVENTWAVE_WHEN_HEADER)
   AddNewLine(blip)
@@ -291,7 +320,7 @@ def MakeEventTemplateWave(wave, conference):
 def MakeNewWave(conference):
   # Create session wave
   try:
-    participants = [conference.owner] + conference.groups
+    participants = [conference.owner] + conference.participants
     new_wave = myrobot.new_wave(wavecred.DOMAIN, submit=True,
                                 participants=participants)
     conference.all_session_waves.append(new_wave.wave_id)
@@ -343,6 +372,35 @@ def MakeSessionWave(session, conference_key):
 
   # Add links to TOC wave
   deferred.defer(AddToTOC, session, conference.key(), new_wave.wave_id)
+
+def UpdateWaveLink(wavelet):
+  SetupRobot()
+  should_update = False
+
+  if wavedata.OLD_TITLE in wavelet.data_documents.keys():
+    old_title = wavelet.data_documents[wavedata.OLD_TITLE]
+    new_title = wavelet.title
+    if new_title != old_title:
+      should_update = True
+  else:
+    should_update = True
+
+  if should_update:
+    wavelet.data_documents[wavedata.OLD_TITLE] = wavelet.title
+    conference_id = wavelet.data_documents[wavedata.CONFERENCE_ID]
+    conference = model.Conference.get_by_id(int(conference_id))
+    wavelet_id = wavelet.domain + '!conv+root'
+    toc_wave = myrobot.fetch_wavelet(conference.toc_wave, wavelet_id,
+                                     proxy_for_id=wavedata.MAIN_PROXY(conference))
+    for annotation in toc_wave.root_blip.annotations:
+      if annotation.name == wavedata.TOC_LINK(wavelet):
+        start = annotation.start
+        end = annotation.end
+    toc_wave.root_blip.range(start, end).replace(wavelet.title,
+        bundled_annotations=[('link/wave', wavelet.wave_id),
+                             (wavedata.TOC_LINK(wavelet), '')])
+    myrobot.submit(toc_wave)
+
 
 def IsAdminWave(wavelet):
   return GetWaveType(wavelet).find('admin') > -1
