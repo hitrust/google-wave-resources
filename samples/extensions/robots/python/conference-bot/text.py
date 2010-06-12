@@ -1,3 +1,7 @@
+SESSIONWAVE_TITLE = ' Wave: Topic'
+
+EVENTWAVE_TITLE = ' Wave: Event'
+
 SESSIONWAVE_TIME_HEADER = 'Time:'
 
 SESSIONWAVE_LOCATION_HEADER = 'Location:'
@@ -13,7 +17,7 @@ SESSIONWAVE_ATTENDEES_HEADER = 'Attendees:'
 SESSIONWAVE_NOTES_HEADER = 'Live Notes:'
 
 SESSIONWAVE_NOTES_TEXT = """
-<i>It usually works best if a few people self-elect themselves as note-takers, and edit this bit with running notes.</i>
+It usually works best if a few people self-elect themselves as note-takers, and edit this bit with running notes.
 """
 
 SESSIONWAVE_TIPS_HEADER = 'Wave Tips:'
@@ -30,6 +34,8 @@ EVENTWAVE_WHO_HEADER = 'Who\'s coming?'
 
 EVENTWAVE_WHERE_HEADER = 'Where is it?'
 
+MAINWAVE_TITLE = 'Main Wave'
+
 MAINWAVE_WAVES_HEADER = 'Waves:'
 
 MAINWAVE_WAVES_TEXT = """
@@ -41,3 +47,7 @@ MAINWAVE_EXTENSION_HEADER = 'Extension:'
 MAINWAVE_EXTENSION_TEXT = """
 Install the extension below and you'll get a new option in your New Wave menu to add waves to this collection.\n
 """
+
+ADMINWAVE_TITLE = 'Admin Wave'
+
+ADMINWAVE_UNTITLE = '(Un) Admin Wave'

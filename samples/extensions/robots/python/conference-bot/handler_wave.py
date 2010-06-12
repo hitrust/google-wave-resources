@@ -9,26 +9,23 @@ import random
 from waveapi import appengine_robot_runner
 from waveapi import element
 from waveapi import events
-from waveapi import ops
 from waveapi import robot
-from django.utils import simplejson
-from google.appengine.ext import deferred
-from google.appengine.ext import webapp
-from google.appengine.ext import db
 
 import util
-import text
 import model
-import converter_ss
 import wavemaker
-import wavedata
 import wavecred
 
 # the robot
 myrobot = None
+ROBOT_NAME = 'Confrenzy'
+ROBOT_IMAGE = 'http://confrenzy.appspot.com/img/avatar.png'
+ROBOT_PROFILE = {'name': ROBOT_NAME, 'imageUrl': ROBOT_IMAGE}
 
 def OnSelfAdded(event, wavelet):
-  if IsAdminWave(wavelet):
+  if IsUnAdminWave(wavelet):
+    wavemaker.MakeAdminWave(wavelet, type='unconference')
+  elif IsAdminWave(wavelet):
     wavemaker.MakeAdminWave(wavelet)
   elif IsTemplateWave(wavelet):
     wavemaker.MakeTemplateWave(wavelet)
@@ -37,12 +34,12 @@ def OnBlipSubmitted(event, wavelet):
   # Add a link to the new wave with the title of this wave.
   # TODO: Listen to wave title changed, update title when that happens.
   if IsTemplateWave(wavelet):
-    wavemaker.AddBackLink(wavelet)
+    wavemaker.UpdateWaveLink(wavelet)
 
 def OnGadgetChanged(event, wavelet):
   domain = wavelet.domain
   if IsAdminWave(wavelet):
-    gadget = event.blip.first(element.Gadget, url=util.GetGadgetUrl())
+    gadget = event.blip.first(element.Gadget)
     if gadget is None:
       logging.info('Error: No gadget found in Admin Wave.')
       return
@@ -57,7 +54,8 @@ def OnGadgetChanged(event, wavelet):
     StoreGadgetChanges(wavelet, gadget, conference)
     create_main = gadget.get('createmain')
     if create_main == 'clicked' and conference.toc_wave is None:
-      wavemaker.MakeMainWave(wavelet, conference)
+      wavemaker.MakeTOCWave(wavelet, conference)
+      gadget.update_element({'createmain': None})
     create_sessions = gadget.get('createsessions')
     if create_sessions == 'clicked':
       wavemaker.MakeSessionWaves(conference)
@@ -70,12 +68,17 @@ def StoreGadgetChanges(wavelet, gadget, conference):
   if make_public and make_public == 'on':
     conference.make_public = True
   #todo split CSV, make into proper list property
-  groups = gadget.get('groups')
-  if groups:
-    conference.groups = [groups]
+  participants = gadget.get('participants')
+  if participants:
+    participants = participants.split(',')
+    conference.participants = participants
   tags = gadget.get('tags')
   if tags:
-    conference.tags = [tags]
+    tags = tags.split(',')
+    conference.tags = tags
+  hashtag = gadget.get('hashtag')
+  if hashtag:
+    conference.hashtag = hashtag
   conference.template = gadget.get('template')
   conference.datasource_type = gadget.get('datasource_type')
   conference.datasource_url = gadget.get('datasource_url')
@@ -93,6 +96,9 @@ def GetConferenceForAdminWave(wavelet):
 
 def IsAdminWave(wavelet):
   return GetWaveType(wavelet).find('admin') > -1
+
+def IsUnAdminWave(wavelet):
+  return GetWaveType(wavelet).find('unadmin') > -1
 
 def IsBlankWave(wavelet):
   return GetWaveType(wavelet).find('newwave-blank') > -1
@@ -123,12 +129,23 @@ def GetWaveId(wavelet):
     logging.info('wave_id %s' % id)
     return id
 
-if __name__ == '__main__':
+def ProfileHandler(proxy_for_id):
+  if proxy_for_id and proxy_for_id == 'unadmin':
+    return ROBOT_PROFILE
+  elif proxy_for_id:
+    conference_id = proxy_for_id.split('-')[0]
+    conference = model.Conference.get_by_id(int(conference_id))
+    if conference:
+      return {'name': conference.name,
+            'imageUrl': conference.icon}
+  return ROBOT_PROFILE
 
-  myrobot = robot.Robot('Confrenzy',
-                        image_url='http://dfki.de/~jameson/icon=conference.gif')
-  myrobot.set_verification_token_info(wavecred.VERIFICATION_TOKEN, wavecred.ST)
+
+if __name__ == '__main__':
+  myrobot = robot.Robot(ROBOT_NAME,
+                        image_url=ROBOT_IMAGE)
   myrobot.register_handler(events.WaveletSelfAdded, OnSelfAdded)
   myrobot.register_handler(events.GadgetStateChanged, OnGadgetChanged)
   myrobot.register_handler(events.BlipSubmitted, OnBlipSubmitted)
+  myrobot.register_profile_handler(ProfileHandler)
   appengine_robot_runner.run(myrobot, debug=True)

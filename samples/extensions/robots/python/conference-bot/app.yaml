@@ -1,17 +1,17 @@
 application: confrenzy
-version: 2
+version: 1
 runtime: python
 api_version: 1
 
 handlers:
 - url: /_wave/.*
-  script: wave.py
+  script: handler_wave.py
 
 - url: /web/.*
-  script: handler.py
+  script: handler_web.py
 
 - url: /service/.*
-  script: handler.py
+  script: handler_service.py
 
 - url: /js
   static_dir: js
