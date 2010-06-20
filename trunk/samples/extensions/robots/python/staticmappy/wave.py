@@ -2,7 +2,6 @@ from waveapi import robot
 from waveapi import events
 from waveapi import element
 from waveapi import appengine_robot_runner
-from google.appengine.api import urlfetch
 
 import logging
 import urllib2
@@ -10,9 +9,9 @@ import urllib2
 ROBOT_KEY = 'appspot/staticmappy/address'
 
 def GetStaticMap(address):
+  address = address.encode('utf-8')
   url = 'http://maps.google.com/maps/api/staticmap?center=%s&size=400x400&sensor=false' % address.replace(' ', '+').replace('&', '%26')
-  #file_data = urllib2.urlopen(url).read().strip()
-  file_data = urlfetch.fetch(url).content
+  file_data = urllib2.urlopen(url).read()
   attachment = element.Attachment(caption=address, data=file_data)
   return attachment
 
