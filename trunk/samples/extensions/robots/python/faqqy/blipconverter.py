@@ -2,6 +2,8 @@ import logging
 import re
 import cgi
 
+from waveapi import element
+
 def Log(message, string):
   logging.info(message + ': ' + string)
 
@@ -23,13 +25,16 @@ def ToCSSProperty(annotation_name):
   css_rule = css_rule.lower()
   return css_rule
 
+def ToCharacter(text):
+  return cgi.escape(text)
+
 def ToHTML(blip):
   # Take in a blip, convert to HTML
   indices = []
   text = blip.text
   i = 0
   while i < len(text):
-    indices.insert(i, {'index': i, 'character': cgi.escape(text[i]),
+    indices.insert(i, {'index': i, 'character': ToCharacter(text[i]),
                        'element': None, 'linkStarts': [], 'linkEnds': [],
                        'annotationStarts': [], 'annotationEnds': []})
     i += 1
@@ -46,19 +51,22 @@ def ToHTML(blip):
       indices[start]['linkStarts'].append(annotation)
       indices[min(end, len(text) -1)]['linkEnds'].append(annotation)
 
-  for element_ind, element in blip._elements.items():
-    indices[element_ind]['element'] = element
+  for elem_ind, elem in blip._elements.items():
+    indices[elem_ind]['element'] = elem
 
   html = ''
+  first_line = len(text.split('\n')[1])+1
   active_annotations = []
   open_span = False
-  for data in indices:
+  line_started = False
+  for data in indices[first_line:]:
     closed_span = False
     saw_new = False
     if data['element']:
-      element = data['element']
-      if element.class_type == 'LINE':
+      elem = data['element']
+      if isinstance(elem, element.Line):
         html += '<br>'
+        line_started = True
 
     if len(data['annotationEnds']) > 0:
       html = html + '</span>'
@@ -92,7 +100,17 @@ def ToHTML(blip):
           html += css_property + ':' + css_value + ';'
       html += '">'
       open_span = True
-    html = html + data['character']
+
+    # Account for whitespace at beginning of lines
+    # by keeping track of when a line starts and when first text
+    # starts after the line.
+    character = data['character']
+    if line_started and character.isspace():
+      html = html + '&nbsp;'
+    else:
+      line_started = False
+      html = html + data['character']
+
     span_now = False
   if open_span:
     html += '</span>'
