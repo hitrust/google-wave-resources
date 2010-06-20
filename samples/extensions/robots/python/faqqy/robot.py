@@ -30,13 +30,13 @@ def ExportRootBlip(wavelet):
   title = wavelet.title
   id = wavelet.wave_id
   body = root_blip.text.split('\n', 1)[1] # strip title
-  html = blipconverter.ToHTML(root_blip)
 
   query = db.Query(models.FAQ)
   query.filter('id =', id)
   faq = query.get()
   new_faq = False
   if faq is None:
+    logging.info('New FAQ')
     new_faq = True
     AddBlip(wavelet, "Exported Wave to FAQ.")
     faq = models.FAQ()
@@ -47,10 +47,11 @@ def ExportRootBlip(wavelet):
   # Format: "FAQ:invites: How can I get invites?"
   split_title = title.split(':', 2)
   if len(split_title) >= 3:
-    faq.short_id = split_title[1]
+    logging.info(split_title[1])
+    faq.shortId = split_title[1]
     faq.title = split_title[2]
     if new_faq:
-      url = 'http://wave-api-faq.appspot.com/#%s' % faq.short_id
+      url = 'http://wave-api-faq.appspot.com/#%s' % faq.shortId
       AddBlip(wavelet, url)
   else:
     logging.warn('Could not find a short title. Exiting')
@@ -58,30 +59,35 @@ def ExportRootBlip(wavelet):
 
   # Figure out if it's a TOC or FAQ
   if title.find('TOC') > -1:
+    logging.info('Its a TOC')
     faq.type = 'toc'
     faq.order = 1
     faq.faqs = []
     # Find short IDs, map to keys, store in listproperty
     short_ids = []
     lines = body.split('\n')
-    for line in lines:
+    for line in lines[1:]:
       split_title = line.split(':', 2)
       if len(split_title) >= 2:
         short_id = split_title[1]
         short_ids.append(short_id)
+        logging.info(short_id)
     query = db.Query(models.FAQ)
     query.filter('shortId IN', short_ids)
-    results = query.fetch(20)
+    results = query.fetch(40)
     for result in results:
+      logging.info(result.key())
+      logging.info(result.shortId)
       faq.faqs.append(result.key())
   elif title.find('FAQ') > -1:
+    logging.info('Its a FAQ')
     faq.type = 'faq'
+    faq.html = blipconverter.ToHTML(root_blip)
   else:
     logging.warn('Could not figure out if TOC or FAQ. Exiting')
     return
 
   faq.body = body
-  faq.html = html
   faq.creator = wavelet.creator
   faq.participants = [p for p in wavelet.participants]
   faq.put()
