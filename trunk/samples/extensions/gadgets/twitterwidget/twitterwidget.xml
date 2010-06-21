@@ -7,6 +7,7 @@
   <Require feature="locked-domain" /> 
 </ModulePrefs> 
 <Content type="html"><![CDATA[ 
+<div id="allDiv" style="width:450px;"> 
   <div id="viewDiv" style="float:left;display:none;"></div> 
   <div id="editDiv" style="float:left;display:none"> 
    <input type="text" value="wave" id="searchInput"> 
