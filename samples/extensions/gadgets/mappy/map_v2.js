@@ -124,7 +124,6 @@ function log(string) {
     wave.log("FROM MAPS GADGET " + string);
 
   }
-  console.log(string);
 }
 
 Geometry = function () {
@@ -963,6 +962,9 @@ function receiveMode(mode) {
   if ((oldWaveMode == wave.Mode.EDIT && waveMode == wave.Mode.VIEW) ||
       (oldWaveMode == wave.Mode.VIEW && waveMode == wave.Mode.EDIT) ||
       (!oldWaveMode)) {
+    log('switching');
+    log(oldWaveMode);
+    log(waveMode);
     modeSwitch();
   }
 }
