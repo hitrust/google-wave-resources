@@ -124,9 +124,9 @@ class Search(webapp.RequestHandler):
       results = query.fetch(20)
 
     if user:
-      found = [{'name': r.name, 'id': r.creator, 'address': r.address} for r in results if r.key().name() != user.key().name()]
+      found = [{'name': r.name, 'id': r.creator} for r in results if r.key().name() != user.key().name()]
     else:
-      found = [{'name': r.name, 'id': r.creator, 'address': r.address} for r in results]
+      found = [{'name': r.name, 'id': r.creator} for r in results]
     gtugs = simplejson.dumps({'msg': msg, 'results': found})
     logging.info("response: %s" % gtugs)
     self.response.headers.add_header('Content-type', 'application/json')
