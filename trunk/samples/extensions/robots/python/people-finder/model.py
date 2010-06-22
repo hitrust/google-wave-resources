@@ -10,7 +10,6 @@ class Profile(GeoModel):
   location is inherited from GeoModel.
   """
   name = db.StringProperty()
-  address = db.StringProperty()
   creator = db.StringProperty()
   interests = db.StringListProperty()
 
@@ -20,3 +19,4 @@ class GTUG(GeoModel):
   """
   gtugid = db.IntegerProperty()
   url = db.StringProperty()
+
