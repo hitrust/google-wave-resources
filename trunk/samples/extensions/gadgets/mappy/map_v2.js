@@ -959,7 +959,9 @@ function getState(key) {
 function receiveMode(mode) {
   oldWaveMode = waveMode;
   waveMode = mode;
-  if (oldWaveMode != waveMode) {
+  // Don't switch if were just going from edit to view or vice versa
+  if ((oldWaveMode == wave.Mode.EDIT && waveMode == wave.Mode.VIEW) ||
+      (oldWaveMode == wave.Mode.VIEW && waveMode == wave.Mode.EDIT)) {
     modeSwitch();
   }
 }
