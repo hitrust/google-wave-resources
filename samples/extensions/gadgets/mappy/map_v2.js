@@ -961,11 +961,6 @@ function receiveMode(mode) {
   // Don't switch if were just going from edit to view or vice versa
   // Basically, only switch if this is the first time we're seeing a mode
   if (!oldWaveMode) {
-    log('switching');
-    log(oldWaveMode);
-    log(waveMode);
-    log(wave.Mode.EDIT);
-    log(wave.Mode.VIEW);
     modeSwitch();
   }
 }
