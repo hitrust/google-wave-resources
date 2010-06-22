@@ -1,5 +1,5 @@
 var sharedMap;
-var waveMode;
+var waveMode, oldWaveMode;
 var key = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSosDVG8KKPE1-m51RBrvYughuyMxQ-i1QfUnH94QxWIa6N4U6MouMmBA";
 var stateCallbacks = 0;
 
@@ -611,7 +611,7 @@ SharedMap.prototype.removeEditingUI_ = function() {
 
 SharedMap.prototype.addEditingUI = function() {
   var me = this;
-  
+
   if (this.statusControl) {
     this.map.removeControl(this.statusControl);
   }
@@ -957,8 +957,11 @@ function getState(key) {
 }
 
 function receiveMode(mode) {
+  oldWaveMode = waveMode;
   waveMode = mode;
-  modeSwitch();
+  if (oldWaveMode != waveMode) {
+    modeSwitch();
+  }
 }
 
 function modeSwitch() {
