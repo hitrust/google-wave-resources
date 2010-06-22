@@ -961,7 +961,8 @@ function receiveMode(mode) {
   waveMode = mode;
   // Don't switch if were just going from edit to view or vice versa
   if ((oldWaveMode == wave.Mode.EDIT && waveMode == wave.Mode.VIEW) ||
-      (oldWaveMode == wave.Mode.VIEW && waveMode == wave.Mode.EDIT)) {
+      (oldWaveMode == wave.Mode.VIEW && waveMode == wave.Mode.EDIT) ||
+      (!oldWaveMode)) {
     modeSwitch();
   }
 }
