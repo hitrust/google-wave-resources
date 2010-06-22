@@ -49,7 +49,7 @@
   <center>
   <div id="map_canvas" style="width: 100%; height: 100%; overflow: hidden;"></div>
   <div id="info">
-   <a target="_blank" href="http://code.google.com/p/google-wave-resources/issues/entry?template=Map%20Gadget%20Report">Help</a> | 
+    <a target="_blank" href="https://wave.google.com/wave/waveref/googlewave.com/w+6lo15569A">Help</a> | 
    <a target="_blank" href="https://wave.google.com/wave/waveref/googlewave.com/w+7XVMrvrKG">What's Changed?</a>
   </div>
   <div id="dialog" style="display:none;">
