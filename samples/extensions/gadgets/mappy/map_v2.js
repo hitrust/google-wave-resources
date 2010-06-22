@@ -965,6 +965,8 @@ function receiveMode(mode) {
     log('switching');
     log(oldWaveMode);
     log(waveMode);
+    log(wave.Mode.EDIT);
+    log(wave.Mode.VIEW);
     modeSwitch();
   }
 }
