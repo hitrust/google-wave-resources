@@ -1,5 +1,5 @@
 var sharedMap;
-var waveMode, oldWaveMode;
+var waveMode=null, oldWaveMode=null;
 var key = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSosDVG8KKPE1-m51RBrvYughuyMxQ-i1QfUnH94QxWIa6N4U6MouMmBA";
 var stateCallbacks = 0;
 
@@ -959,9 +959,8 @@ function receiveMode(mode) {
   oldWaveMode = waveMode;
   waveMode = mode;
   // Don't switch if were just going from edit to view or vice versa
-  if ((oldWaveMode == wave.Mode.EDIT && waveMode == wave.Mode.VIEW) ||
-      (oldWaveMode == wave.Mode.VIEW && waveMode == wave.Mode.EDIT) ||
-      (!oldWaveMode)) {
+  // Basically, only switch if this is the first time we're seeing a mode
+  if (!oldWaveMode) {
     log('switching');
     log(oldWaveMode);
     log(waveMode);
