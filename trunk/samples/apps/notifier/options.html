@@ -17,17 +17,11 @@
 -->
 <title>Google Wave Notifier</title>
 <style>
-  body {
-    margin: 10px;
-    font: 84% Arial, sans-serif
-  }
+  body { margin: 10px; font: 84% Arial, sans-serif }
 
   h1 { font-size: 156% }
 
-  h1 img {
-    margin: 1px 5px 0 1px;
-    vertical-align: middle
-  }
+  h1 img { margin: 1px 5px 0 1px; vertical-align: middle }
 
   h2 {
     border-top: 1px solid #9cc2ef;
@@ -40,25 +34,29 @@
 
   dt { font-weight: bold }
 
-  dd {
-    margin-top: 13px;
-    margin-bottom: 13px
-  }
+  dd { margin-top: 13px; margin-bottom: 13px }
 </style>
 <script>
+  const BACKGROUND = chrome.extension.getBackgroundPage();
+
   onload = function() {
-    options.maxDigests.value = localStorage.maxDigests;
-    options.participantAnnotated.checked =
-      chrome.extension.getBackgroundPage().
-        parse(localStorage.participantAnnotated);
+    const OPTION_COUNT = options.length;
 
-    options.maxDigests.onchange = function() {
-      localStorage.maxDigests = this.value;
-    };
+    for (var i = 0; i < OPTION_COUNT; i++) {
+      var option = options.elements[i];
 
-    options.participantAnnotated.onchange = function() {
-      localStorage.participantAnnotated = this.checked;
-    };
+      if (option.getAttribute('type') == 'checkbox') {
+        option.onchange = function() {
+          localStorage[this.name] = this.checked;
+        };
+
+        option.checked = BACKGROUND.parse(localStorage[option.name]);
+      } else {
+        option.onchange = function() { localStorage[this.name] = this.value; };
+
+        option.value = localStorage[option.name];
+      }
+    }
   };
 </script>
 <h1>
@@ -68,6 +66,11 @@
 <h2>Options</h2>
 <form id="options">
   <dl>
+    <dt>Toolbar button:</dt>
+    <dd>
+      <input type="checkbox" name="animated" checked>
+      Show animation while syncing waves
+    </dd>
     <dt>Popup bubble:</dt>
     <dd>
       Show up to

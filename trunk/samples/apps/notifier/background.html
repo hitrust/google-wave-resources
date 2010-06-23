@@ -30,18 +30,30 @@
   }
 
   function sync() {
-    PRETTYLOAD.start(localStorage.unreadCount);
+    if (parse(localStorage.animated)) {
+      PRETTYLOAD.start(localStorage.unreadCount);
+    }
 
     OAUTH.sendSignedRequest(
-      'http://www-opensocial.googleusercontent.com/api/rpc',
+      SERVICE_URL.replace('*', 'www-opensocial'),
       function(response) {
         const RESULTS = JSON.parse(response).data.searchResults;
         localStorage.digests = JSON.stringify(RESULTS.digests.slice(0, 20));
-        const UNREAD_COUNT = RESULTS.numResults;
-        PRETTYLOAD.finish(
-          localStorage.unreadCount =
-            UNREAD_COUNT < MAX_UNREAD ? UNREAD_COUNT + '' : MAX_UNREAD - 1 + '+'
-        );
+        var unreadCount = RESULTS.numResults;
+
+        switch (unreadCount) {
+          case 0:
+          unreadCount = '';
+          break;
+
+          case MAX_UNREAD:
+          unreadCount = MAX_UNREAD - 1 + '+';
+          break;
+
+          default: unreadCount += '';
+        }
+
+        PRETTYLOAD.finish(localStorage.unreadCount = unreadCount);
       },
       {
         method: 'POST',
@@ -59,8 +71,7 @@
       BROWSER_ACTION.setIcon({path: 'authorized.png'});
       BROWSER_ACTION.setBadgeBackgroundColor({color: [85, 144, 210, 255]});
       sync();
-
-      id = setInterval(function() { sync(); }, 60000);
+      id = setInterval(sync, 60000);
     });
   }
 
@@ -68,25 +79,29 @@
 
   if (!parse(localStorage.initialized)) {
     localStorage.maxDigests = 5;
-    localStorage.participantAnnotated = true;
+    localStorage.animated = true;
     initialize();
+    localStorage.participantAnnotated = true;
     localStorage.initialized = true;
   }
 
   const BROWSER_ACTION = chrome.browserAction;
   load();
   BROWSER_ACTION.setBadgeText({text: UNKNOWN_COUNT});
+  const AUTHORIZATION_BASE = 'https://www.google.com/accounts/';
+  const UNREGISTERED_CONSUMER = 'anonymous';
+  const SERVICE_URL = 'http://*.googleusercontent.com/api/rpc';
   const OAUTH = ChromeExOAuth.initBackgroundPage({
-    request_url: 'https://www.google.com/accounts/OAuthGetRequestToken',
-    authorize_url: 'https://www.google.com/accounts/OAuthAuthorizeToken',
-    access_url: 'https://www.google.com/accounts/OAuthGetAccessToken',
-    consumer_key: 'anonymous',
-    consumer_secret: 'anonymous',
-    scope: 'http://wave.googleusercontent.com/api/rpc',
+    request_url: AUTHORIZATION_BASE + 'OAuthGetRequestToken',
+    authorize_url: AUTHORIZATION_BASE + 'OAuthAuthorizeToken',
+    access_url: AUTHORIZATION_BASE + 'OAuthGetAccessToken',
+    consumer_key: UNREGISTERED_CONSUMER,
+    consumer_secret: UNREGISTERED_CONSUMER,
+    scope: SERVICE_URL.replace('*', 'wave'),
     app_name: 'Google Wave Notifier'
   });
-  var id;
   const PRETTYLOAD = new Prettyload(TRIANGLE_WAVE);
   const MAX_UNREAD = 100;
+  var id;
   authorize();
 </script>
