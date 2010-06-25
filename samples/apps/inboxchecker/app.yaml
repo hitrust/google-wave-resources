@@ -9,3 +9,6 @@ handlers:
 
 - url: /app(.*)
   script: app_handler.py
+
+- url: /
+  script: app_handler.py

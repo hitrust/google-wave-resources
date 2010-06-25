@@ -1,52 +1,22 @@
 import wsgiref.handlers
 import logging
-import pickle
-import uuid
 from time import gmtime, strftime
 
 from google.appengine.ext import webapp
-from google.appengine.ext import db
 from django.utils import simplejson
 
-import gdata
-import atom.http
 from waveapi import search
-import oauth
+import oauth_handler
 
-class DataRequestHandler(oauth.OAuthHandler):
-
-  def get_token(self):
-    session_id = self.request.cookies.get(oauth.OAuthHandler.COOKIE)
-    if not session_id:
-      logging.info('Found no session ID cookie')
-      return self.redirect('/oauth/login')
-    db_query = oauth.OAuthAccessToken.all().filter('session =', session_id)
-    db_token = db_query.get()
-    if db_token is None:
-      logging.info('Found no matching token for session ID')
-      return self.redirect('/oauth/login')
-    self._access_token = gdata.auth.OAuthToken(db_token.token_key, db_token.token_secret,
-                                         scopes=oauth.OAuthHandler.SCOPE,
-                                         oauth_input_params=oauth.OAuthHandler.OAUTH_INPUT_PARAMS)
-    return True
-
-  def make_request(self, data):
-    url = 'https://www-opensocial.googleusercontent.com/api/rpc'
-    #url = 'http://www-opensocial-sandbox.googleusercontent.com/api/rpc'
-    client = atom.http.ProxiedHttpClient()
-    response = self._access_token.perform_request(client, 'POST',
-                                              url, data,
-                                              headers={'Content-Type':'application/json'})
-    return response
-
-class InboxHandler(DataRequestHandler):
+class InboxHandler(oauth_handler.DataRequestHandler):
 
   def get(self):
     if not self.get_token():
       return
-    data = "{'id':'op1','method':'wave.robot.search','params':{'query':'in:inbox'}}"
-    response = self.make_request(data)
-    search_results = results_from_json(response.read())
+
+    query = self.request.get('query', 'in:inbox')
+    num_results = self.request.get('numResults', '10')
+    search_results = self._service.search(query=query, num_results=num_results)
     html = html_for_results(search_results)
     return self.response.out.write(html)
 
@@ -69,7 +39,7 @@ def html_for_results(results):
       html += '<br><br>'
     return html
 
-class FetchWaveHandler(DataRequestHandler):
+class FetchWaveHandler(oauth_handler.DataRequestHandler):
 
   def get(self):
     if not self.get_token():
@@ -78,13 +48,18 @@ class FetchWaveHandler(DataRequestHandler):
     # digest wave
     #wave_id = 'googlewave.com!w+QH8ZW5LQt'
     wavelet_id = 'googlewave.com!conv+root'
+    wave_id = 'googlewave.com!w+0xNca70qA'
+    wave_id = 'googlewave.com!w+TNVx0ka5A'
+    wave_id = 'googlewave.com!w+vlQQ9rZkC26'
+    #wave_id = 'googlewave.com!w%252BQIK8uMFQA'
+    wave_id = 'googlewave.com!w+G7ex3qzpA'
     notify_op = "{'id':'0', 'method':'wave.robot.notifyCapabilitiesHash', 'params': {'protocolVersion': '0.21'}}"
     fetch_op = "{'id':'op1', 'method':'wave.robot.fetchWave','params':{'waveId':'%s', 'waveletId': '%s'}}" % (wave_id, wavelet_id)
     data = "[%s, %s]" % (notify_op, fetch_op)
-    response = self.make_request(data)
-    return self.response.out.write(response.read());
+    response = self.perform_operation(data)
+    return self.response.out.write(response);
 
-class FolderHandler(DataRequestHandler):
+class FolderHandler(oauth_handler.DataRequestHandler):
 
   def get(self):
     if not self.get_token():
@@ -92,14 +67,20 @@ class FolderHandler(DataRequestHandler):
     wave_id = 'googlewave.com!w+_ZvqGPcnH'
     data = "{'id':'op1', 'method':'wave.robot.folderAction','params':{'modifyHow': 'markAsRead', 'waveId':'%s'}}" % (wave_id)
     data = "{'id':'op1', 'method':'wave.robot.folderAction','params':{'waveId':'%s'}}" % (wave_id)
-    response = self.make_request(data)
-    return self.response.out.write(response.read());
+    response = self.perform_operation(data)
+    return self.response.out.write(response);
+
+class MainHandler(webapp.RequestHandler):
+
+  def get(self):
+    self.response.out.write('<html><head><meta name="google-site-verification" content="qHF5ruQQp1eWXVkXD_B3Q4EzdoSstzZu6_thYkqPPLQ" /></head></html>')
 
 def main():
   application = webapp.WSGIApplication([
-                                        ('/data/inbox', InboxHandler),
-                                        ('/data/fetchwave', FetchWaveHandler),
-                                        ('/data/folder', FolderHandler)
+                                        ('/', MainHandler),
+                                        ('/app/inbox', InboxHandler),
+                                        ('/app/fetchwave', FetchWaveHandler),
+                                        ('/app/folder', FolderHandler)
                                         ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
