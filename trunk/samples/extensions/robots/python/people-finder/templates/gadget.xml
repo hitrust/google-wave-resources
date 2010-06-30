@@ -112,7 +112,7 @@
 </head>
 <body>
   <div style="float:left; width:100%; height:100em; margin-top:10px;">
-    <h3>Search for Google I/O Attendees</h3>
+    <h3>Search for {{ title }} Attendees</h3>
     {% for interest in interests %}
       {% ifequal interest.id "--" %}
       <h4 style="clear:both; margin: 0.5em 0">{{ interest.label }}</h4>

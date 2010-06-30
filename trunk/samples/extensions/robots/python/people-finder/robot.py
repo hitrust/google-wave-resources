@@ -11,10 +11,8 @@ from waveapi import robot
 from waveapi import events
 from waveapi import element 
 from waveapi import appengine_robot_runner
+from conference import ROBOT_NAME, CONFERENCE_TITLE, CONFERENCE_HASHTAG
 
-ROBOT_NAME = 'PeopleFinder'
-CONFERENCE_TITLE = 'My Example Conference'
-CONFERENCE_HASHTAG = 'myconf'
 
 def OnSelfAdded(event, wavelet):
   """Invoked when PeopleFinder is first added to the wave."""

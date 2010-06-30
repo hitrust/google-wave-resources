@@ -1,7 +1,8 @@
 <extension 
     name="People Finder"
     thumbnailUrl="http://{{ appid }}.appspot.com/static/icon.png"
-    description="Find attendees at Google I/O that share your interests."> 
+    description="Find attendees at {{ title }} that share your interests."
+    version="1"> 
   <author name="Google"/> 
   <menuHook location="NEW_WAVE_MENU" text="New People Finder Profile"
     iconUrl="https://{{ appid }}.appspot.com/static/icon.png"> 
