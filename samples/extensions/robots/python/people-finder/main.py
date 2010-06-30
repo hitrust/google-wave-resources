@@ -13,6 +13,8 @@ from google.appengine.ext.webapp import template
 from interests import INTERESTS
 from model import GTUG, Profile
 
+from conference import CONFERENCE_TITLE
+
 M_PER_KM = 1000.0
 M_PER_MILE = 1609.344 
 
@@ -26,7 +28,10 @@ def distance_to_meters(distance, units):
 class ExtensionHandler(webapp.RequestHandler):
 
   def get(self):
-    template_values = { 'appid': os.environ['APPLICATION_ID'] }
+    template_values = { 
+        'appid': os.environ['APPLICATION_ID'],
+        'title': CONFERENCE_TITLE
+        }
     path = os.path.join(os.path.dirname(__file__), 'templates', 'extension.xml')
     self.response.headers.add_header('Content-type', 'text/xml')
     self.response.out.write(template.render(path, template_values))
@@ -51,7 +56,7 @@ class GadgetHandler(webapp.RequestHandler):
 
 class GTUGUpdateTask(webapp.RequestHandler):
 
-  def post(self): # should run at most 1/s
+  def post(self): 
     key = self.request.get('key')
     chapters= simplejson.loads(key)
     if chapters:
