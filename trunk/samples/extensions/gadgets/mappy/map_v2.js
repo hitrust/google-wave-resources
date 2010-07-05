@@ -819,6 +819,7 @@ SharedMap.prototype.extendMarker = function(gs, marker, html, result) {
     marker.closeInfoWindow();
     marker.hide();
     geometry.showInfoWindow();
+    geometry.saveData();
   };
 
   div.appendChild(html);
