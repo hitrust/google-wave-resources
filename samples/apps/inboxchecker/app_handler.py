@@ -8,13 +8,18 @@ from django.utils import simplejson
 
 from waveapi import search
 import oauth_handler
-import blipconverter
+import wave_renderer 
 
-def results_from_json(json):
-    if isinstance(json, basestring):
-      json = simplejson.loads(json)
-    search_results = search.Results(json['data']['searchResults'])
-    return search_results
+def page_html(html):
+  base_page = """
+  <html><head>
+  <link rel="stylesheet" type="text/css" href="http://wave-api.appspot.com/public/wave.ui.css">
+  </head>
+  <body>
+  %s
+  </body>
+  </html>"""
+  return base_page % html
 
 def html_for_results(results):
     html = '%s, (%s)<br>' % (results.query, results.num_results)
@@ -30,13 +35,6 @@ def html_for_results(results):
       html += '<br><br>'
     return html
 
-def html_for_wavelet(wavelet):
-  html_list = []
-  for blip_id in wavelet.blips:
-    blip = wavelet.blips.get(blip_id)
-    html_list.append(blipconverter.ToHTML(blip))
-  return string.join(html_list, '<br><br>')
-
 class InboxHandler(oauth_handler.DataRequestHandler):
 
   def get(self):
@@ -47,7 +45,7 @@ class InboxHandler(oauth_handler.DataRequestHandler):
     num_results = self.request.get('numResults', '10')
     search_results = self._service.search(query=query, num_results=num_results)
     html = html_for_results(search_results)
-    return self.response.out.write(html)
+    return self.response.out.write(page_html(html))
 
 class FetchWaveHandler(oauth_handler.DataRequestHandler):
 
@@ -57,8 +55,17 @@ class FetchWaveHandler(oauth_handler.DataRequestHandler):
     DIGEST_WAVE_ID = 'googlewave.com!w+SgYrEnoLE'
     wave_id = self.request.get('wave_id', DIGEST_WAVE_ID)
     wave_id = wave_id.replace('%2B', '+')
-    wavelet = self._service.fetch_wavelet(wave_id, 'googlewave.com!conv+root')
-    return self.response.out.write(html_for_wavelet(wavelet));
+    wavelet = self._service.fetch_wavelet(wave_id)
+    return self.response.out.write(page_html(wave_renderer.render_wavelet(wavelet)));
+
+class FetchProfileHandler(oauth_handler.DataRequestHandler):
+
+  def get(self):
+    if not self.get_token():
+      return
+
+    result = self._service.fetch_my_profile()
+    return self.response.out.write(page_html(result))
 
 class MainHandler(webapp.RequestHandler):
 
@@ -70,6 +77,7 @@ def main():
                                         ('/', MainHandler),
                                         ('/app/inbox', InboxHandler),
                                         ('/app/fetchwave', FetchWaveHandler),
+                                        ('/app/fetchprofile', FetchProfileHandler),
                                         ],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
