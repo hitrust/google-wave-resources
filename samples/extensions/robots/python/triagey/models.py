@@ -23,5 +23,5 @@ class TriagePreset(db.Model):
   def SetSourcesFromList(self, list):
     self.sources = simplejson.dumps(list)
 
-  def GetDict(self): 
+  def GetDict(self):
     return {'name': self.name, 'sources': self.GetSourcesList(), 'key': str(self.key())}

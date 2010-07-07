@@ -1,4 +1,4 @@
-application: bug-triagey 
+application: bug-triagey
 version: 1
 runtime: python
 api_version: 1
