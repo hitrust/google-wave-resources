@@ -13,34 +13,11 @@ from django.utils import simplejson
 import models
 import util
 
-class StartHandler(webapp.RequestHandler):
+class ConfigHandler(webapp.RequestHandler):
   def get(self):
-    self.Render(self.GetTemplateFilename(), self.GetTemplateValues(), self.GetContentType())
-
-  def GetContentType(self):
-    return 'text/html'
-
-  def GetTemplateFilename(self):
-    return ''
-
-  def GetTemplateValues(self):
-    # render dropdown
-    q = models.TriagePreset.all()
-    presets = q.fetch(100)
-    template_values = {'presets': presets, 'server': util.GetServer()}
-    return template_values
-
-  def Render(self, filename, template_values, content_type):
-    path = os.path.join(os.path.dirname(__file__), 'templates/' + filename)
-    self.response.headers['Content-Type'] = content_type
-    self.response.out.write(template.render(path, template_values))
-
-class StartGadgetHandler(StartHandler):
-  def GetTemplateFilename(self):
-    return 'config.xml'
-
-  def GetContentType(self):
-    return 'text/xml'
+    path = os.path.join(os.path.dirname(__file__), 'templates/config.xml')
+    self.response.headers['Content-Type'] = 'text/xml' 
+    self.response.out.write(template.render(path, {}))
 
 class GetPresetsHandler(webapp.RequestHandler):
   def get(self):
@@ -54,7 +31,7 @@ class GetPresetsHandler(webapp.RequestHandler):
 
 
 class GetPresetHandler(webapp.RequestHandler):
-  def post(self):
+  def get(self):
     preset_key = self.request.get('preset_key')
     preset = models.TriagePreset.get(preset_key)
     json = simplejson.dumps(preset.GetDict())
@@ -105,7 +82,7 @@ class SavePresetHandler(webapp.RequestHandler):
 
 application = webapp.WSGIApplication(
                                      [
-                                     ('/web/gadget', StartGadgetHandler),
+                                     ('/web/gadget', ConfigHandler),
                                      ('/web/edit', EditPresetHandler),
                                      ('/web/presets', GetPresetsHandler),
                                      ('/web/preset', GetPresetHandler),

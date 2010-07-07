@@ -1,6 +1,10 @@
 #!/usr/bin/python2.4
 import logging
 import os
+from time import strftime
+
+from django.utils import simplejson
+from google.appengine.api import urlfetch
 
 from waveapi import events
 from waveapi import robot
@@ -96,15 +100,19 @@ def OnGadgetChanged(event, wavelet):
   gadget = blip.first(element.Gadget, url=util.GetGadgetUrl())
   preset_key = gadget.preset_key
   gadget.delete()
-  preset = models.TriagePreset.get(preset_key)
-  if preset:
-    sources = preset.GetSourcesList()
+  url = 'http://bug-triagey.appspot.com/web/preset?preset_key=%s' % preset_key
+  logging.info(url)
+  result = urlfetch.fetch(url)
+  logging.info(result)
+  if result.status_code == 200:
+    sources  = simplejson.loads(result.content)['sources']
+    logging.info(sources)
     for source in sources:
       AddItems(blip, source)
 
 def OnSelfAdded(event, wavelet):
   if len(wavelet.title) < 2:
-    wavelet.title = 'Bug Triage'
+    wavelet.title = 'Bug Triage: %s' % strftime('%Y-%m-%d')
   wavelet.root_blip.append('\n')
   gadget = element.Gadget(url=util.GetGadgetUrl())
   wavelet.root_blip.append(gadget)
@@ -112,7 +120,7 @@ def OnSelfAdded(event, wavelet):
 
 if __name__ == '__main__':
   removey = robot.Robot('Bug Triagey',
-      image_url='http://bug-triagey.appspot.com/static/avatar.jpg',
+      image_url='http://bug-triagey.appspot.com/static/avatar.png',
       profile_url='')
   removey.register_handler(events.WaveletSelfAdded, OnSelfAdded)
   removey.register_handler(events.GadgetStateChanged, OnGadgetChanged)
