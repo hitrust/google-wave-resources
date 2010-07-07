@@ -17,53 +17,82 @@ import gdata.data
 import atom.http_core
 import atom.core
 
-import item
 import models
 import util
 
-def AddItems(blip, source):
-  items = GetItems(source['project'], source['label'])
-  blip.append('Open issues for: %s, %s \n' % (source['project'], source['label']))
-  for item in items:
-    blip.append('\n')
-    blip.append(item.title)
-    blip.append('\n')
-    blip.append('Looking at this? ')
-    blip.append(element.Button(name=(item.id + '-looking'), caption='No'))
-    blip.append('Responded? ')
-    blip.append(element.Button(name=(item.id + '-responded'), caption='No'))
-    blip.all(item.title).annotate('link/manual', item.link)
-    blip.append('\n')
-  blip.append('\n')
+TRIAGEY_ID = 'bug-triagey/issueid'
 
-def GetItems(project, label):
+def AddItems(blip, source):
+  # Store some handy local vars
+  project = source['project']
+  status = source['status']
+  label = source['label']
+  labeled_buckets = GetItems(project, status, label)
+
+  # Append a descriptive header
+  header = 'Issues for %s with status %s, sorted by %s:' % (project, status, label)
+  blip.append(header, [('style/fontWeight', 'bold')])
+  blip.append('\n\n')
+
+  for bucket_label, issues in labeled_buckets.items():
+    header_label = '%s:' % bucket_label
+    blip.append(header_label, [('style/fontWeight', 'bold')])
+    for issue in issues:
+      issue_id = issue.id.text.split('/')[-1]
+      issue_link = 'http://code.google.com/p/%s/issues/detail?id=%s' % (source['project'], issue_id)
+      issue_title = issue.title.text
+      blip.append('\n', [])
+      blip.append(issue_title, [('link/manual', issue_link), (TRIAGEY_ID, issue_id)])
+      blip.append('\n', [('link/manual', None)])
+      blip.append('Looking at this? ')
+      blip.append(element.Button(name=(issue_id + '-looking'), value='No'))
+      blip.append(' Responded? ')
+      blip.append(element.Button(name=(issue_id + '-responded'), value='No'))
+      blip.append('\n')
+    blip.append('\n')
+
+def GetItems(project, status, bucket_label):
   issues_client = gdata.projecthosting.client.ProjectHostingClient()
   project_name = project
-  query = gdata.projecthosting.client.Query(label=label, status='New')
+  query = gdata.projecthosting.client.Query(status=status)
   feed = issues_client.get_issues(project_name, query=query)
-  items = []
+  labeled_buckets = {'NOLABEL': []}
   for issue in feed.entry:
-    issue_id = issue.id.text.split('/')[-1]
-    issue_link = 'http://code.google.com/p/%s/issues/detail?id=%s' % (project_name, issue_id)
-    items.append(item.TriageItem(issue_id, issue.title.text, issue_link))
-  return items
+    in_bucket = False
+    for label in issue.label:
+      if not in_bucket and label.text.find(bucket_label) > -1:
+        if label.text not in labeled_buckets:
+          labeled_buckets[label.text] = []
+        labeled_buckets[label.text].append(issue)
+        in_bucket = True
+    if not in_bucket:
+      labeled_buckets['NOLABEL'].append(issue)
+  return labeled_buckets
 
 def OnButtonClicked(event, wavelet):
+  # Find out who clicked the button
   clicker = event.modified_by.split('@')[0]
+
+  # Find the button element
   button_name = event.button_name
   button = event.blip.first(element.Button, name=button_name)
-  if button:
-    value = 'Yes (%s)' % clicker
-    button.update_element({'value': value})
 
-def OnSelfAdded(event, wavelet):
-  blip = event.blip
-  gadget = element.Gadget(url=util.GetGadgetUrl())
-  blip.append(gadget)
+  # Change button label to show who clicked it
+  value = 'Yes (%s)' % clicker
+  button.update_element({'value': value})
+
+  # Strike out the relevant issue if they clicked responded button
+  if button_name.find('looking') > -1:
+    return
+  issue_id = button_name.split('-')[0]
+  for annotation in wavelet.root_blip.annotations:
+    if annotation.name == TRIAGEY_ID and annotation.value == issue_id:
+      start = annotation.start
+      end = annotation.end
+      event.blip.range(start, end).annotate('style/textDecoration', 'line-through')
 
 def OnGadgetChanged(event, wavelet):
   blip = event.blip
-  logging.info('gadget changed')
   gadget = blip.first(element.Gadget, url=util.GetGadgetUrl())
   preset_key = gadget.preset_key
   gadget.delete()
@@ -72,6 +101,14 @@ def OnGadgetChanged(event, wavelet):
     sources = preset.GetSourcesList()
     for source in sources:
       AddItems(blip, source)
+
+def OnSelfAdded(event, wavelet):
+  if len(wavelet.title) < 2:
+    wavelet.title = 'Bug Triage'
+  wavelet.root_blip.append('\n')
+  gadget = element.Gadget(url=util.GetGadgetUrl())
+  wavelet.root_blip.append(gadget)
+
 
 if __name__ == '__main__':
   removey = robot.Robot('Bug Triagey',

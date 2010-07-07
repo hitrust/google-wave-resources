@@ -13,8 +13,10 @@ import robot
 class RobotTest(unittest.TestCase):
 
   def testGetItems(self):
-    robot.GetItems()
-    pass
+    labeled_buckets = robot.GetItems('google-wave-resources', 'New', 'ApiType')
+    for label, issues in labeled_buckets.items():
+      print label
+      print issues
 
 if __name__ == '__main__':
   unittest.main()

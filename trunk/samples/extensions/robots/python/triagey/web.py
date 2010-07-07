@@ -37,14 +37,10 @@ class StartHandler(webapp.RequestHandler):
 
 class StartGadgetHandler(StartHandler):
   def GetTemplateFilename(self):
-    return 'start_gadget.xml'
+    return 'config.xml'
 
   def GetContentType(self):
     return 'text/xml'
-
-class StartPageHandler(StartHandler):
-  def GetTemplateFilename(self):
-    return 'start_page.html'
 
 class GetPresetsHandler(webapp.RequestHandler):
   def get(self):
@@ -60,7 +56,6 @@ class GetPresetsHandler(webapp.RequestHandler):
 class GetPresetHandler(webapp.RequestHandler):
   def post(self):
     preset_key = self.request.get('preset_key')
-    logging.info('preset_kkey %s' % preset_key)
     preset = models.TriagePreset.get(preset_key)
     json = simplejson.dumps(preset.GetDict())
     self.response.out.write(json)
@@ -88,9 +83,12 @@ class SavePresetHandler(webapp.RequestHandler):
     while source != '':
       source_project = self.request.get('source_project' + str(source_num))
       source_label = self.request.get('source_label' + str(source_num))
+      source_status = self.request.get('source_status' + str(source_num))
       logging.info('project:' + source_project)
       logging.info('label:' + source_label)
-      sources.append({'type': 'code', 'project': source_project, 'label': source_label})
+      logging.info('status:' + source_label)
+      sources.append({'type': 'code', 'project': source_project, 
+                      'label': source_label, 'status': source_status})
       source_num += 1
       source = self.request.get('source' + str(source_num))
 
@@ -107,8 +105,7 @@ class SavePresetHandler(webapp.RequestHandler):
 
 application = webapp.WSGIApplication(
                                      [
-                                     ('/web/start/gadget', StartGadgetHandler),
-                                     ('/web/start', StartPageHandler),
+                                     ('/web/gadget', StartGadgetHandler),
                                      ('/web/edit', EditPresetHandler),
                                      ('/web/presets', GetPresetsHandler),
                                      ('/web/preset', GetPresetHandler),

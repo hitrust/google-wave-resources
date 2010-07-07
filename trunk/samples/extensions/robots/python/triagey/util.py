@@ -1,7 +1,7 @@
 import os
 
 def GetGadgetUrl():
-  return GetServer() + '/web/start/gadget?nocache=true'
+  return GetServer() + '/web/gadget?nocache=true'
 
 def GetServer():
   server = os.environ['SERVER_NAME']
