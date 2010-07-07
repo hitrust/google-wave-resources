@@ -1,7 +1,7 @@
 import os
 
 def GetGadgetUrl():
-  return GetServer() + '/web/gadget?nocache=true'
+  return 'http://bug-triagey.appspot.com/web/gadget?nocache=true'
 
 def GetServer():
   server = os.environ['SERVER_NAME']
