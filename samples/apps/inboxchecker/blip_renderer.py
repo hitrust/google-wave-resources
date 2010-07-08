@@ -44,6 +44,7 @@ def to_html(blip):
     if 'link' in annotation.name:
       indices[start]['linkStarts'].append(annotation)
       indices[min(end, len(text)-1)]['linkEnds'].append(annotation)
+      logging.info(annotation)
 
 
   for element_ind, element in blip._elements.items():
@@ -57,7 +58,7 @@ def to_html(blip):
     saw_new = False
     if data['element']:
       element = data['element']
-      if element.class_type == 'LINE' and data['index'] > 1:
+      if element.type == 'LINE' and data['index'] > 1:
         html += '<br>'
 
     if len(data['annotationEnds']) > 0:
@@ -92,11 +93,12 @@ def to_html(blip):
       open_span = True
     html = html + data['character']
     span_now = False
+
+    # End anchor goes after the character
+    if len(data['linkEnds']) > 0:
+      html += '</a>'
+
   if open_span:
     html += '</span>'
-
-  # End anchor goes after the character
-  if len(data['linkEnds']) > 0:
-    html += '</a>'
 
   return html
