@@ -756,10 +756,10 @@ Geometry.prototype.createForm = function(parent_div) {
   div.appendChild(document.createTextNode(' '));
   var deleteButton = SharedMap.createButton('Delete');
   deleteButton.onclick = function() {
-    me.saveData(true);
     me.disableEditingOverlay();
     me.getSharedMap().map.closeInfoWindow();
     me.getSharedMap().map.removeOverlay(me.getOverlay());
+    me.saveData(true);
   };
   div.appendChild(deleteButton);
   div.appendChild(document.createElement('br'));
