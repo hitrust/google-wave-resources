@@ -70,7 +70,7 @@ class FetchProfileHandler(oauth_handler.DataRequestHandler):
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
-    self.response.out.write('<html><head><meta name="google-site-verification" content="qHF5ruQQp1eWXVkXD_B3Q4EzdoSstzZu6_thYkqPPLQ" /></head></html>')
+    self.redirect('/app/inbox')
 
 def main():
   application = webapp.WSGIApplication([
