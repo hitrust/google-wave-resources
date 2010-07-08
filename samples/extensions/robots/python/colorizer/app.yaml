@@ -1,0 +1,19 @@
+application: colorizer-bot
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /_wave/.*
+  script: wave.py
+
+- url: /installer.xml
+  static_files: installer.xml
+  upload: installer.xml
+  mime_type: text/xml
+
+- url: /installer_corp.xml
+  static_files: installer_corp.xml
+  upload: installer_corp.xml
+  mime_type: text/xml
+

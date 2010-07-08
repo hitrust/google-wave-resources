@@ -1,0 +1,13 @@
+<extension
+    name="Colorizer"
+    thumbnailUrl="http://www.astro.cf.ac.uk/aboutus/forteachersandschools/resources/rainbow-th.jpg"
+    description="Select text and click the toolbar icon to randomly color it!">
+  <author name="Google"/>
+  <menuHook location="toolbar" text="Colorize!"
+    iconUrl="http://www.astro.cf.ac.uk/aboutus/forteachersandschools/resources/rainbow-th.jpg">
+    <annotateSelection key="colorizer" value=""/>
+    <addParticipants>
+      <participant id="colorizer-bot@appspot.com"/>
+    </addParticipants>
+  </menuHook>
+</extension>
