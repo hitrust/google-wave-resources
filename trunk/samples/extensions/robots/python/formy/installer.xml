@@ -1,0 +1,10 @@
+<extension name="Formy" description="Creates a new form."
+  thumbnailUrl="http://sites.google.com/site/mori79b/_/rsrc/1258609508780/icons-logos/Forms-icon.gif">
+  <author name="Gooogle"/>
+  <menuHook location="NEW_WAVE_MENU" text="New Form">
+    <createNewWave>
+      <participant id="formy-bot@appspot.com"/>
+    </createNewWave>
+  </menuHook>
+  <savedSearchHook name="Forms" query="with:formy-bot"/>
+</extension>
