@@ -77,8 +77,10 @@ function receiveState(state) {
   // Remove deleted overlays
   for (geometryKey in sharedMap.geometries) {
     var geometry = sharedMap.geometries[geometryKey]; 
-    if (!state.get(geometryKey) & geometry.notSavedYet == false) {
-      sharedMap.map.removeOverlay(geometry.getOverlay());
+    if (!state.get(geometryKey)) {
+      if (geometry) {
+        sharedMap.map.removeOverlay(geometry.getOverlay());
+      }
       sharedMap.geometries[geometryKey] = null;
     }
   }
@@ -280,13 +282,18 @@ Geometry.prototype.createOverlay = function() {
       GEvent.trigger(me.getSharedMap().editControl, 'view');
     });
     GEvent.addListener(overlay, 'lineupdated', function() {
-      me.updateCoordinatesFromOverlay();
       var sharedMap = me.getSharedMap();
       if (sharedMap.mode == 'line' || sharedMap.mode == 'poly') {
         sharedMap.statusControl.setText('Click on the final point to finish the line.');
       }
-      me.saveData();
-     });
+      var oldDataString = me.getDataString();
+      me.updateCoordinatesFromOverlay();
+      // Check if coordnates changed
+      var newDataString = me.getDataString();
+      if (oldDataString != newDataString) {
+        me.saveData();
+      }
+    });
   }
   GEvent.addListener(overlay, 'click', function() {
     me.showInfoWindow();
@@ -335,6 +342,8 @@ Geometry.prototype.startEditingOverlay = function() {
   if (this.isPoly()) {
     if (this.getOverlay().getVertexCount() == 1) {
       this.getOverlay().enableDrawing();
+      this.tooltip = new MapTooltip(this.getOverlay(), 'Click on the final point to finish the line.');
+      this.getSharedMap().map.addOverlay(this.tooltip);  
     }  else {
       this.getOverlay().enableEditing();
     }
@@ -360,6 +369,9 @@ Geometry.prototype.disableEditingOverlay = function() {
     this.getOverlay().setStrokeStyle({color: Geometry.COLOR_VIEW});
     if (this.getType() == Geometry.TYPE_POLY) {
       this.getOverlay().setFillStyle({color: Geometry.COLOR_VIEW});
+    }
+    if (this.tooltip) {
+     this.tooltip.remove();
     }
     GEvent.clearListeners(this.getOverlay(),  'mouseover');
     GEvent.clearListeners(this.getOverlay(),  'mouseout');
@@ -515,7 +527,9 @@ SharedMap.prototype.createMap = function() {
     }
     // Disable any lines still in edit mode
     me.processGeometries(function(geometry) {
-      geometry.disableEditingOverlay();
+      if (geometry) {
+        geometry.disableEditingOverlay();
+      }
     });
     // Create either a new marker or a new line, depending on mode
     var geometry = new Geometry();
@@ -604,7 +618,9 @@ SharedMap.prototype.removeEditingUI_ = function() {
 
   this.map.disableGoogleBar();
   this.processGeometries(function(geometry) {
-    geometry.disableEditingOverlay();
+    if (geometry) {
+      geometry.disableEditingOverlay();
+    }
   });
 }
 
@@ -757,6 +773,7 @@ Geometry.prototype.createForm = function(parent_div) {
   var deleteButton = SharedMap.createButton('Delete');
   deleteButton.onclick = function() {
     me.disableEditingOverlay();
+    me.getSharedMap().geometries[geometryKey] = null;
     me.getSharedMap().map.closeInfoWindow();
     me.getSharedMap().map.removeOverlay(me.getOverlay());
     me.saveData(true);
@@ -765,7 +782,11 @@ Geometry.prototype.createForm = function(parent_div) {
   div.appendChild(document.createElement('br'));
   div.appendChild(document.createElement('br'));
   var span = document.createElement('span');
-  span.innerHTML = 'You can now drag the green marker to change the location.';
+  if (me.isPoint()) {
+    span.innerHTML = 'You can now drag the green marker to change the location.';
+  } else {
+    span.innerHTML = 'You can now drag the handles to change the shape.';
+  } 
   div.appendChild(span);
   return div;
 };
@@ -942,6 +963,84 @@ StatusControl.prototype.setText = function(text) {
 
 StatusControl.prototype.getDefaultPosition = function() {
   return new GControlPosition(G_ANCHOR_BOTTOM_LEFT, new GSize(460, 5));
+}
+
+var MapTooltip = function(poly, html) {
+  this.poly = poly;
+  this.html = html;
+}
+
+MapTooltip.prototype = new GOverlay();
+
+MapTooltip.prototype.initialize = function(map) {
+  var me = this;
+
+  if (!me.div) {
+    var div = document.createElement('div');
+  } else {
+    var div = me.div;
+  }
+
+  div.style.width = '150px';
+  div.style.color = 'grey';
+  div.style.backgroundColor = 'white';
+  div.style.border = '1px solid grey';
+  div.style.padding = '5px';
+  div.style.fontSize = '11px';
+	
+  // Positioning the tooltip
+  div.innerHTML = this.html;
+  div.style.position = 'absolute';
+  div.style.zIndex = '1000';
+
+  var offsetX = 10;
+  var offsetY = 0;
+  
+  var bounds = map.getBounds();
+  rightEdge = map.fromLatLngToDivPixel(bounds.getNorthEast()).x;
+  bottomEdge = map.fromLatLngToDivPixel(bounds.getSouthWest()).y;
+  
+  GEvent.addListener(this.poly, 'lineupdated', function() {
+    var lastVertex = me.poly.getVertex(me.poly.getVertexCount()-1);
+    var latlng = lastVertex;
+
+    var pixelPosX = (map.fromLatLngToDivPixel(latlng)).x + offsetX;
+    var pixelPosY = (map.fromLatLngToDivPixel(latlng)).y - offsetY;
+    div.style.left = pixelPosX + 'px';
+    div.style.top = pixelPosY + 'px';
+
+    map.getPane(G_MAP_FLOAT_PANE).appendChild(div);
+    
+    // Adjusting tooltip position
+    // This have to be done after the tooltip has been added to the map for the offsetWidth and offsetHeight to be able 
+    // to calculate the correct dimensions of the div containing the tooltip
+        
+    // Check to see if the tooltip is outside right edge of the map
+    if ( (pixelPosX + div.offsetWidth) > rightEdge ) {
+      div.style.left = (rightEdge - div.offsetWidth - 10) + 'px';
+    }
+
+    // Check to see if the tooltip is outside the bottom edge of the map
+    if ( (pixelPosY + div.offsetHeight) > bottomEdge ) {
+      div.style.top = (bottomEdge - div.offsetHeight - 10) + 'px';
+    }
+  });
+  GEvent.addListener(this.poly, 'endline', function() {
+    div.style.display = 'none';
+  });
+
+  this.map = map;
+  this.div = div;
+}
+
+MapTooltip.prototype.remove = function() {
+  if(this.div != null) {
+    this.div.parentNode.removeChild(this.div);	
+  }
+}
+
+MapTooltip.prototype.redraw = function(force) {
+  // Not implemented
 }
  
 function saveState(key, value) {
