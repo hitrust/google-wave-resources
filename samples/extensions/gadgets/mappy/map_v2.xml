@@ -8,7 +8,6 @@
   <UserPref name="selection" default_value="${selection}" datatype="string" />
   <Content type="html"><![CDATA[
 <head>
- <link type="text/css" href="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/jquery-ui-1.7.2.custom.css" rel="stylesheet" /> 
  <style type="text/css" media="screen">
    body { font-size:14px; font-family:Arial, sans serif;}
    #map { float:left; width:700px; height:500px; margin-top:10px; }
@@ -29,9 +28,6 @@
    .accordion, .tabs { font-size:12px!important; width:300px; }
    .ui-dialog, .ui-slider { font-size:12px!important; }
    .icon { float:left; position:absolute; cursor:pointer; cursor:hand; padding:3px; }
-   #dropdown li { list-style:none; margin: 0px; margin-bottom: 3px; padding: 3px; text-align:center; }
-   #dropdown li:hover { cursor:pointer; cursor:hand; }
-   #dropdown {position: absolute; margin-left: 0px; padding-left: 0px;}
    #dialog {position: absolute; margin-left: 30%; top: 150px;}
    #info {background: white; padding: 3px; border: 1px solid black; box-shadow: 2px 2px 3px #888; position: absolute; left: 30px; top: 7px; font-size:11px;}
   </style>
@@ -41,7 +37,7 @@
   google.load("maps", "2");
   google.load("search", "1");
 </script>
-<script language="JavaScript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
+<script src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
 <script
   src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mappy/map_v2.js"></script>
 </head>
