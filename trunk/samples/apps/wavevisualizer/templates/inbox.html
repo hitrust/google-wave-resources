@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block body %}
+<p>Select a wave to visualize it:</p>
+
+{% for digest in digests %}
+  <a href="/app/fetchwave?wave_id={{ digest.wave_id|urlencode }}"><b>{{digest.title}}</b></a>
+  <br><br>
+{% endfor %}
+{% endblock %}

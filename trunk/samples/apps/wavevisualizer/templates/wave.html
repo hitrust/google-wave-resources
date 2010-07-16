@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="http://thejit.org/static/v20/Jit/jit-yc.js"></script>
+<link type="text/css" href="http://thejit.org/static/v20/Jit/Examples/css/Spacetree.css" rel="stylesheet" />
+{% endblock %}
+{% block body %}
+  <div id="infovis" style="width:99%%; height:99%%;"></div>
+  <script>
+var json = {{ json }};
+
+var st = new $jit.ST({
+  //id of viz container element
+  injectInto: 'infovis',
+  //set duration for the animation
+  duration: 100,
+  //set distance between node and its children
+  levelDistance: 50,
+  levelsToShow: 10,
+  offsetX: (window.innerWidth/2 - 100),
+  //enable panning
+  Navigation: {
+    enable:true,
+    panning:true
+  },
+  //set node and edge styles
+  //set overridable=true for styling individual
+  //nodes or edges
+  Node: {
+    height: 20,
+    width: 120,
+    type: 'rectangle',
+    color: '#aaa',
+    overridable: true
+  },
+  Edge: {
+    type: 'bezier',
+    overridable: true
+  },
+  Tips: {
+    enable: true,
+    offsetX: 10,
+    offsetY: 10,
+    onShow: function(tip, node) {
+      tip.innerHTML = node.data.snippet;
+      tip.style.overflow = 'hidden';
+    }
+  },
+
+  //This method is called on DOM label creation.
+  //Use this method to add event handlers and styles to
+  //your node.
+  onCreateLabel: function(label, node){
+    label.id = node.id;
+    label.innerHTML = node.name;
+    //set label styles
+    var style = label.style;
+    style.width = 120 + 'px';
+    style.height = 17 + 'px';
+    style.cursor = 'pointer';
+    style.cursor = 'pointer';
+    if (node.name.indexOf('blip') > -1) {
+      style.backgroundColor = '#00ff00';
+    } else {
+      style.backgroundColor = '#0000ff';
+    }
+    style.fontSize = '0.7em';
+    style.textAlign= 'center';
+    style.paddingTop = '3px';
+    label.onclick = function() {
+      window.open(node.data.url, '_blank');
+    };
+  },
+});
+
+//load json data
+st.loadJSON(json);
+
+//compute node positions and layout
+st.compute();
+
+//emulate a click on the root node.
+st.onClick(st.root);
+ </script>
+{% endblock %}
