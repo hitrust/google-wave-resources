@@ -11,7 +11,7 @@ def render_thread(thread, wavelet):
   if len(thread.id) < 2:
     id = 'root'
   else:
-    id = thread.id
+    id = 't'+thread.id
   node['id'] = id
   node['name'] = 'thread:' + id
   node['data'] = {
@@ -28,9 +28,12 @@ def render_blip(blip, wavelet):
   node['id'] = blip.blip_id
   node['name'] = 'blip: ' + blip.blip_id
   url = 'http://wave.google.com/wave/waveref/%s/%s/~/conv+root/%s' % (wavelet.domain, wavelet.wave_id.split('!')[1], blip.blip_id)
-  logging.info(url)
+  if len(blip.text) > 150:
+    snippet = blip.text[0:150] + '...'
+  else:
+    snippet = blip.text
   node['data'] = {
-      'snippet': blip.text[0:100],
+      'snippet': snippet,
       'type': 'blip',
       'url': url}
   node['children'] = []

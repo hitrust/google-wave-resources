@@ -15,8 +15,8 @@ var st = new $jit.ST({
   duration: 100,
   //set distance between node and its children
   levelDistance: 50,
-  levelsToShow: 10,
-  offsetX: (window.innerWidth/2 - 100),
+  levelsToShow: 30,
+//  offsetX: (window.innerWidth/2 - 100),
   //enable panning
   Navigation: {
     enable:true,
@@ -51,24 +51,24 @@ var st = new $jit.ST({
   //your node.
   onCreateLabel: function(label, node){
     label.id = node.id;
-    label.innerHTML = node.name;
     //set label styles
     var style = label.style;
     style.width = 120 + 'px';
     style.height = 17 + 'px';
     style.cursor = 'pointer';
-    style.cursor = 'pointer';
-    if (node.name.indexOf('blip') > -1) {
-      style.backgroundColor = '#00ff00';
-    } else {
-      style.backgroundColor = '#0000ff';
-    }
     style.fontSize = '0.7em';
     style.textAlign= 'center';
     style.paddingTop = '3px';
-    label.onclick = function() {
-      window.open(node.data.url, '_blank');
-    };
+    if (node.data.type == 'thread') {
+      label.innerHTML = node.data.snippet;
+      style.backgroundColor = '#C9E2FC';
+    } else {
+      label.innerHTML = node.data.snippet.substr(0, 20) + '...';
+      style.backgroundColor = '#ffffff';
+      label.onclick = function() {
+        window.open(node.data.url, '_blank');
+      };
+    }
   },
 });
 
