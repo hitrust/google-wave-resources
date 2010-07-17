@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block head %}
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script> 
+  <script type="text/javascript"> 
+    google.load('visualization', '1', {packages: ['annotatedtimeline']});
+    var rows = {{ json }};
+
+    function showTimeline() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('date', 'Date');
+      data.addColumn('number', 'Total Blips');
+      data.addRows(rows.length);
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var year = row['year'];
+        var month = row['month']-1;
+        var day = row['day'];
+        var total = row['total'];
+        data.setValue(i, 0, new Date(year, month, day));
+        data.setValue(i, 1, total);
+      }
+
+      var annotatedtimeline = new google.visualization.AnnotatedTimeLine(
+          document.getElementById('visualization'));
+      annotatedtimeline.draw(data, {'displayAnnotationsFilter': false,
+          'displayAnnotations': false});
+    }
+
+    google.setOnLoadCallback(showTimeline);
+  </script>
+{% endblock %}
+{% block body %}
+  <h1>Timeline: {{ title }}</h1>
+  <div id="visualization" style="width:99%%; height:500px;"></div>
+ </script>
+{% endblock %}
