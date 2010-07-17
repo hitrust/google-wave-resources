@@ -10,7 +10,8 @@ from google.appengine.ext.webapp import template
 
 from waveapi import search
 import oauth_handler
-import wave_renderer
+import tree_renderer
+import timeline_renderer
 
 class InboxHandler(oauth_handler.DataRequestHandler):
 
@@ -19,7 +20,7 @@ class InboxHandler(oauth_handler.DataRequestHandler):
       return
 
     query = self.request.get('query', 'in:inbox')
-    num_results = self.request.get('numResults', '20')
+    num_results = self.request.get('numResults', '50')
     results = self._service.search(query=query, num_results=num_results)
     template_values = {
       'digests': results.digests
@@ -33,15 +34,23 @@ class FetchWaveHandler(oauth_handler.DataRequestHandler):
   def get(self):
     if not self.get_token():
       return
-    SAMPLE_WAVE_ID = 'googlewave.com!w+SgYrEnoLE'
-    wave_id = self.request.get('wave_id', SAMPLE_WAVE_ID)
+    wave_id = self.request.get('wave_id')
     wave_id = wave_id.replace('%2B', '+')
     wavelet = self._service.fetch_wavelet(wave_id)
-    tree = wave_renderer.render_wavelet(wavelet)
+
+    format = self.request.get('format', 'tree')
+    if format == 'tree':
+      data = tree_renderer.render_wavelet(wavelet)
+      file = 'wave_tree.html'
+    else:
+      data = timeline_renderer.render_wavelet(wavelet)
+      file = 'wave_timeline.html'
+
     template_values = {
-      'json': simplejson.dumps(tree) 
+      'json': simplejson.dumps(data),
+      'title': wavelet.title
     }
-    path = os.path.join(os.path.dirname(__file__), 'templates/wave.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/'+file)
     self.response.out.write(template.render(path, template_values))
 
 
