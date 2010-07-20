@@ -17,6 +17,7 @@ var st = new $jit.ST({
   //set distance between node and its children
   levelDistance: 50,
   levelsToShow: 30,
+  constrained: false,
 //  offsetX: (window.innerWidth/2 - 100),
   //enable panning
   Navigation: {
@@ -27,8 +28,8 @@ var st = new $jit.ST({
   //set overridable=true for styling individual
   //nodes or edges
   Node: {
-    height: 20,
-    width: 120,
+    height: 17,
+    width: 100,
     type: 'rectangle',
     color: '#aaa',
     overridable: true
@@ -54,12 +55,13 @@ var st = new $jit.ST({
     label.id = node.id;
     //set label styles
     var style = label.style;
-    style.width = 120 + 'px';
-    style.height = 17 + 'px';
+    style.width = 100 + 'px';
+    style.height = 14 + 'px';
     style.cursor = 'pointer';
     style.fontSize = '0.7em';
     style.textAlign= 'center';
     style.paddingTop = '3px';
+    style.overflow = 'hidden';
     if (node.data.type == 'thread') {
       label.innerHTML = node.data.snippet;
       style.backgroundColor = '#C9E2FC';
@@ -81,5 +83,7 @@ st.compute();
 
 //emulate a click on the root node.
 st.onClick(st.root);
+
+st.switchPosition('top', 'replot');
  </script>
 {% endblock %}
