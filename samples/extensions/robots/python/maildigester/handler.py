@@ -32,8 +32,19 @@ class MailReceiver(mail_handlers.InboundMailHandler):
     receiver = urllib.unquote(self.request.path.split('_ah/mail/')[1])
     prefix = receiver.split('@')[0]
     sender = CleanAddress(message.sender)
-    subject = CleanSubject(message.subject)
-    body = CleanBodies(message.bodies)
+    if hasattr(message, 'subject'):
+      subject = CleanSubject(message.subject)
+    else:
+      subject = 'untitled'
+    text_bodies = message.bodies(content_type='text/plain')
+    use_html = False
+    if len(list(text_bodies)) > 0:
+      body = CleanBodies(message.bodies)
+    else:
+      html_bodies = message.bodies(content_type='text/html')
+      body = CleanHtmlBodies(message.bodies)
+      use_html = True
+
     #logging.info('Received mail message from %r to %r: %r \n %r',
     #             sender, receiver, subject, body)
 
@@ -43,7 +54,9 @@ class MailReceiver(mail_handlers.InboundMailHandler):
     maildigest = query.get()
     if maildigest is None:
       # Try to figure out wave address of sender
-      if sender.find('gmail.com') > -1:
+      if sender == 'mail-noreply@google.com':
+        sender = subject.split('from')[1].strip()
+      if sender.find('gmail.com') > -1 or sender.find('googlemail.com') > -1:
         wave_address = sender.split('@')[0] + '@googlewave.com'
       else:
         wave_address = sender
@@ -61,7 +74,7 @@ class MailReceiver(mail_handlers.InboundMailHandler):
       SetDigestWaveTitle(digest_wave, receiver)
 
     # Update digest wave
-    UpdateDigestWave(maildigest, subject, body)
+    UpdateDigestWave(maildigest, subject, body, use_html)
 
 def CleanAddress(address):
   if '<' in address and '>' in address:
@@ -76,6 +89,8 @@ def CleanSubject(subject):
     cleaned_subject = decoded_header[0][0].decode(decoded_header[0][1])
   else:
     cleaned_subject = decoded_header[0][0]
+  cleaned_subject = cleaned_subject.replace('\t', ' ')
+  cleaned_subject = cleaned_subject.replace('\r', ' ')
   return cleaned_subject
 
 def CleanBodies(bodies):
@@ -89,6 +104,31 @@ def CleanBodies(bodies):
   all_body.replace('\r', '\n')
   return all_body
 
+def CleanHtmlBodies(bodies):
+  from BeautifulSoup import BeautifulSoup, NavigableString
+
+  html_bodies = bodies(content_type='text/html')
+  all_body = ''
+  for body in html_bodies:
+    all_body += body[1].decode()
+  all_body.encode('utf-8')
+  acceptable_elements = ['p', 'div', 'b', 'strong', 'i', 'em', 'u']
+  soup = BeautifulSoup( all_body.strip() )
+  def cleanup( soup ):
+    for tag in soup:
+      if not isinstance( tag, NavigableString):
+        if tag.name == 'a':
+          href = tag['href'].replace('&', '&amp;')
+          tag.replaceWith(href)
+        elif tag.name not in acceptable_elements:
+          tag.extract()
+        else:
+          for attr in tag._getAttrMap().keys():
+            del tag[attr]
+          cleanup(tag)
+  cleanup(soup)
+  return unicode(soup)
+
 def SetDigestWaveTitle(digest_wave, receiver):
   digest_wave.title = 'Digest for emails sent to: %s' % receiver
   try:
@@ -96,12 +136,16 @@ def SetDigestWaveTitle(digest_wave, receiver):
   except urlfetch.DownloadError:
     robotty.submit(digest_wave)
 
-def UpdateDigestWave(maildigest, subject, body):
+def UpdateDigestWave(maildigest, subject, body, use_html=False):
   digest_wave = robotty.blind_wavelet(maildigest.wave_json)
   new_blip = digest_wave.reply('\n')
   new_blip.append(subject, [('style/fontWeight', 'bold')])
-  new_blip.append('\n')
-  new_blip.append(body, [('style/fontWeight', None)])
+  new_blip.append('\n', [('style/fontWeight', None)])
+  if use_html:
+    new_blip.append_markup(body)
+  else:
+    new_blip.append(body)
+
   try:
     robotty.submit(digest_wave)
   except urlfetch.DownloadError:
