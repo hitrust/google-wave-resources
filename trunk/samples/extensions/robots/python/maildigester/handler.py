@@ -34,8 +34,8 @@ class MailReceiver(mail_handlers.InboundMailHandler):
     sender = CleanAddress(message.sender)
     subject = CleanSubject(message.subject)
     body = CleanBodies(message.bodies)
-    logging.info('Received mail message from %r to %r: %r \n %r',
-                 sender, receiver, subject, body)
+    #logging.info('Received mail message from %r to %r: %r \n %r',
+    #             sender, receiver, subject, body)
 
     # Check if prefix is already associated with a digest wave
     query = db.Query(MailDigestWave)
