@@ -62,7 +62,7 @@ class MailReceiver(mail_handlers.InboundMailHandler):
         wave_address = sender
       participants = [wave_address]
       # Create new wave
-      digest_wave = robotty.new_wave('googlewave.com',
+      digest_wave = robotty.new_wave(credentials.DOMAIN,
                                     participants, submit=True)
       # Save in datastore so we can recreate later
       maildigest = MailDigestWave()

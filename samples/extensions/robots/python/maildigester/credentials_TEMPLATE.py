@@ -1,5 +1,7 @@
 # Fill this out and rename credentials.py
 
+DOMAIN = 'googlewave.com'
+
 VERIFICATION_TOKEN = ''
 
 ST = ''
