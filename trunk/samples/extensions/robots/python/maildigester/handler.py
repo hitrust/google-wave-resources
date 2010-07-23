@@ -28,41 +28,40 @@ class MailDigestWave(db.Model):
 
 class MailReceiver(mail_handlers.InboundMailHandler):
    def receive(self, message):
+    # Parse all the needed info from the message/request
     receiver = urllib.unquote(self.request.path.split('_ah/mail/')[1])
     prefix = receiver.split('@')[0]
     sender = CleanAddress(message.sender)
     subject = CleanSubject(message.subject)
-    logging.info('Received mail message from %r to %r: %r', sender, receiver, subject)
-    bodies = message.bodies(content_type='text/plain')
-    all_body = ''
-    for body in bodies:
-      all_body += body[1].decode()
-    all_body.encode('utf-8')
-    logging.info(all_body)
-    return
+    body = CleanBodies(message.bodies)
+    logging.info('Received mail message from %r to %r: %r \n %r',
+                 sender, receiver, subject, body)
 
+    # Check if prefix is already associated with a digest wave
     query = db.Query(MailDigestWave)
     query.filter('prefix = ', prefix)
     maildigest = query.get()
     if maildigest is None:
-      maildigest = MailDigestWave()
-      maildigest.prefix = prefix
-      # Try to figure out wave address
+      # Try to figure out wave address of sender
       if sender.find('gmail.com') > -1:
         wave_address = sender.split('@')[0] + '@googlewave.com'
       else:
         wave_address = sender
       participants = [wave_address]
+      # Create new wave
       digest_wave = robotty.new_wave('googlewave.com',
                                     participants, submit=True)
+      # Save in datastore so we can recreate later
+      maildigest = MailDigestWave()
+      maildigest.prefix = prefix
       maildigest.wave_id = digest_wave.wave_id
       maildigest.wave_json = simplejson.dumps(digest_wave.serialize())
       maildigest.put()
-      digest_wave.title = 'Digest for emails sent to: %s' % receiver
-      robotty.submit(digest_wave)
+      # Update the title and submit the change
+      SetDigestWaveTitle(digest_wave, receiver)
 
     # Update digest wave
-    UpdateDigestWave(maildigest, subject, all_body)
+    UpdateDigestWave(maildigest, subject, body)
 
 def CleanAddress(address):
   if '<' in address and '>' in address:
@@ -79,13 +78,34 @@ def CleanSubject(subject):
     cleaned_subject = decoded_header[0][0]
   return cleaned_subject
 
+def CleanBodies(bodies):
+  text_bodies = bodies(content_type='text/plain')
+  all_body = ''
+  for body in text_bodies:
+    all_body += body[1].decode()
+  all_body.encode('utf-8')
+  # Replace characters that Wave breaks on
+  all_body.replace('\t', ' ')
+  all_body.replace('\r', '\n')
+  return all_body
+
+def SetDigestWaveTitle(digest_wave, receiver):
+  digest_wave.title = 'Digest for emails sent to: %s' % receiver
+  try:
+    robotty.submit(digest_wave)
+  except urlfetch.DownloadError:
+    robotty.submit(digest_wave)
+
 def UpdateDigestWave(maildigest, subject, body):
   digest_wave = robotty.blind_wavelet(maildigest.wave_json)
   new_blip = digest_wave.reply('\n')
   new_blip.append(subject, [('style/fontWeight', 'bold')])
   new_blip.append('\n')
   new_blip.append(body, [('style/fontWeight', None)])
-  robotty.submit(digest_wave)
+  try:
+    robotty.submit(digest_wave)
+  except urlfetch.DownloadError:
+    robotty.submit(digest_wave)
 
 if __name__ == '__main__':
   robotty = robot.Robot('Mail Digester',
