@@ -100,8 +100,8 @@ def CleanBodies(bodies):
     all_body += body[1].decode()
   all_body.encode('utf-8')
   # Replace characters that Wave breaks on
-  all_body.replace('\t', ' ')
-  all_body.replace('\r', '\n')
+  all_body = all_body.replace('\t', ' ')
+  all_body = all_body.replace('\r', '\n')
   return all_body
 
 def CleanHtmlBodies(bodies):
@@ -112,7 +112,10 @@ def CleanHtmlBodies(bodies):
   for body in html_bodies:
     all_body += body[1].decode()
   all_body.encode('utf-8')
-  return html2text(all_body)
+  all_body = html2text(all_body)
+  all_body = all_body.replace('\t', ' ')
+  all_body = all_body.replace('\r', '\n')
+  return all_body
 
 def SetDigestWaveTitle(digest_wave, receiver):
   digest_wave.title = 'Digest for emails sent to: %s' % receiver
