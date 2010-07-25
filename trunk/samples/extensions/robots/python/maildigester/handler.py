@@ -105,29 +105,14 @@ def CleanBodies(bodies):
   return all_body
 
 def CleanHtmlBodies(bodies):
-  from BeautifulSoup import BeautifulSoup, NavigableString
+  from html2text import html2text
 
   html_bodies = bodies(content_type='text/html')
   all_body = ''
   for body in html_bodies:
     all_body += body[1].decode()
   all_body.encode('utf-8')
-  acceptable_elements = ['p', 'div', 'b', 'strong', 'i', 'em', 'u']
-  soup = BeautifulSoup( all_body.strip() )
-  def cleanup( soup ):
-    for tag in soup:
-      if not isinstance( tag, NavigableString):
-        if tag.name == 'a':
-          href = tag['href'].replace('&', '&amp;')
-          tag.replaceWith(href)
-        elif tag.name not in acceptable_elements:
-          tag.extract()
-        else:
-          for attr in tag._getAttrMap().keys():
-            del tag[attr]
-          cleanup(tag)
-  cleanup(soup)
-  return unicode(soup)
+  return html2text(all_body)
 
 def SetDigestWaveTitle(digest_wave, receiver):
   digest_wave.title = 'Digest for emails sent to: %s' % receiver
