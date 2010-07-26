@@ -1,0 +1,4 @@
+#summary Release notes for Wave Gadgets API changes.
+
+
+<wiki:gadget url="http://hosting.gmodules.com/ig/gadgets/file/102816022445188405566/wave-embed.xml" up_waveID="googlewave.com!w+jB9QGKhNA" up_wavePath="https://wave.google.com/wave/" up_bgcolor="white" width="600" height="800" border="0" /> 
