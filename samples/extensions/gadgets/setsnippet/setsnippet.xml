@@ -1,0 +1,30 @@
+<Module>
+  <ModulePrefs height="200" title="setSnippet Example">
+    <Require feature="wave"/> 
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[ 
+<div id="winner_div" style="height:100px"></div>
+<a id="winButton" href="javascript:void(0)" onclick="onButtonClick()">Win</a>
+<script>
+function onButtonClick() {
+  var winner = wave.getViewer().getId();
+  wave.getState().submitDelta({'winner': winner});
+}
+
+function onStateCallback(state, delta) {
+  var winner = wave.getState().get('winner') || 'not decided yet';
+  var div = document.getElementById('winner_div');
+  div.innerHTML = '<MARQUEE BGCOLOR="pink" behavior="alternate"><b>The winner is ' + winner + '</B></MARQUEE>';
+  wave.setSnippet('The winner is ' + winner);
+}
+
+function init() {
+  wave.setStateCallback(onStateCallback);
+  wave.ui.makeButton(document.getElementById("winButton"));
+}
+
+gadgets.util.registerOnLoadHandler(init);
+</script>
+    ]]>
+</Content> </Module> 
