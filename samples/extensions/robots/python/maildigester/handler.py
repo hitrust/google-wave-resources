@@ -37,13 +37,11 @@ class MailReceiver(mail_handlers.InboundMailHandler):
     else:
       subject = 'untitled'
     text_bodies = message.bodies(content_type='text/plain')
-    use_html = False
     if len(list(text_bodies)) > 0:
       body = CleanBodies(message.bodies)
     else:
       html_bodies = message.bodies(content_type='text/html')
       body = CleanHtmlBodies(message.bodies)
-      use_html = True
 
     #logging.info('Received mail message from %r to %r: %r \n %r',
     #             sender, receiver, subject, body)
@@ -74,7 +72,7 @@ class MailReceiver(mail_handlers.InboundMailHandler):
       SetDigestWaveTitle(digest_wave, receiver)
 
     # Update digest wave
-    UpdateDigestWave(maildigest, subject, body, use_html)
+    UpdateDigestWave(maildigest, subject, body, sender)
 
 def CleanAddress(address):
   if '<' in address and '>' in address:
@@ -97,7 +95,10 @@ def CleanBodies(bodies):
   text_bodies = bodies(content_type='text/plain')
   all_body = ''
   for body in text_bodies:
-    all_body += body[1].decode()
+    if body[1].encoding and body[1].encoding.lower() != '7bit' and body[1].encoding.lower() != '8bit':
+      all_body += body[1].decode()
+    else:
+      all_body += body[1].payload
   all_body.encode('utf-8')
   # Replace characters that Wave breaks on
   all_body = all_body.replace('\t', ' ')
@@ -124,15 +125,12 @@ def SetDigestWaveTitle(digest_wave, receiver):
   except urlfetch.DownloadError:
     robotty.submit(digest_wave)
 
-def UpdateDigestWave(maildigest, subject, body, use_html=False):
+def UpdateDigestWave(maildigest, subject, body, sender):
   digest_wave = robotty.blind_wavelet(maildigest.wave_json)
   new_blip = digest_wave.reply('\n')
   new_blip.append(subject, [('style/fontWeight', 'bold')])
-  new_blip.append('\n', [('style/fontWeight', None)])
-  if use_html:
-    new_blip.append_markup(body)
-  else:
-    new_blip.append(body)
+  new_blip.append(('\nFrom: %s\n\n' % sender), [('style/fontWeight', None)])
+  new_blip.append(body)
 
   try:
     robotty.submit(digest_wave)
