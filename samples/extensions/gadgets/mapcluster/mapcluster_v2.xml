@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="Map Cluster" height="500" width="100%">
+  <ModulePrefs title="Map Cluster"
+    description="Add your location to the map, and see where everyone else is from, using a cluster visualization."
+    screenshot="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/mapcluster/screenshot_mapcluster.png"
+    thumbnail="http://wave-samples-gallery.appspot.com/images?img_id=41005&img_type=thumbnail"
+    author="Google"
+    height="500" width="100%">
    <Require feature="wave"></Require>
   </ModulePrefs>
 <Content type="html">
