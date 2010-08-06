@@ -50,7 +50,7 @@ class Application(db.Model):
 
   DEFAULT_SCHEMA_VERSION = 3
 
-  APIS = ['Robots', 'Gadgets', 'Embed', 'Installer']
+  APIS = ['Robots', 'Gadgets', 'Embed', 'Installer', 'Data', 'WaveThis']
   LANGUAGES = ['Java', 'Python', 'JavaScript', 'ActionScript']
   api_v2 = db.BooleanProperty(default = False)
   author_ref = db.ReferenceProperty(ApplicationAuthor)
