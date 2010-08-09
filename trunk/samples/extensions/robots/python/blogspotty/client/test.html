@@ -1,0 +1,167 @@
+<html>
+  <head>
+    <style>
+.testContainer {
+  float: left;
+  margin: 20px 10px 20px 10px;
+  width: 40%;
+  height: 140px;
+}
+    </style>
+    <script>
+function FakeState(stateMap) {
+  this.transient_ = {};
+  this.listeners_ = [];
+  this.stateMap_ = stateMap;
+}
+
+FakeState.prototype.addChangeListener = function (listener) {
+  this.listeners_.push(listener);
+};
+
+FakeState.prototype.fireStateChanged = function () {
+  for (var i = 0; i < this.listeners_.length; i++) {
+    (this.listeners_[i])(this);
+  }
+};
+
+FakeState.prototype.get = function (name, ifMissing) {
+  if (name in this.stateMap_) {
+    return this.stateMap_[name];
+  } else {
+    return ifMissing;
+  }
+}
+
+FakeState.prototype.setTransient = function (key, value) {
+  this.transient_[key] = value;
+  Promise.yield().onValue(this.fireStateChanged.bind(this));
+};
+
+var DUMMY_OWNER = "testy@example.com";
+var OTHER_DUMMY_OWNER = "testysfriend@example.com";
+
+function FakeBackend(useridOpt, waveidOpt) {
+  this.userid_ = useridOpt || DUMMY_OWNER;
+  this.waveid_ = waveidOpt || "0123456789abcdef";
+}
+
+FakeBackend.prototype.getLoaded = function () {
+  return Promise.yield();
+};
+
+FakeBackend.prototype.getUserId = function () {
+  return this.userid_;
+};
+
+FakeBackend.prototype.getWaveId = function () {
+  return this.waveid_;
+};
+
+function load() {
+  var containers = document.getElementsByClassName("testContainer");
+  for (var i = 0; i < containers.length; i++) {
+    var container = containers[i];
+    var state = new FakeState(getState(container.id));
+    var backend = new FakeBackend();
+    var gadget = new Gadget(state, backend);
+    gadget.getView().render(containers[i]);
+    // Hacky hacky
+    var page = getPage(container.id);
+    gadget.getView().tabs_.tabs_[page].select();
+    state.fireStateChanged();
+  }
+}
+
+function getState(id) {
+  var result = {};
+  switch (id) {
+    case "initial":
+      break;
+    case "loading":
+      result[Gadget.STATUS_KEY] = Gadget.LOGIN;
+      break;
+    case "connected":
+    case "connected_owner":
+    case "connected_other":
+    case "connected_any_other":
+    case "connected_any_owner":
+    case "connected_auto":
+    case "connected_manual":
+    case "connected_draft":
+      result[Gadget.STATUS_KEY] = Gadget.CONNECTED;
+      result[Gadget.BLOGS_KEY] = "[{\"id\": \"000\", \"title\": \"Whip\"}, {\"id\": \"001\", \"title\": \"Whap\"}, {\"id\": \"002\", \"title\": \"Whombat\"}]";
+      result[Gadget.BLOG_KEY] = '002';
+      switch (id) {
+        case "connected_owner":
+          result[Gadget.OWNER_KEY] = DUMMY_OWNER;
+          result[Gadget.PUBLISH_RIGHTS_KEY] = Gadget.PUBLISH_RIGHTS_OWNER;
+          break;
+        case "connected_other":
+          result[Gadget.OWNER_KEY] = OTHER_DUMMY_OWNER;
+          result[Gadget.PUBLISH_RIGHTS_KEY] = Gadget.PUBLISH_RIGHTS_OWNER;
+          break;
+        case "connected_any_owner":
+          result[Gadget.OWNER_KEY] = DUMMY_OWNER;
+          result[Gadget.PUBLISH_RIGHTS_KEY] = Gadget.PUBLISH_RIGHTS_ANYONE;
+          break;
+        case "connected_auto":
+        case "connected_manual":
+        case "connected_draft":
+        case "connected_any_other":
+          result[Gadget.OWNER_KEY] = OTHER_DUMMY_OWNER;
+          result[Gadget.PUBLISH_RIGHTS_KEY] = Gadget.PUBLISH_RIGHTS_ANYONE;
+          result[Gadget.TITLE_KEY] = "Test Blogpost";
+          result[Gadget.URL_KEY] = "http://www.example.com";
+          result[Gadget.POST_TIME_KEY] = "Sunday, 8 August 2010"
+          switch (id) {
+            case "connected_auto":
+              result[Gadget.PUBLISH_MODE_KEY] = Gadget.PUBLISH_AUTO;
+              break;
+            case "connected_manual":
+              result[Gadget.PUBLISH_MODE_KEY] = Gadget.PUBLISH_MANUAL;
+              break;
+            case "connected_draft":
+              result[Gadget.PUBLISH_MODE_KEY] = Gadget.PUBLISH_DRAFT;
+              break;
+          }
+          break;
+      }
+      break;
+    case "logging_in":
+      result[Gadget.STATUS_KEY] = Gadget.LOGGING_IN;
+      break;
+  }
+  return result;
+}
+
+function getPage(id) {
+  switch (id) {
+    case "connected":
+      return 1;
+    default:
+      return 0;
+  }
+}
+    </script>
+    <link rel="stylesheet" href="blogspotty.css" type="text/css">
+    <script type="text/javascript" src="blogspotty.js"></script>
+    <script>
+    var Gadget = blogspotty.Gadget;
+    var Promise = blogspotty.Promise;
+    </script>
+  </head>
+  <body onload="load()">
+    <div id="connected_auto" class="testContainer">Publish by anyone, as non-owner, auto mode</div>
+    <div id="connected_manual" class="testContainer">Publish by anyone, as non-owner, manual mode</div>
+    <div id="connected_draft" class="testContainer">Publish by anyone, as non-owner, draft mode</div>
+    <div id="connected_any_other" class="testContainer">Publish by anyone, as non-owner</div>
+    <div id="connected_any_owner" class="testContainer">Publish by anyone, as owner</div>
+    <div id="connected_other" class="testContainer">Publish by owner, as non-owner</div>
+    <div id="connected_owner" class="testContainer">Publish by owner, as owner</div>
+    <div id="connected" class="testContainer">Connected settings</div>
+    <div id="login" class="testContainer">Log in</div>
+    <div id="logging_in" class="testContainer">Logging in</div>
+    <div id="initial" class="testContainer">Uninitialized</div>
+  </body>
+</html>

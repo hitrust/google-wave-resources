@@ -1,0 +1,31 @@
+application: blogspotty
+version: 1
+runtime: python
+api_version: 1
+
+inbound_services:
+  - mail
+
+handlers:
+- url: /_wave/.*
+  script: server/robot.py
+
+- url: /server/.*
+  script: server/server.py
+
+- url: /assets
+  static_dir: assets
+
+- url: /static
+  static_dir: static
+
+- url: /client
+  static_dir: client
+
+- url: /gadget.xml
+  static_files: gadget.xml
+  upload: gadget.xml
+
+- url: /_ah/mail/.* 
+  script: server/email.py 
+  login: admin
