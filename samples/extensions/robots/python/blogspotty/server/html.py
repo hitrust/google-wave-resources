@@ -158,6 +158,7 @@ class TitleHandler(object):
 
 _MANUAL_LINK = 'link/manual'
 _WAVE_LINK = 'link/wave'
+_AUTO_LINK = 'link/auto'
 _TITLE = 'conv/title'
 
 
@@ -170,6 +171,7 @@ _TAG_MAP = {
   blip.Annotation.COLOR: SpanTag('color: %s;'),
   blip.Annotation.FONT_SIZE: SpanTag('font-size: %s;'),
   _MANUAL_LINK: AnchorTag(),
+  _AUTO_LINK: AnchorTag(),
   _WAVE_LINK: WaveLinkTag(),
   _TITLE: TitleHandler()
 }
