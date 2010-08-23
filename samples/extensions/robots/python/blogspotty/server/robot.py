@@ -45,22 +45,23 @@ class Gadget(object):
   LOGIN = 'login'
   LOGGED_IN = 'logged_in'
   CONNECTED = 'connected'
-  
+
   PUBLISH_MODE_KEY = 'publish_mode';
   PUBLISH_NONE = 'none';
   PUBLISH_AUTO = 'auto';
   PUBLISH_MANUAL = 'manual';
   PUBLISH_DRAFT = 'draft';
-  
+
   REQUEST_KEY = 'request'
   REQUEST_CONNECT = 'connect'
   REQUEST_PUBLISH = 'publish'
   REQUEST_SAVE_DRAFT = 'save_draft'
   REQUEST_NONE = 'none'
-  
+
   OWNER_KEY = 'owner'
   URL_KEY = 'post_url'
   TITLE_KEY = 'post_title'
+  BLOG_KEY = 'blog'
   POST_TIME_KEY = 'post_time'
 
   def __init__(self, ref):
@@ -72,25 +73,31 @@ class Gadget(object):
 
   def set_owner(self, value):
     return self.set(Gadget.OWNER_KEY, value)
-  
+
   def set_url(self, value):
     return self.set(Gadget.URL_KEY, value)
-  
+
   def set_title(self, value):
     return self.set(Gadget.TITLE_KEY, value)
-  
+
   def set_post_time(self, time):
     return self.set(Gadget.POST_TIME_KEY, time)
-  
+
   def get_owner(self):
     return self.get(Gadget.OWNER_KEY)
 
+  def get_blog(self):
+    return self.get(Gadget.BLOG_KEY)
+
+  def set_blog(self, value):
+    return self.set(Gadget.BLOG_KEY, value)
+
   def get_status(self):
     return self.get(Gadget.STATUS_KEY, 'none')
-  
+
   def get_request(self):
     return self.get(Gadget.REQUEST_KEY, Gadget.REQUEST_NONE)
-  
+
   def clear_request(self):
     return self.set(Gadget.REQUEST_KEY, Gadget.REQUEST_NONE)
 
@@ -198,7 +205,7 @@ class Robot(object):
     keys = sorted(self.command_handlers_.keys())
     wavelet.reply().append_markup("<ul>%s</ul>" % "".join(["<li>%s</li>" % k for k in keys]))
     return True
-  
+
   def do_publish_command(self, event, wavelet, gadget=None):
     if not gadget:
       return False
@@ -216,7 +223,8 @@ class Robot(object):
     contents = _OUTPUT_TEMPLATE % {
       'body': body
     }
-    post = blogger.publish(connection.blog, connection.feed_link, wavelet.title,
+    blog = gadget.get_blog()
+    post = blogger.publish(blog, connection.feed_link, wavelet.title,
         contents, is_draft)
     link = post.get_html_link()
     if link:
@@ -284,7 +292,7 @@ class Robot(object):
     gadget.set_owner(userid)
     gadget.set_status(Gadget.CONNECTED)
     gadget.set('blogs', utils.to_json(blogs))
-    gadget.set('blog', blog)
+    gadget.set_blog(blog)
 
   def on_gadget_state_changed(self, event, wavelet):
     blip = event.blip
