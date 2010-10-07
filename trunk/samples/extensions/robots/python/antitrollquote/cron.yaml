@@ -1,0 +1,4 @@
+cron:
+- description: new wave 
+  url: /web/cron
+  schedule: every 1 minutes
