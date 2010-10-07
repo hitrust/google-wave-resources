@@ -21,7 +21,6 @@ import gdata.data
 import atom.http_core
 import atom.core
 
-import models
 import util
 
 TRIAGEY_ID = 'bug-triagey/issueid'
@@ -34,37 +33,51 @@ def AddItems(blip, source):
   labeled_buckets = GetItems(project, status, label)
 
   # Append a descriptive header
-  header = 'Issues for %s with status %s, sorted by %s:' % (project, status, label)
+  header = 'Issues for %s with status %s' % (project, status)
+  # Some templates may not specify a label to sort by
+  if len(label) > 0:
+    header = '%s, sorted by %s' % (header, label)
   blip.append(header, [('style/fontWeight', 'bold')])
   blip.append('\n\n')
 
   for bucket_label, issues in labeled_buckets.items():
+    if bucket_label == 'NOLABEL':
+      continue
     header_label = '%s:' % bucket_label
     blip.append(header_label, [('style/fontWeight', 'bold')])
-    for issue in issues:
-      issue_id = issue.id.text.split('/')[-1]
-      issue_link = 'http://code.google.com/p/%s/issues/detail?id=%s' % (source['project'], issue_id)
-      issue_title = issue.title.text
-      blip.append('\n', [])
-      blip.append(issue_title, [('link/manual', issue_link), (TRIAGEY_ID, issue_id)])
-      blip.append('\n', [('link/manual', None)])
-      blip.append('Looking at this? ')
-      blip.append(element.Button(name=(issue_id + '-looking'), value='No'))
-      blip.append(' Responded? ')
-      blip.append(element.Button(name=(issue_id + '-responded'), value='No'))
-      blip.append('\n')
+    AddIssuesToBlip(blip, issues, source)
+
+  # Do the unlabeled bucket last
+  # If no label specified, don't show bucket label
+  if len(label) > 1:
+    blip.append('No label specified:', [('style/fontWeight', 'bold')])
+  AddIssuesToBlip(blip, labeled_buckets['NOLABEL'], source)
+
+def AddIssuesToBlip(blip, issues, source):
+  for issue in issues:
+    issue_id = issue.id.text.split('/')[-1]
+    issue_link = 'http://code.google.com/p/%s/issues/detail?id=%s' % (source['project'], issue_id)
+    issue_title = issue.title.text
+    blip.append('\n', [])
+    blip.append(issue_title, [('link/manual', issue_link), (TRIAGEY_ID, issue_id)])
+    blip.append('\n', [('link/manual', None)])
+    blip.append('Looking at this? ')
+    blip.append(element.Button(name=(issue_id + '-looking'), value='No'))
+    blip.append(' Responded? ')
+    blip.append(element.Button(name=(issue_id + '-responded'), value='No'))
     blip.append('\n')
+  blip.append('\n')
 
 def GetItems(project, status, bucket_label):
   issues_client = gdata.projecthosting.client.ProjectHostingClient()
   project_name = project
-  query = gdata.projecthosting.client.Query(status=status)
+  query = gdata.projecthosting.client.Query(status=status, max_results=50)
   feed = issues_client.get_issues(project_name, query=query)
   labeled_buckets = {'NOLABEL': []}
   for issue in feed.entry:
     in_bucket = False
     for label in issue.label:
-      if not in_bucket and label.text.find(bucket_label) > -1:
+      if not in_bucket and len(bucket_label) > 0 and label.text.find(bucket_label) > -1:
         if label.text not in labeled_buckets:
           labeled_buckets[label.text] = []
         labeled_buckets[label.text].append(issue)

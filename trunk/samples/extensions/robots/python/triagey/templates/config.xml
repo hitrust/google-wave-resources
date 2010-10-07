@@ -32,6 +32,13 @@ function init() {
   wave.ui.makeButton(document.getElementById('loadButton'));
   wave.ui.makeButton(document.getElementById('newButton'));
   wave.ui.makeButton(document.getElementById('saveButton'));
+  wave.setParticipantCallback(function () {
+    if (wave.getViewer()) {
+      document.getElementById('viewerInput').value = wave.getViewer().getId();
+      getPresets();
+    }
+  });
+  gadgets.window.adjustHeight();
 }
 
 function hide(id) {
@@ -59,7 +66,13 @@ function getPresets() {
   var params = {}
   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
   params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 10;
-  gadgets.io.makeRequest(server + '/web/presets', onPresetsLoad, params);
+  var url = server + '/web/presets';
+
+  // If we know who viewer is, specify in request
+  if (wave.getViewer()) {
+    url += '?viewer=' + wave.getViewer().getId();
+  }
+  gadgets.io.makeRequest(url, onPresetsLoad, params);
 }
 
 function getPreset() {
@@ -67,8 +80,8 @@ function getPreset() {
   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
   params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 10;
   params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
-  params[gadgets.io.RequestParameters.POST_DATA] = getFormData(document.getElementById('startForm'));
-  gadgets.io.makeRequest(server + '/web/preset', onPresetLoad, params);
+  var presetKey = getFormData(document.getElementById('startForm'));
+  gadgets.io.makeRequest(server + '/web/preset?' + presetKey, onPresetLoad, params);
 }
 
 function savePreset() {
@@ -86,8 +99,11 @@ function getEl(id) {
 var numSources = 0;
 
 function onPresetLoad(response) {
-  getEl('edit_name').value = response.data.name;
-  getEl('edit_key').value = response.data.key;
+  getEl('nameInput').value = response.data.name;
+  getEl('keyInput').value = response.data.key;
+  if (response.data.public) {
+    getEl('publicCheck').checked = true
+  }
   for (var i = 0; i < response.data.sources.length; i++) {
     addSource(i, response.data.sources[i]);
  }
@@ -122,8 +138,8 @@ function goToEdit() {
 }
 
 function goToNew() {
-  getEl('edit_name').value = '';
-  getEl('edit_key').value = '';
+  getEl('nameInput').value = '';
+  getEl('keyInput').value = '';
   addSource(0);
   hide('start');
   show('form');
@@ -133,19 +149,23 @@ function goToNew() {
 <div id="frame">
 <div id="start">
   <form method="get" name="start" id="startForm">
-  <select name="preset_key" id="presetKey">
+  Pick a template <select name="preset_key" id="presetKey">
   </select>
+  and then
   <a href="javascript:void(0)" id="editButton" onclick="goToEdit();">Edit</a>
-  <a href="javascript:void(0)" id="loadButton" onclick="onLoadClicked()">Load Issues</a>
+  or
+  <a href="javascript:void(0)" id="loadButton" onclick="onLoadClicked()">Load issues</a>
   </form>
-  <a href="javascript:void(0)" id="newButton" onclick="goToNew();">Create New</a>
+  <br>or</br>
+  <a href="javascript:void(0)" id="newButton" onclick="goToNew();">Create new template</a>
 </div>
 <div id="form" style='display:none'>
   <form method="get" name="edit" id="editForm">
   <table>
    <tr>
-    <td>Name:</td><td><input type="text" value="" name="name" id='edit_name'>
-    <input type="hidden" name="key" value="" id='edit_key'>
+    <td>Name:</td><td><input type="text" value="" name="name" id="nameInput">
+      <input type="hidden" name="key" value="" id="keyInput">
+      <input type="hidden" name="viewer" value="" id="viewerInput">
     </td>
    </tr>
    <tr>
@@ -160,6 +180,10 @@ function goToNew() {
     <td><a onclick="addSource(numSources)" href="#">Add another source</a></td>
    </tr>
    <tr>
+    <td colspan="2">
+      <input type="checkbox" name="public" id="publicCheck"> Share template
+        with world.
+   <tr>
      <td colspan="2">
        <a href="javascript:void(0)" id="saveButton" onclick="savePreset();goToStart()">Save</a>
      </td>
@@ -167,8 +191,15 @@ function goToNew() {
   </table>
   </form>
 </div>
+  <div style="text-align:right">
+  <a target="_blank"
+    href="http://code.google.com/p/google-wave-resources/issues/entry?template=Bug%20Triagey%20Report">Feedback</a>
+  | 
+  <a target="_blank"
+    href="https://wave.google.com/wave/waveref/googlewave.com/w+07fkdICrF">How-to</a>
+  </div>
 </div>
-<br><br><br>
+<br><br><br><br><br><br>
   ]]>
   </Content>
 </Module>

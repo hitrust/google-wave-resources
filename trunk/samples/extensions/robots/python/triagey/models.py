@@ -14,6 +14,9 @@ from django.utils import simplejson
 
 class TriagePreset(db.Model):
   name = db.StringProperty()
+  creator = db.StringProperty()
+  public = db.BooleanProperty(default=False)
+
   # each source should be a serialized list of dicts
   sources = db.StringProperty(multiline=True)
 
@@ -24,4 +27,4 @@ class TriagePreset(db.Model):
     self.sources = simplejson.dumps(list)
 
   def GetDict(self):
-    return {'name': self.name, 'sources': self.GetSourcesList(), 'key': str(self.key())}
+    return {'public': self.public, 'name': self.name, 'sources': self.GetSourcesList(), 'key': str(self.key())}
