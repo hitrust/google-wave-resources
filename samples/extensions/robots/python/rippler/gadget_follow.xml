@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Submitty" height="45">
+    <Require feature="dynamic-height" />
+    <Require feature="wave"/>
+  </ModulePrefs>
+  <Content type="html">
+  <![CDATA[
+  <script src="http://ripple-bot.appspot.com/js/wadget.js"></script>
+  <script>
+var sawState = false;
+var sawParticipant = false;
+var checkedFollowing = false;
+var creator, viewer;
+
+function init() {
+  wadget.ui.convertButtons();
+  wave.setStateCallback(onStateCallback);
+  wave.setParticipantCallback(onParticipantCallback);
+}
+
+function onFollowInfoCallback(response) {
+  var json = response['data'];
+  var status = json['status'];
+  if (status == 'success') {
+    var following = json['answer']
+    toggleFollowing(following);
+  }
+}
+
+function toggleFollowing(following) {
+  if (following == 'yes') {
+    document.getElementById('yes-following').style.display = 'block';
+    document.getElementById('no-following').style.display = 'none';
+  } else {
+    document.getElementById('yes-following').style.display = 'none';
+    document.getElementById('no-following').style.display = 'block';
+  }
+}
+
+function onStateCallback() {
+  sawState = true;
+  onCallback();
+}
+function onParticipantCallback() {
+  sawParticipant = true;
+  onCallback();
+}
+
+function onCallback() {
+  if (sawState && sawParticipant && !checkedFollowing) {
+    doIt();
+  }
+}
+
+function doIt() {
+  checkedFollowing = true;
+  creator = wave.getState().get('creator');
+  viewer = wave.getViewer().getId();
+  if (creator == viewer) {
+    document.getElementById('thats-you').style.display = 'block';
+    return;
+  }
+  // Find out if current viewer is following this person
+  callService('isfollowing', onFollowInfoCallback);
+}
+
+function followClicked() {
+  callService('follow', onFollowCallback);
+}
+
+function unFollowClicked() {
+  callService('unfollow', onFollowCallback);
+}
+
+function onFollowCallback(response) {
+  var json = response['data'];
+  var status = json['status'];
+  if (status == 'success') {
+    toggleFollowing(json['answer']);
+  } 
+}
+
+function callService(service, callback) {
+  var randUnrounded=Math.random()*999999999;
+  var randNumber=Math.floor(randUnrounded);
+
+  var baseUrl = 'http://ripple-bot.appspot.com/service/'
+  var url = baseUrl + service + '?creator=' + creator + '&viewer=' + viewer +
+    '&rand=' + randNumber;
+  var params = {};
+  params[wadget.io.RequestParameters.METHOD] = wadget.io.MethodType.GET;
+  params[wadget.io.RequestParameters.CONTENT_TYPE] = wadget.io.ContentType.JSON;
+  params[wadget.io.RequestParameters.REFRESH_INTERVAL] = 1;
+  wadget.io.makeRequest(url, callback, params);
+}
+
+wadget.util.registerOnLoadHandler(init);
+  </script>
+  <center>
+    <div id="no-following" style="display:none">
+     <input type="button" onclick="followClicked()" value="Follow"/>
+    </div>
+    <div id="yes-following" style="display:none">
+     <span>Following.</span> &mdash 
+     <input type="button" onclick="unFollowClicked()" value="Un-follow"/>
+    </div>
+    <div id="thats-you" style="display:none">
+     <span>That's you!</span>
+    </div>
+</div>
+ ]]>
+   </Content>
+ </Module>
+
