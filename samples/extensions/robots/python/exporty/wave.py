@@ -36,8 +36,9 @@ def ExportWaveletToHTML(wavelet):
   html_list = []
   for blip_id in wavelet.blips:
     blip = wavelet.blips.get(blip_id)
-    html_list.append(blipconverter.ToHTML(blip))
-  return string.join(html_list, '<br><br>')
+    html_list.append('<div class="blip">' + blipconverter.ToHTML(blip) +
+                     '</div>')
+  return string.join(html_list, '<br>')
 
 def ExportWaveletToText(wavelet):
   text_list = []
@@ -54,7 +55,7 @@ def StoreExport(wavelet, html='', text=''):
   if waveExport is None:
     server = os.environ['SERVER_NAME']
     url = "http://" + server + "/export?waveId=" + id.replace("+", "%252B")
-    url_text = '%s&format=text'
+    url_text = '%s&format=text' % url
     AddBlip(wavelet, "View export: \n%s\n%s\n" % (url, url_text))
     waveExport = models.WaveExport()
 

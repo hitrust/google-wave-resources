@@ -10,7 +10,7 @@ def ToText(blip):
 Creator: %s \n\
 Contributors: %s \n\
 Last Modified: %s \n\
-Content: %s\
+Content: %s\n\
 -------------------------------\n"
   text = format % (blip.creator, ', '.join(blip.contributors),
                    blip.last_modified_time, blip.text)
