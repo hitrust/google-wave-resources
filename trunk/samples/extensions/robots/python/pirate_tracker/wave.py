@@ -57,10 +57,10 @@ def AddTweets(wavelet, id=None):
     id = str(tweet['id'])
     tweet_user = tweet['from_user'].encode('utf-8')
     tweet_text = tweet['text'].encode('utf-8')
-    tweet_text_all = '\n%s: %s' % (tweet_user, tweet_text)
     url = 'http://twitter.com/%s' % tweet_user
-    blip.at(insert_point).insert(tweet_text_all)
-    blip.range(insert_point, insert_point+len(tweet_user)+1).annotate('link/manual', url)
+    blip.append(tweet_user, bundled_annotations=[('link/manual', url)])
+    blip.append(': ' + tweet_text + '\n', bundled_annotations=[('link/manual',
+                                                                None)])
   return id
 
 
