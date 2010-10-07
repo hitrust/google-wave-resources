@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
   <ModulePrefs title="Submitty" height="45">
-    <Require feature="dynamic-height" />
     <Require feature="wave" />
   </ModulePrefs>
   <Content type="html">
   <![CDATA[
-  <script src="http://submitty-bot.appspot.com/js/util.js"></script>
+  <script src="http://2.latest.submitty-bot.appspot.com/js/config.js"></script>
   <script>
 function getEl(id) {
   return document.getElementById(id);
@@ -27,6 +26,10 @@ function renderState() {
   hide(getEl('status_review_admin'));
   hide(getEl('status_approved'));
 
+  if (status && isViewerApprover()) {
+   show(getEl('status_review_admin'));
+  }
+
   if (status == 'review') {
   if (isViewerApprover()) {
       show(getEl('status_review_admin'));
@@ -42,8 +45,7 @@ function renderState() {
 
 function isViewerApprover() {
   var viewerId = wave.getViewer().getId();
-  if (viewerId == 'pamela.fox@wavesandbox.com' ||
-    viewerId == 'pamela.fox@googlewave.com') {
+  if (approvers.indexOf(viewerId) > -1) {
     return true;
   }
   return false;
@@ -54,24 +56,32 @@ function reviewClicked() {
 }
 
 function approveClicked() {
-  wave.getState().submitDelta({'status': 'approved', 'approve_clicked': wave.getViewer().getId()});
+  var rand = Math.floor(Math.random()*999999999);
+  wave.getState().submitDelta({'approve_rand': rand, 'status': 'approved', 'approve_clicked': wave.getViewer().getId()});
+}
+
+function refreshClicked() {
+  wave.getState().submitDelta({'refresh_clicked': 'yes'});
 }
 
 function init() {
-  wrappy.ui.convertButtons();
   wave.setStateCallback(renderState);
 }
 
-wrappy.util.registerOnLoad(init);
+gadgets.util.registerOnLoad(init);
 </script>
 
 <div style="padding:3px; margin:auto; text-align: center; border: 1px solid #5590D2;
   background-color:#C9E2FC; width:95%; height:30px;">
   <center>
-    <input id="status_new" type="button" onclick="reviewClicked()" value="Share with Reviewers"
-      style="display:none"/>
-    <input id="status_review_admin" type="button" onclick="approveClicked()" value="Approve for Gallery"
-      style="display:none"/>
+    <!-- Buttons -->
+    <a id="status_new" onclick="reviewClicked()"
+      href="javascript:void(0)" style="display:none">Share with Reviewers</a>
+    <a id="status_review_admin" onclick="approveClicked()" href="javascript:void(0)" style="display:none">Approve for Gallery</a>
+    <a id="refresh_installer" onclick="refreshClicked()"
+      href="javascript:void(0)" style="display:none">Reload Installer</a>
+
+    <!-- Status Text -->
     <span id="status_review" style="display:none">This wave is now shared with the review team. We
       will respond within a week.</span>
     <span id="status_approved" style="display:none">This extension is now in the gallery. We will
