@@ -1,0 +1,59 @@
+<Module> 
+  <ModulePrefs title="Document State Helper" height="25" width="160"> 
+    <Require feature="wave"/>
+    <Require feature="dynamic-height"/>
+  </ModulePrefs> 
+ 
+  <Content type="html"> 
+  <![CDATA[ 
+  <script type="text/javascript"> 
+ 
+    function getSelector() {
+      return document.getElementById('selector');
+    };
+ 
+    function onSelectionChanged() {
+      var selector = getSelector();
+      var options = selector.options;
+      wave.getState().submitDelta({'state': options[selector.selectedIndex].value});
+      window.setTimeout('renderInfo();', 1000); 
+    };
+ 
+    function renderInfo() {
+      if (!wave.getState()) {
+        return;
+      }
+ 
+      var state = wave.getState().get('state');
+      var selector = getSelector();
+      var options = selector.options;
+      if (!state) {
+        selector.selectedIndex = 0;
+      } else {
+        for (var i = 0; i < options.length; ++i) {
+          if (options[i].value == state) {
+            selector.selectedIndex = i;
+            break;
+          }
+        }
+      }
+      gadgets.window.adjustHeight();
+    };
+    
+    function changeMode() {
+      getSelector().disabled=(wave.getMode() == wave.Mode.PLAYBACK);
+    }
+ 
+    function main() {
+      if (wave && wave.isInWaveContainer()) {
+        wave.setStateCallback(renderInfo);
+        wave.setModeCallback(changeMode);
+      }
+    }
+ 
+    gadgets.util.registerOnLoadHandler(main);
+  </script> 
+  <div><select id="selector" size="1" disabled="true" onChange="onSelectionChanged();"><option value="draft">Draft</option><option value="review">For Review</option><option value="final">Final</option></select></div> 
+]]>
+</Content> 
+</Module> 
