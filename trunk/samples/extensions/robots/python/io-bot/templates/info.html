@@ -1,0 +1,30 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <table>
+    <tr>
+      <td>title</td>
+      <td>session id</td>
+      <td>wave id</td>
+      <td>num blips</td>
+      <td>num peeps</td>
+      <td>num questions</td>
+      <td>num votes</td>
+    </tr>
+    {% for session_info in session_infos %}
+     <tr>
+      <td>{{ session_info.title }}</td>
+      <td>{{ session_info.id }}</td>
+      <td>{{ session_info.wave_id }}</td>
+      <td>{{ session_info.num_blips }}</td>
+      <td>{{ session_info.num_participants }}</td>
+      <td>{{ session_info.num_questions }}</td>
+      <td>{{ session_info.num_votes }}</td>
+      <td>
+     </tr>
+    {% endfor %}
+    </table>
+
+  </body>
+</html>
