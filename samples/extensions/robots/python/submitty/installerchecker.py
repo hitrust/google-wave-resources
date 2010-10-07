@@ -23,11 +23,17 @@ def check(installer_url):
           errors.append('Installer XML is missing required tag(s): ' + ', '.join(required_tagerrors)) 
   return errors
 
-def get_name(installer_url):
+def get_field(installer_url, field):
   response = urlfetch.fetch(installer_url)
   if response.status_code == 200:
     dom = minidom.parseString(response.content)
     extension_tag = dom.getElementsByTagName('extension')
     if extension_tag:
-      name = extension_tag[0].getAttribute('name')
+      name = extension_tag[0].getAttribute(field)
       return name
+
+def get_name(installer_url):
+  return get_field(installer_url, 'name')
+
+def get_thumbnail(installer_url):
+  return get_field(installer_url, 'thumbnailUrl')
