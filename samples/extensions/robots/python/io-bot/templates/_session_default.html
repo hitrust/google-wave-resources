@@ -1,0 +1,16 @@
+
+{% if session.time %}<b>Time</b>: {{ session.time }}{% endif %}
+{% if session.day %}<b>Day</b>: {{ session.day}}{% endif %}
+{% if session.location %}<b>Location</b>: {{ session.location }}{% endif %}
+
+{% if session.description %}{{ session.description|fix_ampersands }}{% endif %}
+
+{% if session.type %}<b>Session type: </b>{{ session.type }}{% endif %}
+{% if session.prereqs %}<b>Attendee requirements: </b>{{ session.prereqs }}{% endif %}
+
+{% if speaker.name %}<b>Speaker(s)</b>: {{ speaker.name }}{% endif %}
+
+{% if session.hashtag %}<b>Hashtag</b>: {{ session.hashtag }}{% endif %}
+
+<b>Session Links:</b>
+
