@@ -21,11 +21,24 @@ class ConfigHandler(webapp.RequestHandler):
 
 class GetPresetsHandler(webapp.RequestHandler):
   def get(self):
-    q = models.TriagePreset.all()
-    presets = q.fetch(100)
     presets_list = []
+    preset_names = {}
+    if self.request.get('viewer'):
+      logging.info('querying viewer' + self.request.get('viewer'))
+      q = models.TriagePreset.all()
+      q.filter('creator =', self.request.get('viewer'))
+      presets = q.fetch(20)
+      for preset in presets:
+        preset_names[preset.name] = 'seen'
+        presets_list.append(preset.GetDict())
+
+    q = models.TriagePreset.all()
+    q.filter('public =', True)
+    presets = q.fetch(100)
     for preset in presets:
-      presets_list.append(preset.GetDict())
+      if preset.name not in preset_names:
+        presets_list.append(preset.GetDict())
+
     json = simplejson.dumps(presets_list)
     self.response.out.write(json)
 
@@ -74,6 +87,11 @@ class SavePresetHandler(webapp.RequestHandler):
       preset = models.TriagePreset.get(key)
     else:
       preset = models.TriagePreset()
+      preset.creator = self.request.get('viewer')
+      public = self.request.get('public')
+      if public:
+        preset.public = True
+
     preset.name = name
     preset.SetSourcesFromList(sources)
     preset.put()
