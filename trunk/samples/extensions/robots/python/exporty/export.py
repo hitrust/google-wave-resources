@@ -32,7 +32,8 @@ class MainPage(webapp.RequestHandler):
           self.redirect(users.create_login_url(self.request.uri))
           return
         sandboxEmail = user.email().replace('@gmail.com', '@wavesandbox.com')
-        if sandboxEmail in participants:
+        previewEmail = user.email().replace('@gmail.com', '@googlewave.com')
+        if sandboxEmail or previewEmail in participants:
           canDisplayWave = True
       id_domain = waveId.split('!')[0]
       if id_domain == 'googlewave.com':
@@ -67,7 +68,7 @@ class MainPage(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), filename)
     self.response.out.write(template.render(path, template_values))
 
-  
+
 application = webapp.WSGIApplication(
                                      [('/export', MainPage)],
                                      debug=True)
