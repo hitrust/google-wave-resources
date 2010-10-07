@@ -15,7 +15,6 @@ from google.appengine.api import urlfetch
 import credentials
 import models
 
-domain = 'wavesandbox.com'
 SEARCH_TERM = 'twitter-searchy/search_term'
 
 def fetchJSON(url):
@@ -32,10 +31,14 @@ def OnBlipSubmitted(event, wavelet):
   pass
 
 def OnSelfAdded(event, wavelet):
-  search_term = wavelet.proxy_for_id or 'buzz'
+  search_term = GetSearchTerm(wavelet)
+  # Only change title if
+  if len(wavelet.title) < 2:
+    wavelet.title = 'Twitter search: %s' % search_term
   id = AddTweets(wavelet, search_term)
   wave = models.SearchWave()
   wave.wave_json = simplejson.dumps(wavelet.serialize())
+  wave.domain = wavelet.domain
   wave.last_id = id
   wave.search_term = search_term
   wave.put()
@@ -48,23 +51,18 @@ def AddTweets(wavelet, search_term, id=None):
   text = ''
   annotations = []
   tweets_info = []
-  if len(tweets) > 0:
-    #text += '<p></p>'
-    #text += '\n'
-    pass
   insert_point = len(wavelet.title)+1
   for tweet in tweets:
     id = str(tweet['id'])
     tweet_user = tweet['from_user'].encode('utf-8')
     tweet_text = tweet['text'].encode('utf-8')
-    #text += '<p><a href="http://twitter.com/%s">%s</a>: %s</p>' % (tweet_user,
-    #                                                        tweet_user,
-    #                                                        tweet_text)
     tweet_text_all = '\n%s: %s' % (tweet_user, tweet_text)
     url = 'http://twitter.com/%s' % tweet_user
-    blip.at(insert_point).insert(tweet_text_all)
-    blip.range(insert_point, insert_point+len(tweet_user)+1).annotate('link/manual', url)
-  #blip.append_markup(text.encode('utf-8'))
+    blip = wavelet.reply('\n')
+    blip.append(tweet_user, bundled_annotations=[('link/manual', url)])
+    blip.append(': ' + tweet_text, bundled_annotations=[('link/manual', None)])
+    #blip.at(insert_point).insert(tweet_text_all)
+    #blip.range(insert_point, insert_point+len(tweet_user)+1).annotate('link/manual', url)
   return id
 
 
@@ -88,6 +86,8 @@ class CronHandler(webapp.RequestHandler):
     waves = models.SearchWave.all()
     for wave in waves:
       logging.info(wave.wave_json)
+      domain = wave.domain
+      searchy.setup_oauth(credentials.CONSUMER_KEY[domain], credentials.CONSUMER_SECRET[domain], server_rpc_base=credentials.RPC_BASE[domain])
       blind_wave = self.robot.blind_wavelet(wave.wave_json,
                                             proxy_for_id=wave.search_term)
       if wave.last_id:
@@ -99,15 +99,21 @@ class CronHandler(webapp.RequestHandler):
       wave.put()
       self.robot.submit(blind_wave)
 
+def GetSearchTerm(wavelet):
+  robot_address = wavelet.robot_address.split('@')[0]
+  split_addy = robot_address.split('+')
+  if len(split_addy) > 1:
+    search_term = split_addy[1]
+  else:
+    search_term = 'buzz'
+  return search_term
+
 if __name__ == '__main__':
-  removey = robot.Robot('Twitter Searchy',
+  searchy = robot.Robot('Twitter Searchy',
       image_url='http://www.seoish.com/wp-content/uploads/2009/04/wrench.png',
       profile_url='')
-  removey.set_verification_token_info(credentials.VERIFICATION_TOKEN[domain], credentials.ST[domain]) 
-  removey.setup_oauth(credentials.CONSUMER_KEY[domain], credentials.CONSUMER_SECRET[domain],
-    server_rpc_base=credentials.RPC_BASE[domain])
-  removey.register_handler(events.BlipSubmitted, OnBlipSubmitted)
-  removey.register_handler(events.WaveletSelfAdded, OnSelfAdded)
-  appengine_robot_runner.run(removey, debug=True, extra_handlers=[('/web/cron',
+  searchy.register_handler(events.BlipSubmitted, OnBlipSubmitted)
+  searchy.register_handler(events.WaveletSelfAdded, OnSelfAdded)
+  appengine_robot_runner.run(searchy, debug=True, extra_handlers=[('/web/cron',
                                                                    lambda:
-                                                                   CronHandler(removey))])
+                                                                   CronHandler(searchy))])
