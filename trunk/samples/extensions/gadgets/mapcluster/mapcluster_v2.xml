@@ -147,7 +147,6 @@ function getInfoHtml(participants) {
     var participant = wave.getParticipantById(participants[i]);
     html.push('<img src="' + participant.getThumbnailUrl() + '" width="30" height="30">');
     html.push('</td><td>' + participant.getDisplayName() + '<br>');
-    html.push('<span class="littletext">' + participant.getId() + '</span>');
     html.push('</td></tr>');
   }
   html.push('</table>');
