@@ -49,7 +49,7 @@ function showStart() {
 
   $('#custom-button').click(function() {
     // remove punctuation?
-    var text =  $('#custom-text').val().replace(/['";:,.\/?\\-]/g, '');
+    var text =  $('#custom-text').val().replace(/['";:,.()\/?\\-]/g, '');
     text = text.replace(/\s+/g, '|');
     // todo - alert if no words entered
     words = text.split('|');
