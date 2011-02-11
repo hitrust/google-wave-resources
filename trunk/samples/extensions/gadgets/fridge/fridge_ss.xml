@@ -2,8 +2,8 @@
   <ModulePrefs
     title="Magnetic Fridge Poetry"
     description="Create poetry by moving words around the gadget like they were sitting on your fridge."
-    screenshot="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/fridge/jquery.addons.js"
-    thumbnail="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/fridge/jquery.addons.js"
+    screenshot="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/fridge/screenshot_fridge_ss.png"
+    thumbnail="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/fridge/screenshot_fridge_ss.png"
     author="Google"
     author_email="sharedspaces@google.com">
    <Require feature="wave"/>
