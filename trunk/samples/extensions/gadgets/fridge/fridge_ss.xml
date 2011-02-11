@@ -86,7 +86,7 @@ function redrawWords(keys) {
 
 function styleWord(id, key) {
   if (id != 'computer') {
-    $('#' + key).css({backgroundColor: getColor(id)});
+    //$('#' + key).css({backgroundColor: getColor(id)});
     var poet = wave.getParticipantById(id);
     var name = poet.getDisplayName();
     if (id == wave.getViewer().getId()) { 
