@@ -1,7 +1,6 @@
 <Module>
   <ModulePrefs
     title="Magnetic Fridge Poetry"
-    height="500"
     description="Create poetry by moving words around in the gadget like they were sitting on your fridge"
     author="Douwe Osinga"
     author_email="douwe@gmail.com">
@@ -9,9 +8,10 @@
   </ModulePrefs>
   <Content type="html">
   <![CDATA[
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+<script src="http://wave-api-dmo.appspot.com/public/jquery.js"></script>
+<script src="http://wave-api-dmo.appspot.com/public/jquery-ui.js"></script>
 <script src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/fridge/jquery.addons.js"></script>
-<link href="http://fonts.googleapis.com/css?family=Copse:regular" rel="stylesheet" type="text/css" />
+<link href="http://fonts.googleapis.com/css?family=Cabin:regular" rel="stylesheet" type="text/css" />
 <script>
 var defaultWords = "see|the|stone|set|in|your|eyes|i|wait|for|you|you|gave|it|all" +
             "|but|i|want|more|my|hands|are|tied|my|body|bruised|and|nothing" +
@@ -34,7 +34,11 @@ function stateUpdated(state, changedState) {
     setupWords();
   }
 
-  redrawWords(changedState);
+  var keys = [];
+  for (var key in changedState) {
+    keys.push(key);
+  }
+  redrawWords(keys);
 }
 
 function showStart() {
@@ -49,7 +53,7 @@ function showStart() {
 
   $('#custom-button').click(function() {
     // remove punctuation?
-    var text =  $('#custom-text').val().replace(/['";:,.()\/?\\-]/g, '');
+    var text =  $('#custom-text').val().replace(/[";:,.\/?\\-]/g, '');
     text = text.replace(/\s+/g, '|');
     // todo - alert if no words entered
     words = text.split('|');
@@ -58,76 +62,80 @@ function showStart() {
   });
 }
 
-function redrawWords(changedState) {
-  if (changedState) {
-    var keys = [];
-    for (var key in changedState) {
-      keys.push(key);
-    }
-  } else {
-    var keys = currentState.getKeys();
-  }
+function redrawWords(keys) {
+  if (!currentState) return;
+  var keys = keys || currentState.getKeys();
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     if (key.indexOf('word_') == -1) continue;
     var value = currentState.get(key);
-    var position = getpixels(value);
+    var position = getposition(value);
     var currentPosition =  $('#' + key).position();
+    if (!position || !currentPosition) continue;
     var leftDiff = Math.abs(position.left - currentPosition.left);
     var topDiff = Math.abs(position.top - currentPosition.top);
     if (leftDiff > 1 || topDiff > 1) {
       $('#' + key).css({left: position.left + 'px', top: position.top + 'px', position:'absolute'});
     }
     var id = value.split('|')[2];
-    if (id != 'computer') {
-      var poet = wave.getParticipantById(id);
-      var name = poet.getDisplayName();
-      if (id != wave.getViewer().getId()) { 
-        $('#' + key).attr('title', name);
-        $('#' + key).tooltip();
-      }
-    }
+    styleWord(id, key);
   }
 }
 
-function getpixels(value) {
-  var pos = value.split('|');
-  var leftPercent = parseFloat(pos[0]);
-  var topPercent = parseFloat(pos[1]);
-  var leftPx = leftPercent/100 * $(window).width();
-  var topPx = topPercent/100 * $(window).height();
-  return {left: leftPx, top: topPx};
+function styleWord(id, key) {
+  if (id != 'computer') {
+    $('#' + key).css({backgroundColor: getColor(id)});
+    var poet = wave.getParticipantById(id);
+    var name = poet.getDisplayName();
+    if (id == wave.getViewer().getId()) { 
+      name = 'You';
+    }
+    $('#' + key).attr('title', name);
+    $('#' + key).tooltip();
+  }
 }
 
-function getpercent(elem) {
-  var position = $(elem).position();
-  var leftPercent = ((position.left/$(window).width())*100).toFixed(4);
-  var topPercent = ((position.top/$(window).height())*100).toFixed(4);
-  return {left: leftPercent, top: topPercent};
+function hashCode(str) { // java String#hashCode
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+       hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return hash;
+} 
+
+function intToARGB(i){
+    return ((i>>16)&0xFF).toString(16) + 
+           ((i>>8)&0xFF).toString(16) + 
+           (i&0xFF).toString(16);
 }
+
+function getColor(str) {
+  return intToARGB(hashCode(str));
+}
+
+function getposition(value) {
+  var pos = value.split('|');
+  var left = parseFloat(pos[0]);
+  var top = parseFloat(pos[1]);
+  return {left: left, top: top};
+}
+
 
 function setupWords(firstTime) {  
   var delta = {};
   for (var i = 0; i < words.length; ++i) {
-    if (words[i].length == 0) {
+    var word = words[i];
+    if (word.length == 0) {
       words.splice(i, 1);
       continue;
     }
-    var html = '<div class="block" id="word_' + i + '" >' + words[i] + '</div>'
-    div = $(html);
-    div.draggable({start: function() { $('#tooltip').hide() }});
-
-    div.mouseup(function(){
-      var delta = {};
-      var position = getpercent(this);
-      delta[$(this).attr('id')] = position.left + '|' + position.top + '|' + wave.getViewer().getId();
-      wave.getState().submitDelta(delta);
-    });
+    var div = makeWord(i, word);
     if (firstTime) {
-      x = Math.ceil(90 * Math.random());
-      y = Math.ceil(90 * Math.random());
+      var wordWidth = (word.length * 8) + 15
+      x = Math.ceil(($(window).width() - wordWidth) * Math.random());
+      y = Math.ceil(($(window).height() - 50) * Math.random());
       delta['word_' + i] = '' + x + '|' + y + '|computer';
-      var position = getpixels(delta['word_' + i]);
+      var position = getposition(delta['word_' + i]);
       div.css({left: position.left + 'px', top: position.top + 'px', position:'absolute'});
     }
     $("#container").append(div);
@@ -137,9 +145,25 @@ function setupWords(firstTime) {
     wave.getState().submitDelta(delta);
   }
 }
+
+function makeWord(num, word, firstTime) {
+  var html = '<div class="block" id="word_' + num + '" >' + word + '</div>';
+  div = $(html);
+  div.draggable({start: function() { $('#tooltip').hide() }});
+
+  div.mouseup(function(){
+    var delta = {};
+    var position = $(this).position();
+    delta[$(this).attr('id')] = position.left + '|' + position.top + '|' + wave.getViewer().getId();
+    wave.getState().submitDelta(delta);
+    styleWord(wave.getViewer().getId(), $(this).attr('id'));
+  });
+  div.bind('selectstart', function () { return false; });
+  return div;
+}
+  
   
 function main() {
-
   wave.setStateCallback(stateUpdated);
 
   $(window).resize(function() {
@@ -150,6 +174,13 @@ function main() {
 gadgets.util.registerOnLoadHandler(main);
 </script>
 <style>
+body {
+  background: #363636;
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#363636), to(#666666));
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
 .block {
   border-left: 1px solid #101010;
   border-top: 1px solid #101010;
@@ -160,7 +191,7 @@ gadgets.util.registerOnLoadHandler(main);
   display: block;
   padding: 3px;
   cursor: pointer;
-  font-family: 'Copse', serif;
+  font-family: 'Cabin', serif;
   font-size: 16px;
   font-weight: bold;
   position: absolute;
