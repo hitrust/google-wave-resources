@@ -36,7 +36,7 @@ body {
 /* close button positioned on upper right corner */
 .overlay .close {
   display: block;
-  background-image:url(http://imagine-it.org/google/playtube/close.png);
+  background-image:url(http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/close.png);
   position:absolute;
   right:-15px;
   top:-15px;
@@ -110,7 +110,7 @@ button:hover, button:focus {
 }
 
 .control-button.play {
-  background:url('http://imagine-it.org/google/playtube/play.png') no-repeat center center;
+  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/play.png') no-repeat center center;
   cursor: pointer;
 }
 
@@ -120,12 +120,12 @@ button:hover, button:focus {
 }
 
 .control-button.pause {
-  background:url('http://imagine-it.org/google/playtube/pause.png') no-repeat -99999px;
+  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/pause.png') no-repeat -99999px;
   cursor: pointer;
 }
 
 .control-button.loading {
-  background:url('http://imagine-it.org/google/playtube/ajax-loader.gif') no-repeat center center;
+  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/ajax-loader.gif') no-repeat center center;
   cursor: default;
 }
 
