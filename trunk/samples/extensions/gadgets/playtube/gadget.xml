@@ -1,0 +1,669 @@
+<Module>
+ <ModulePrefs
+  title="Youtube Co-Viewer"
+  height="650"
+  description="Find a video on Youtube and watch it at the same time as other participants."
+  author="Pamela Fox"
+  author_email="pamelafox@google.com">
+  <Require feature="wave"/>
+ </ModulePrefs>
+ <Content type="html">
+<![CDATA[
+
+<a style="display:none" id="picker-trigger" href="#" rel="#picker"></a>
+
+<div id="picker" class="overlay">
+ <div id="picker-header">
+  <img src="http://imagine-it.org/google/playtube/youtubelogo.png">
+  <input id="search-input" type="text" placeholder="e.g. fox, robyn">
+  <button id="search-button">Search</button>
+ </div>
+ <div id="picker-results"></div>
+</div>
+
+<div id="player" style="display:none">
+ <div id="player-header">
+   <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
+   <div id="player-nowplaying"></div>
+ </div>
+ <div id="player-ytapiplayer"></div>
+ <div id="player-control" class="control-button loading"></div>
+ <div id="player-progressbar" class="progress-bar">
+   <div id="player-elapsedbar" class="elapsed"></div>
+ </div>
+ <div id="player-time"></div>
+ </div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script> 
+<script src="http://imagine-it.org/google/playtube/util.js"></script>
+<link href="http://imagine-it.org/google/playtube/styles.css" rel="stylesheet" type="text/css"/>
+<script>
+
+var youtubePlayer = null;
+var pickerOverlay = null;
+var videoState = null;
+var preloadingNow = false;
+var progressInterval = null;
+
+var DEBUG = true;
+
+/** Timing related constants **/
+var SECONDS_PRELOAD = 3;
+var SECONDS_WAITING = 0;
+
+/** DOM elements **/
+var DOM = {
+  PICKER: null,
+  PICKERRESULTS: null,
+  PICKERTRIGGER: null,
+  SEARCHBUTTON: null,
+  SEARCHINPUT: null,
+  PLAYER: null,
+  PLAYINGNOW: null,
+  PLAYTIME: null,
+  CONTROL: null,
+  PROGRESSBAR: null,
+  ELAPSEDBAR: null,
+}
+
+/** Time diffs allowed **/
+var DIFF = {
+  PLAYLAG: 1,
+  PAUSELAG: 1,
+  PRELOAD: 1
+}
+
+/** Keys + key prefixes **/
+var KEY = {
+  ID: 'video-id',
+  STATUS: 'video-status:',
+  DATA: 'video-data:',
+  PLAYTIME: 'video-playtime:',
+  TIMESTAMP: 'video-timestamp:',
+  MODIFIER: 'video-modifier:'
+}
+
+/** Status of video, as set by participants **/
+var STATUS = {
+  SELECTED: 'selected',
+  PLAYING: 'playing',
+  PAUSED: 'paused'
+}
+
+/** State of YouTube player, as specified by Youtube API **/
+var PLAYERSTATE = {
+  UNSTARTED: -1,
+  ENDED: 0,
+  PLAYING: 1,
+  PAUSED: 2,
+  BUFFERING: 3,
+  CUED: 5
+};
+
+
+/**
+ * Object for managing state for a selected video.
+ */
+function VideoState(id) {
+  this.id = id;
+}
+
+VideoState.prototype.saveSelection = function(data){
+  var delta = {};
+  delta[KEY.ID] = this.id;
+  delta[KEY.DATA + this.id] = JSON.stringify(data);
+  delta[KEY.STATUS + this.id] = 'selected';
+  wave.getState().submitDelta(delta);
+}
+
+VideoState.prototype.saveStatus = function(status, playtime, timestamp) {
+  var delta = {};
+  delta[KEY.STATUS + this.id] = status;
+  if (playtime == null || playtime == undefined) {
+    playtime = youtubePlayer.getCurrentTime();
+  }
+  delta[KEY.PLAYTIME + this.id] = playtime;
+  delta[KEY.TIMESTAMP + this.id] = timestamp || new Date();
+  delta[KEY.MODIFIER + this.id] = wave.getViewer().getId();
+  wave.getState().submitDelta(delta);
+}
+
+VideoState.prototype.deleteState = function() {
+  var delta = {};
+  var keys = [KEY.DATA, KEY.STATUS, KEY.PLAYTIME, KEY.TIMESTAMP, KEY.MODIFIER];
+  for (var i = 0; i < keys.length; i++) {
+    delta[keys[i] + this.id] = null;
+  }
+  wave.getState().submitDelta(delta);
+}
+
+VideoState.prototype.getId = function() {
+  return this.id;
+}
+
+VideoState.prototype.getModifier = function() {
+  return wave.getState().get(KEY.MODIFIER + this.id);
+}
+
+VideoState.prototype.getData = function() {
+  var data = wave.getState().get(KEY.DATA + this.id);
+  if (data) {
+    data = JSON.parse(data);
+    return data;
+  }
+  return null;
+}
+
+VideoState.prototype.getTitle = function() {
+  var data = this.getData();
+  if (data) {
+    return data.title;
+  }
+  return null;
+}
+  
+VideoState.prototype.getDuration = function() {
+  var data = this.getData();
+  if (data) {
+    return data.duration;
+  }
+  return null;
+}
+
+VideoState.prototype.getStatus = function() {
+  return wave.getState().get(KEY.STATUS + this.id);
+}
+
+VideoState.prototype.getPlaytime = function() {
+  var playtime = wave.getState().get(KEY.PLAYTIME + this.id);
+  if (playtime != null) {
+    return parseFloat(playtime);
+  } else {
+    return null;
+  }
+}
+
+
+VideoState.prototype.getTimestamp = function() {
+  var timestamp = wave.getState().get(KEY.TIMESTAMP + this.id);
+  if (timestamp) {
+    return new Date(timestamp);
+  } else {
+    return null;
+  }
+}
+
+VideoState.prototype.getComputedPlaytime = function() {
+  if (this.getPlaytime() == null) return null;
+  var timeElapsed = new Date() - this.getTimestamp();
+  var currentPlaytime = this.getPlaytime() + (timeElapsed/1000);
+  return currentPlaytime;
+}
+
+/**
+ * Sets up state callback and initializes UI elements.
+ */
+function init() {
+  gadgets.window.adjustHeight(-1); 
+  DOM.PICKER = $('#picker');
+  DOM.PICKERTRIGGER = $('#picker-trigger');
+  DOM.PICKERRESULTS = $('#picker-results');
+  DOM.SEARCHBUTTON = $('#search-button');
+  DOM.SEARCHINPUT = $('#search-input');
+  DOM.PLAYER = $('#player');
+  DOM.PLAYINGNOW = $('#player-nowplaying');
+  DOM.PLAYTIME = $('#player-time');
+  DOM.PICKERLink = $('#player-link');
+  DOM.CONTROL = $('#player-control');
+  DOM.PROGRESSBAR = $('#player-progressbar');
+  DOM.ELAPSEDBAR = $('#player-elapsedbar');
+  
+  DOM.PICKERTRIGGER.overlay({target: DOM.PICKER});
+  pickerOverlay = DOM.PICKERTRIGGER.data('overlay');
+
+  DOM.SEARCHBUTTON.click(function() {
+    showSearch(DOM.SEARCHINPUT.val());
+  });
+
+  DOM.PICKERLink.click(function() {
+    pickerOverlay.load();
+    DOM.PICKER.removeClass('start');
+    showRelated(videoState.getId());
+  });
+  
+  DOM.PROGRESSBAR.click(function(e){
+    var ratio = (e.pageX-DOM.PROGRESSBAR.offset().left)/DOM.PROGRESSBAR.outerWidth();
+    DOM.ELAPSEDBAR.width(ratio*100+'%');
+    var playtime = videoState.getDuration()*ratio;
+    youtubePlayer.seekTo(playtime, true);
+    videoState.saveStatus(STATUS.PLAYING, playtime);
+    return false;
+  });
+  
+  DOM.CONTROL.click(function(){
+    if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
+      playVideo();
+      log('Saving the playing state');
+      videoState.saveStatus(STATUS.PLAYING);
+    } else if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING) {
+      pauseVideo();
+      log('Saving the pause state');
+      videoState.saveStatus(STATUS.PAUSED);
+    }
+  });
+
+  wave.setStateCallback(onStateChange);
+}
+
+
+function log(message) {
+  if (DEBUG) {
+    if (window.console && console.log) {
+      console.log(message);
+    }
+  }
+}
+
+/**
+ * Handles state callbacks.
+ */
+function onStateChange(state, changedState) {
+  log(state);
+  log(changedState);
+  // If no video has been selected, show picker + featured vids
+  if (!state.get(KEY.ID)) {
+    pickerOverlay.load();
+    DOM.PICKER.addClass('start');
+    showFeatured();
+    return;
+  }
+
+  // If the video changed
+  if (changedState[KEY.ID]) {
+    videoState = new VideoState(state.get(KEY.ID));
+    prepVideo();
+    return;
+  }
+  
+  // If video is same but status changed
+  var statusKey = (KEY.STATUS + videoState.getId());
+  if (videoState && changedState[statusKey]) {
+    controlVideo();  
+  }
+}
+
+
+/*** PICKER RELATED FUNCTIONALITY ***/
+
+function showSearch(query) {
+  var searchUrl = 'http://gdata.youtube.com/feeds/api/videos';
+  var params = {
+    'v': '2',
+    'alt': 'jsonc',
+    'format': '5',
+    'q': query
+  }
+  DOM.PICKERRESULTS.empty(); 
+  DOM.PICKERRESULTS.append('<div class="picker-divider">Search Results:</div>'); 
+  JSONP.get(searchUrl, params, null, function(json) {
+    handleSearchResults(json);
+  });
+}
+
+function showRelated(id) {
+  var feedUrl = 'http://gdata.youtube.com/feeds/api/videos/' + id + '/related';
+  var params = {
+    'v': '2',
+    'alt': 'jsonc',
+    'format': '5'
+  }
+  DOM.PICKERRESULTS.empty(); 
+  DOM.PICKERRESULTS.append('<div class="picker-divider">Related Videos:</div>'); 
+  JSONP.get(feedUrl, params, null, function(json) {
+    handleFeedResults(json);
+  });
+}
+
+
+function showFeatured() {
+  var feedUrl = 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured';
+  var params = {
+    'v': '2',
+    'alt': 'jsonc',
+    'format': '5'
+  }
+  DOM.PICKERRESULTS.empty(); 
+  DOM.PICKERRESULTS.append('<div class="picker-divider">Featured Videos:</div>'); 
+  JSONP.get(feedUrl, params, null, function(json) {
+    handleFeedResults(json);
+  });
+}
+
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
+}
+
+
+function handleFeedResults(json) {
+  DOM.PICKERRESULTS.removeClass('search').addClass('feed');
+  var results = json.data.items || [];
+  var resultsArea = $('<div></div>');
+  for (var i = 0; i < Math.min(14, results.length); i++) {
+    addFeedResult(results[i], resultsArea);
+  }
+  DOM.PICKERRESULTS.append(resultsArea); 
+}
+
+
+function addFeedResult(result, resultsArea) {
+  var resultBlock= $('<div></div>').appendTo(resultsArea);
+  resultBlock.addClass('result');
+  var image = $('<img src="' + result.thumbnail.sqDefault + '">').appendTo(resultBlock);
+  var linkBlock = $('<div class="title"><a href="javascript:void()">' + truncate(result.title, 37) + '</div>').appendTo(resultBlock);
+  linkBlock.click(function() {
+    selectVideo(result);
+  });
+  var infoBlock = $('<div class="info"></div>').appendTo(resultBlock);
+  infoBlock.append('by ' + result.uploader);
+  if (result.viewCount) {
+    var views = numberWithCommas(result.viewCount);
+    infoBlock.append('<br>' + views + ' views');
+  }
+}
+
+
+function handleSearchResults(json) {
+  DOM.PICKERRESULTS.removeClass('feed').addClass('search');
+  var results = json.data.items || [];
+  var resultsTable = $('<table></table>');
+  for (var i = 0; i < results.length; i++) {
+    addSearchResult(results[i], resultsTable);
+  }
+  DOM.PICKERRESULTS.append(resultsTable); 
+}
+
+function addSearchResult(result, resultsTable) {
+  var row = $('<tr></tr>').appendTo(resultsTable);
+  var imageCell = $('<td width="140"></td>').appendTo(row);
+  var image = $('<img src="' + result.thumbnail.sqDefault + '">').appendTo(imageCell);
+  var infoCell = $('<td></td>').appendTo(row);
+  var linkBlock = $('<div class="title"><a href="javascript:void()">' + result.title + '</a></div>').appendTo(infoCell);
+  linkBlock.click(function() {
+    selectVideo(result);
+  });
+  infoCell.append('<p>' + truncate(result.description, 140) + '<br>');
+  var uploaded = new Date(result.uploaded).toRelativeTime();
+  var views = numberWithCommas(result.viewCount);
+  infoCell.append('by ' + result.uploader + ' | ' + uploaded + ' | ' + views + ' views</p>');
+}
+
+/*** PICKER -> PLAYER TRANSITION FUNCTIONALITY ***/
+
+function selectVideo(result) {
+  stopVideo();
+  pickerOverlay.close();
+  if (videoState) {
+    videoState.deleteState();
+    videoState = null;
+  }
+  videoState = new VideoState(result.id);
+  videoState.saveSelection(result);
+}
+
+
+/*** PLAYER RELATED FUNCTIONALITY ***/
+
+function prepVideo() {
+  DOM.PLAYER.show();
+  DOM.PLAYINGNOW.html('Now playing: ' + videoState.getTitle());
+  if (!youtubePlayer) {
+    var params = {allowScriptAccess: 'always', allowFullScreen: 'true', wmode: 'transparent'};
+    var atts = {id: 'myytplayer'};
+    var width = DOM.PLAYER.outerWidth();
+    var height = DOM.PLAYER.outerHeight() - 100;
+    var url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&playerapiid=ytplayer&video_id=' + videoState.getId();
+    swfobject.embedSWF(url,
+      'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
+  } else {
+    stopVideo();
+    youtubePlayer.cueVideoById(videoState.getId());
+    preloadVideo();
+  }
+}
+
+
+function onYouTubePlayerReady(playerId) {
+  youtubePlayer = document.getElementById('myytplayer');
+  youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
+  preloadVideo();
+}
+
+
+function preloadVideo() {
+  // Handle easy cases where video is paused or
+  // video was playing but is now past the end time
+  if (videoState.getStatus() == STATUS.PAUSED) {
+    pauseWithPreload();
+    return;
+  } else if (videoState.getStatus() == STATUS.PLAYING && videoState.getComputedPlaytime() >= videoState.getDuration()) {
+    stopVideo();
+    DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
+    DOM.PICKERLink.click();
+    return;
+  }
+  log('Preloading');
+  preloadingNow = true;
+  var currentPlaytime = videoState.getComputedPlaytime(); 
+  if (!currentPlaytime) {
+    // The video was selected but hasn't been played by anyone yet
+    currentPlaytime = 0;
+  }
+  youtubePlayer.style.visibility = 'hidden';
+  youtubePlayer.mute();
+  if (currentPlaytime > 0) {
+    log('Seeking to ' + currentPlaytime);
+    youtubePlayer.seekTo(currentPlaytime);
+  } else {
+    log('Playing video for preloading purposes.');
+    youtubePlayer.playVideo();
+  }
+  
+  var preloadPlaytime = currentPlaytime + SECONDS_PRELOAD;
+  var checkInterval = window.setInterval(function() {
+   var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - preloadPlaytime);
+   if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING && timeDiff <= DIFF.PRELOAD) {
+     window.clearInterval(checkInterval);
+     youtubePlayer.pauseVideo();
+     preloadingNow = false;
+     almostPlayVideo();
+   }
+   }, 30);
+}
+
+
+function almostPlayVideo() {
+  log('Almost playing video');
+  if (videoState.getStatus() == STATUS.SELECTED) {
+    log('Noone else started playing it, Ill start playing in ' + SECONDS_WAITING + ' seconds');
+    var predictedTimestamp = new Date();
+    predictedTimestamp.setMilliseconds(predictedTimestamp.getMilliseconds() + (SECONDS_WAITING * 1000));
+    window.setTimeout(function() { 
+       playVideo(0);
+     }, 1000*SECONDS_WAITING);
+    videoState.saveStatus(STATUS.PLAYING, 0, predictedTimestamp);
+  } else if (videoState.getStatus() == STATUS.PLAYING) {
+    var currentPlaytime = videoState.getComputedPlaytime();
+    log('Someone else is already playing it, Im starting at ' + currentPlaytime);
+    if (currentPlaytime < videoState.getDuration()) {
+      playVideo(currentPlaytime);
+    } 
+  }
+}
+
+
+function playVideo(playtime) {
+  if (preloadingNow) return;
+  youtubePlayer.style.visibility = 'visible';
+  youtubePlayer.unMute();
+  if (playtime != undefined) { 
+    log('Seeking to ' + playtime);
+    youtubePlayer.seekTo(playtime);
+  }
+  youtubePlayer.playVideo();
+  log('Playing from ' + playtime + ' at ' + (new Date()));
+  
+  progressInterval = window.setInterval(updateProgress,1000);
+}
+
+function updateProgress() {
+  DOM.ELAPSEDBAR.width(((youtubePlayer.getCurrentTime()/videoState.getDuration())*100)+'%');
+  if (DEBUG) {
+    DOM.PLAYTIME.text(youtubePlayer.getCurrentTime());
+  }
+}
+
+function pauseVideo() {
+  // If the video is currently playing, pause it:
+  youtubePlayer.pauseVideo();
+  window.clearInterval(progressInterval);
+}
+
+
+function stopVideo() {
+  if (!youtubePlayer) return;
+  youtubePlayer.stopVideo();
+}
+
+
+function onYouTubePlayerStateChange(state) {
+  logState(state);
+  if (preloadingNow) {
+    log('Preloading now, dont care about state change.');
+    return;
+  }
+  switch (state) {
+    case PLAYERSTATE.UNSTARTED:
+      DOM.CONTROL.removeClass('loading play pause').addClass('replay');
+      break;
+    case PLAYERSTATE.ENDED:
+      DOM.CONTROL.removeClass('loading play pause').addClass('replay');
+      DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
+      DOM.PROGRESSBAR.hide();
+      pickerOverlay.load();
+      showRelated(videoState.getId());
+      break;
+    case PLAYERSTATE.PLAYING:
+      DOM.CONTROL.removeClass('loading play replay').addClass('pause');
+      DOM.PROGRESSBAR.show();
+      // If we'd been buffering, let's see if we need to catch up
+      if (videoState.getStatus() == STATUS.PLAYING && justBuffered) {
+        var timeDiff = Math.abs(videoState.getComputedPlaytime() - youtubePlayer.getCurrentTime());
+        if (timeDiff > DIFF.PLAYLAG) {
+          playVideo(videoState.getComputedPlaytime() + 1);
+        }
+      }
+      justBuffered = false;
+      break;
+    case PLAYERSTATE.PAUSED:
+      DOM.CONTROL.removeClass('loading pause replay').addClass('play');
+      DOM.PROGRESSBAR.show();
+      updateProgress();
+      break;
+    case PLAYERSTATE.BUFFERING:
+      DOM.CONTROL.removeClass('play pause replay').addClass('loading');
+      DOM.PROGRESSBAR.show();
+      justBuffered = true;
+      break;
+    case PLAYERSTATE.CUED:
+      DOM.CONTROL.removeClass('play pause replay').addClass('loading');
+      DOM.PROGRESSBAR.hide();
+      break;
+    default:
+      break;
+  }
+}
+
+
+function logState(state) {
+  var logInfo = [];
+  logInfo.push('currentTime: ' + youtubePlayer.getCurrentTime());
+  logInfo.push('videoBytesLoaded: ' + youtubePlayer.getVideoBytesLoaded());
+  switch(state) {
+    case PLAYERSTATE.UNSTARTED:
+      logInfo.push('state: unstarted');
+      break;
+    case PLAYERSTATE.ENDED:
+      logInfo.push('state: ended');
+      break;
+    case PLAYERSTATE.PLAYING:
+      logInfo.push('state: playing');
+      break;
+    case PLAYERSTATE.PAUSED:
+      logInfo.push('state: paused');
+      break;
+    case PLAYERSTATE.BUFFERING:
+      logInfo.push('state: buffering');
+      break;
+    case PLAYERSTATE.CUED:
+      logInfo.push('state: cued');
+      break;
+  }
+  log(logInfo.join(','));
+}
+
+
+function pauseWithPreload() {
+  preloadingNow = true;
+  var playtime = videoState.getPlaytime();
+  youtubePlayer.seekTo(playtime, true);
+  var checkInterval = window.setInterval(function() {
+    var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - playtime);
+    if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING && timeDiff <= DIFF.PRELOAD) {
+      window.clearInterval(checkInterval);
+      preloadingNow = false;
+      youtubePlayer.pauseVideo();
+    }
+  }, 30);
+}
+
+function controlVideo() {
+  if (!youtubePlayer || !youtubePlayer.pauseVideo) return;
+  var status = videoState.getStatus(); 
+  var modifier = videoState.getModifier();
+  switch(status) {
+    case STATUS.PAUSED:
+     var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getPlaytime());
+     if (modifier != wave.getViewer().getId() && timeDiff >= DIFF.PAUSELAG) {
+       log('Pausing because ' + modifier + ' told me to and time diff is ' + timeDiff);
+       pauseWithPreload();
+     }
+     if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING) {
+       log('Pausing because I was playing before');
+       pauseWithPreload();
+     }
+     break;
+   case STATUS.PLAYING:
+     console.log('playing now');
+     var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getComputedPlaytime());
+     // Sync only play requests from other user that are more than X seconds diff
+     if (modifier != wave.getViewer().getId() && timeDiff > DIFF.PLAYLAG) {
+       log('Playing because ' + modifier + ' told me to and timeDiff is ' + timeDiff);
+       playVideo(videoState.getComputedPlaytime());
+     }
+     if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
+       log('Playing because I was paused before');
+       playVideo(videoState.getComputedPlaytime());
+     }
+     break;
+  }
+}
+
+init();
+
+</script>
+]]></Content>
+</Module>
+
