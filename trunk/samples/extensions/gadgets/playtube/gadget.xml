@@ -215,7 +215,7 @@ function init() {
   DOM.PLAYER = $('#player');
   DOM.PLAYINGNOW = $('#player-nowplaying');
   DOM.PLAYTIME = $('#player-time');
-  DOM.PICKERLink = $('#player-link');
+  DOM.PICKERLINK = $('#player-link');
   DOM.CONTROL = $('#player-control');
   DOM.PROGRESSBAR = $('#player-progressbar');
   DOM.ELAPSEDBAR = $('#player-elapsedbar');
@@ -227,7 +227,14 @@ function init() {
     showSearch(DOM.SEARCHINPUT.val());
   });
 
-  DOM.PICKERLink.click(function() {
+  DOM.SEARCHINPUT.keypress(function(event) {
+    if (event.which == '13') {
+      showSearch(DOM.SEARCHINPUT.val());
+      event.preventDefault();
+    }
+  });
+
+  DOM.PICKERLINK.click(function() {
     pickerOverlay.load();
     DOM.PICKER.removeClass('start');
     showRelated(videoState.getId());
@@ -282,6 +289,7 @@ function onStateChange(state, changedState) {
 
   // If the video changed
   if (changedState[KEY.ID]) {
+    pickerOverlay.close();
     videoState = new VideoState(state.get(KEY.ID));
     prepVideo();
     return;
@@ -451,7 +459,7 @@ function preloadVideo() {
   } else if (videoState.getStatus() == STATUS.PLAYING && videoState.getComputedPlaytime() >= videoState.getDuration()) {
     stopVideo();
     DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
-    DOM.PICKERLink.click();
+    DOM.PICKERLINK.click();
     return;
   }
   log('Preloading');
