@@ -102,7 +102,6 @@ var PLAYERSTATE = {
   CUED: 5
 };
 
-
 /**
  * Object for managing state for a selected video.
  */
@@ -110,7 +109,7 @@ function VideoState(id) {
   this.id = id;
 }
 
-VideoState.prototype.saveSelection = function(data){
+VideoState.prototype.saveSelection = function(data) {
   var delta = {};
   delta[KEY.ID] = this.id;
   delta[KEY.DATA + this.id] = JSON.stringify(data);
@@ -184,7 +183,6 @@ VideoState.prototype.getPlaytime = function() {
     return null;
   }
 }
-
 
 VideoState.prototype.getTimestamp = function() {
   var timestamp = wave.getState().get(KEY.TIMESTAMP + this.id);
@@ -368,12 +366,12 @@ function handleFeedResults(json) {
 
 function addFeedResult(result, resultsArea) {
   var resultBlock= $('<div></div>').appendTo(resultsArea);
+  resultBlock.click(function() {
+    selectVideo(result);
+  });
   resultBlock.addClass('result');
   var image = $('<img src="' + result.thumbnail.sqDefault + '">').appendTo(resultBlock);
   var linkBlock = $('<div class="title"><a href="javascript:void()">' + truncate(result.title, 37) + '</div>').appendTo(resultBlock);
-  linkBlock.click(function() {
-    selectVideo(result);
-  });
   var infoBlock = $('<div class="info"></div>').appendTo(resultBlock);
   infoBlock.append('by ' + result.uploader);
   if (result.viewCount) {
@@ -396,12 +394,15 @@ function handleSearchResults(json) {
 function addSearchResult(result, resultsTable) {
   var row = $('<tr></tr>').appendTo(resultsTable);
   var imageCell = $('<td width="140"></td>').appendTo(row);
-  var image = $('<img src="' + result.thumbnail.sqDefault + '">').appendTo(imageCell);
-  var infoCell = $('<td></td>').appendTo(row);
-  var linkBlock = $('<div class="title"><a href="javascript:void()">' + result.title + '</a></div>').appendTo(infoCell);
-  linkBlock.click(function() {
+  imageCell.click(function() {
     selectVideo(result);
   });
+  var image = $('<img src="' + result.thumbnail.sqDefault + '">').appendTo(imageCell);
+  var infoCell = $('<td></td>').appendTo(row);
+  infoCell.click(function() {
+    selectVideo(result);
+  });
+  var linkBlock = $('<div class="title"><a href="javascript:void()">' + result.title + '</a></div>').appendTo(infoCell);
   infoCell.append('<p>' + truncate(result.description, 140) + '<br>');
   var uploaded = new Date(result.uploaded).toRelativeTime();
   var views = numberWithCommas(result.viewCount);
@@ -442,13 +443,11 @@ function prepVideo() {
   }
 }
 
-
 function onYouTubePlayerReady(playerId) {
   youtubePlayer = document.getElementById('myytplayer');
   youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
   preloadVideo();
 }
-
 
 function preloadVideo() {
   // Handle easy cases where video is paused or
