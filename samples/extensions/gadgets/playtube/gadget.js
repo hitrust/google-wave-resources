@@ -86,7 +86,7 @@ VideoState.prototype.saveStatus = function(status, playtime, timestamp) {
   delta[KEY.TIMESTAMP + this.id] = timestamp || new Date();
   delta[KEY.MODIFIER + this.id] = wave.getViewer().getId();
   wave.getState().submitDelta(delta);
-}
+};
 
 VideoState.prototype.deleteState = function() {
   var delta = {};
@@ -95,15 +95,15 @@ VideoState.prototype.deleteState = function() {
     delta[keys[i] + this.id] = null;
   }
   wave.getState().submitDelta(delta);
-}
+};
 
 VideoState.prototype.getId = function() {
   return this.id;
-}
+};
 
 VideoState.prototype.getModifier = function() {
   return wave.getState().get(KEY.MODIFIER + this.id);
-}
+};
 
 VideoState.prototype.getData = function() {
   var data = wave.getState().get(KEY.DATA + this.id);
@@ -112,7 +112,7 @@ VideoState.prototype.getData = function() {
     return data;
   }
   return null;
-}
+};
 
 VideoState.prototype.getTitle = function() {
   var data = this.getData();
@@ -120,7 +120,7 @@ VideoState.prototype.getTitle = function() {
     return data.title;
   }
   return null;
-}
+};
 
 VideoState.prototype.getDuration = function() {
   var data = this.getData();
@@ -253,7 +253,11 @@ function onStateChange(state, changedState) {
   if (changedState[KEY.ID]) {
     pickerOverlay.close();
     videoState = new VideoState(state.get(KEY.ID));
-    prepVideo();
+    if (videoState.getStatus() == STATUS.ENDED) {
+      showEnded();
+    } else {
+      prepVideo();
+    }
     return;
   }
 
@@ -532,14 +536,8 @@ function onYouTubePlayerStateChange(state) {
       DOM.CONTROL.removeClass('loading play pause').addClass('replay');
       break;
     case PLAYERSTATE.ENDED:
-      window.setTimeout(function() {
-        videoState.saveStatus(STATUS.ENDED);
-        DOM.CONTROL.removeClass('loading play pause').addClass('replay');
-        DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
-        DOM.PROGRESSBAR.hide();
-        pickerOverlay.load();
-        showRelated(videoState.getId());
-      }, 0);
+      videoState.saveStatus(STATUS.ENDED);
+      showEnded();
       break;
     case PLAYERSTATE.PLAYING:
       if (bufferStart) {
@@ -567,6 +565,14 @@ function onYouTubePlayerStateChange(state) {
     default:
       break;
   }
+}
+
+function showEnded() {
+  DOM.CONTROL.removeClass('loading play pause').addClass('replay');
+  DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
+  DOM.PROGRESSBAR.hide();
+  pickerOverlay.load();
+  showRelated(videoState.getId());
 }
 
 function catchupOnLag(state) {
@@ -654,8 +660,6 @@ function controlVideo() {
         playVideo(videoState.getComputedPlaytime());
       }
       break;
-    case STATUS.ENDED:
-
   }
 }
 
