@@ -62,6 +62,7 @@ button {
   padding: 5px;
   margin-top: 3px;
   margin-bottom: 5px;
+  vertical-align: middle;
 }
 
 button:hover, button:focus {
