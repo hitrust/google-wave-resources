@@ -307,7 +307,7 @@ function showFeatured() {
     'v': '2',
     'alt': 'jsonc',
     'format': '5'
-  }
+  };
   DOM.PICKERRESULTS.empty();
   DOM.PICKERRESULTS.append('<div class="picker-divider">Featured Videos:</div>');
   JSONP.get(feedUrl, params, null, function(json) {
@@ -448,16 +448,15 @@ function preloadVideo() {
 
   var preloadPlaytime = currentPlaytime + SECONDS_PRELOAD;
   var checkInterval = window.setInterval(function() {
-   var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - preloadPlaytime);
-   if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING && timeDiff <= DIFF.PRELOAD) {
+    var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - preloadPlaytime);
+    if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING && timeDiff <= DIFF.PRELOAD) {
      window.clearInterval(checkInterval);
      youtubePlayer.pauseVideo();
      preloadingNow = false;
      almostPlayVideo();
-   }
-   }, 30);
+    }
+  }, 30);
 }
-
 
 function almostPlayVideo() {
   log('Almost playing video');
@@ -468,7 +467,7 @@ function almostPlayVideo() {
       predictedTimestamp.setMilliseconds(predictedTimestamp.getMilliseconds() + (SECONDS_WAITING * 1000));
       window.setTimeout(function() {
         playVideo(0);
-      }, 1000*SECONDS_WAITING);
+      }, 1000 * SECONDS_WAITING);
       // Only do this if we're a participant. Otherwise we'd auto-join the space.
         videoState.saveStatus(STATUS.PLAYING, 0, predictedTimestamp);
     } else if (videoState.getStatus() == STATUS.PLAYING) {
@@ -478,8 +477,6 @@ function almostPlayVideo() {
         playVideo(currentPlaytime);
       }
     }
-  } else {
-    log("IS NOT PARTICIPANT");
   }
 }
 
@@ -507,6 +504,7 @@ function updateProgress() {
 }
 
 function pauseVideo() {
+  log('Pausing video');
   // If the video is currently playing, pause it:
   youtubePlayer.pauseVideo();
   window.clearInterval(progressInterval);
@@ -543,7 +541,9 @@ function onYouTubePlayerStateChange(state) {
       if (bufferStart) {
         bufferTimeEstimation = (new Date().getTime() / 1000) - bufferStart;
       }
-      catchupOnLag(state);
+      if (justBuffered) {
+        catchupOnLag(state);
+      }
       DOM.CONTROL.removeClass('loading play replay').addClass('pause');
       DOM.PROGRESSBAR.show();
       justBuffered = false;
@@ -575,9 +575,9 @@ function showEnded() {
   showRelated(videoState.getId());
 }
 
-function catchupOnLag(state) {
+function catchupOnLag() {
   // If we'd been buffering, let's see if we need to catch up
-  if (videoState.getStatus() == STATUS.PLAYING && justBuffered) {
+  if (videoState.getStatus() == STATUS.PLAYING) {
     var timeDiff = videoState.getComputedPlaytime() - youtubePlayer.getCurrentTime();
     if (Math.abs(timeDiff) > DIFF.PLAYLAG) {
       var newTime = Math.min(youtubePlayer.getDuration(),
