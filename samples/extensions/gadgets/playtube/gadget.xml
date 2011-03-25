@@ -6,6 +6,6 @@
   author_email="pamelafox@google.com">
   <Require feature="wave"/>
  </ModulePrefs>
- <Content type="url" href="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/gadget.html"/>
+ <Content type="url" href="http://tirsen.com/playtube/gadget.html"/>
 </Module>
 
