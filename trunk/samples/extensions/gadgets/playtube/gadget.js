@@ -10,6 +10,8 @@ var DEBUG = true;
 var SECONDS_PRELOAD = 3;
 var SECONDS_WAITING = 0;
 
+var DEFAULT_VOLUME = 60;
+
 /** DOM elements **/
 var DOM = {
   PICKER: null,
@@ -162,69 +164,6 @@ VideoState.prototype.getComputedPlaytime = function() {
   var currentPlaytime = this.getPlaytime() + (timeElapsed/1000);
   return currentPlaytime;
 }
-
-/**
- * Sets up state callback and initializes UI elements.
- */
-function init() {
-  gadgets.window.adjustHeight(-1);
-  DOM.PICKER = $('#picker');
-  DOM.PICKERTRIGGER = $('#picker-trigger');
-  DOM.PICKERRESULTS = $('#picker-results');
-  DOM.SEARCHBUTTON = $('#search-button');
-  DOM.SEARCHINPUT = $('#search-input');
-  DOM.PLAYER = $('#player');
-  DOM.PLAYINGNOW = $('#player-nowplaying');
-  DOM.PLAYTIME = $('#player-time');
-  DOM.PICKERLINK = $('#player-link');
-  DOM.CONTROL = $('#player-control');
-  DOM.PROGRESSBAR = $('#player-progressbar');
-  DOM.ELAPSEDBAR = $('#player-elapsedbar');
-
-  DOM.PICKERTRIGGER.overlay({target: DOM.PICKER});
-  pickerOverlay = DOM.PICKERTRIGGER.data('overlay');
-
-  DOM.SEARCHBUTTON.click(function() {
-    showSearch(DOM.SEARCHINPUT.val());
-  });
-
-  DOM.SEARCHINPUT.keypress(function(event) {
-    if (event.which == '13') {
-      showSearch(DOM.SEARCHINPUT.val());
-      event.preventDefault();
-    }
-  });
-
-  DOM.PICKERLINK.click(function() {
-    pickerOverlay.load();
-    DOM.PICKER.removeClass('start');
-    showRelated(videoState.getId());
-  });
-
-  DOM.PROGRESSBAR.click(function(e){
-    var ratio = (e.pageX-DOM.PROGRESSBAR.offset().left)/DOM.PROGRESSBAR.outerWidth();
-    DOM.ELAPSEDBAR.width(ratio*100+'%');
-    var playtime = videoState.getDuration()*ratio;
-    youtubePlayer.seekTo(playtime, true);
-    videoState.saveStatus(STATUS.PLAYING, playtime);
-    return false;
-  });
-
-  DOM.CONTROL.click(function(){
-    if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
-      playVideo();
-      log('Saving the playing state');
-      videoState.saveStatus(STATUS.PLAYING);
-    } else if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING) {
-      pauseVideo();
-      log('Saving the pause state');
-      videoState.saveStatus(STATUS.PAUSED);
-    }
-  });
-
-  wave.setStateCallback(onStateChange);
-}
-
 
 function log(message) {
   if (DEBUG) {
@@ -414,6 +353,7 @@ function prepVideo() {
 function onYouTubePlayerReady(playerId) {
   youtubePlayer = document.getElementById('myytplayer');
   youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
+  youtubePlayer.setVolume(DEFAULT_VOLUME);
   preloadVideo();
 }
 
@@ -545,22 +485,18 @@ function onYouTubePlayerStateChange(state) {
         catchupOnLag(state);
       }
       DOM.CONTROL.removeClass('loading play replay').addClass('pause');
-      DOM.PROGRESSBAR.show();
       justBuffered = false;
       break;
     case PLAYERSTATE.PAUSED:
       DOM.CONTROL.removeClass('loading pause replay').addClass('play');
-      DOM.PROGRESSBAR.show();
       updateProgress();
       break;
     case PLAYERSTATE.BUFFERING:
       DOM.CONTROL.removeClass('play pause replay').addClass('loading');
-      DOM.PROGRESSBAR.show();
       bufferStart = new Date().getTime() / 1000;
       break;
     case PLAYERSTATE.CUED:
       DOM.CONTROL.removeClass('play pause replay').addClass('loading');
-      DOM.PROGRESSBAR.hide();
       break;
     default:
       break;
@@ -570,7 +506,6 @@ function onYouTubePlayerStateChange(state) {
 function showEnded() {
   DOM.CONTROL.removeClass('loading play pause').addClass('replay');
   DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
-  DOM.PROGRESSBAR.hide();
   pickerOverlay.load();
   showRelated(videoState.getId());
 }
@@ -668,5 +603,91 @@ function isParticipant() {
   return !!wave.getViewer().thumbnailUrl_;
 }
 
-init();
+/**
+ * Sets up state callback and initializes UI elements.
+ */
+$(function() {
+  gadgets.window.adjustHeight(-1);
+  DOM.PICKER = $('#picker');
+  DOM.PICKERTRIGGER = $('#picker-trigger');
+  DOM.PICKERRESULTS = $('#picker-results');
+  DOM.SEARCHBUTTON = $('#search-button');
+  DOM.SEARCHINPUT = $('#search-input');
+  DOM.PLAYER = $('#player');
+  DOM.PLAYINGNOW = $('#player-nowplaying');
+  DOM.PLAYTIME = $('#player-time');
+  DOM.PICKERLINK = $('#player-link');
+  DOM.CONTROL = $('#player-control');
+  DOM.PROGRESSBAR = $('#player-progressbar');
+  DOM.ELAPSEDBAR = $('#player-elapsedbar');
+  DOM.VOLUME = $('#player-volume');
+
+  DOM.PICKERTRIGGER.overlay({target: DOM.PICKER});
+  pickerOverlay = DOM.PICKERTRIGGER.data('overlay');
+
+  DOM.SEARCHBUTTON.click(function() {
+    showSearch(DOM.SEARCHINPUT.val());
+  });
+
+  DOM.SEARCHINPUT.keypress(function(event) {
+    if (event.which == '13') {
+      showSearch(DOM.SEARCHINPUT.val());
+      event.preventDefault();
+    }
+  });
+
+  DOM.PICKERLINK.click(function() {
+    pickerOverlay.load();
+    DOM.PICKER.removeClass('start');
+    showRelated(videoState.getId());
+  });
+
+  DOM.PROGRESSBAR.click(function(e){
+    var ratio = (e.pageX-DOM.PROGRESSBAR.offset().left)/DOM.PROGRESSBAR.outerWidth();
+    DOM.ELAPSEDBAR.width(ratio*100+'%');
+    var playtime = videoState.getDuration()*ratio;
+    youtubePlayer.seekTo(playtime, true);
+    videoState.saveStatus(STATUS.PLAYING, playtime);
+    return false;
+  });
+
+  DOM.CONTROL.click(function(){
+    if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
+      playVideo();
+      log('Saving the playing state');
+      videoState.saveStatus(STATUS.PLAYING);
+    } else if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING) {
+      pauseVideo();
+      log('Saving the pause state');
+      videoState.saveStatus(STATUS.PAUSED);
+    }
+  });
+
+  DOM.PROGRESSBAR.hide();
+  DOM.VOLUME.hide();
+  DOM.PLAYER.hover(
+    function() {
+      DOM.PROGRESSBAR.fadeIn();
+      DOM.VOLUME.fadeIn();
+    },
+    function() {
+      DOM.PROGRESSBAR.fadeOut();
+      DOM.VOLUME.fadeOut();
+    }
+  );
+
+  DOM.VOLUME.height(300);
+  DOM.VOLUME.slider({
+    orientation: "vertical",
+    range: "min",
+    min: 0,
+    max: 100,
+    value: DEFAULT_VOLUME,
+    slide: function( event, ui ) {
+      youtubePlayer.setVolume(parseInt(ui.value));
+    }
+  });
+
+  wave.setStateCallback(onStateChange);
+});
 

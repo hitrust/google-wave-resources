@@ -80,8 +80,8 @@ button:hover, button:focus {
   position: absolute;
   width: auto;
   height: 15px;
-  left: 0px;
-  right: 0px;
+  left: 0;
+  right: 0;
   background-color:#141414;
   overflow:hidden;
   cursor:pointer;
@@ -169,6 +169,15 @@ button:hover, button:focus {
 
 #player-link button {
   margin: 0px;
+}
+
+#player-volume {
+  position: absolute;
+  height: 300px;
+  width: 10px;
+  bottom: 20%;
+  left: 5%;
+  z-index: 100;
 }
 
 #picker-results {
