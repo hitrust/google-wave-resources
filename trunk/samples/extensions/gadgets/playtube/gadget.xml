@@ -1,7 +1,6 @@
 <Module>
  <ModulePrefs
   title="Youtube Co-Viewer"
-  height="650"
   description="Find a video on Youtube and watch it at the same time as other participants."
   author="Pamela Fox"
   author_email="pamelafox@google.com">
