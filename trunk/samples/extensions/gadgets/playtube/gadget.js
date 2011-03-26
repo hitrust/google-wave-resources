@@ -607,7 +607,7 @@ function isParticipant() {
  * Sets up state callback and initializes UI elements.
  */
 $(function() {
-  gadgets.util.runOnLoadHandlers();
+  gadgets.window.adjustHeight(-1);
   DOM.PICKER = $('#picker');
   DOM.PICKERTRIGGER = $('#picker-trigger');
   DOM.PICKERRESULTS = $('#picker-results');
