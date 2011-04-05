@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="UpDown" height="300" width="100%">
+   <Require feature="wave"></Require>
+   <Require feature="dynamic-height"></Require>
+  </ModulePrefs>
+<Content type="html">
+<![CDATA[<html><head>
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxQGj0PqsCtxKvarsoS-iqLdqZSKfxRdmoPmGl7Y9335WLC36wIGYa6o5Q&sensor=false" type="text/javascript"></script> 
+<script src="http://wave-api.appspot.com/public/wave.js"></script>
+</script>
+<script type="text/javascript">
+var markersAdded;
+var viewerMarker;
+var map;
+var icon;
+var bounds;
+
+/**
+ * Updates vote status information when the user clicks thumbs up or down.
+ * @param {string} dir The direction the user pressed (plus or minus).
+ */
+function saveLocation(address, latlng) {
+ 
+  var viewerId = wave.getViewer().getId();
+  var viewerData = {latlng: latlng.toUrlValue(6), address: address};
+  var delta = {};
+  delta[viewerId] = JSON.stringify(viewerData);
+  wave.getState().submitDelta(delta);
+}
+
+/**
+ * Updates the html of the page to reflect the vote status information.
+ */
+function stateUpdated() {
+  var state = wave.getState();
+  if (state) {
+    bounds = new GLatLngBounds();
+    map.clearOverlays();
+    var allKeys = state.getKeys();
+    if (allKeys.length == 0) { return; }
+    for (var i = 0; i < allKeys.length; i++) {
+      var key = allKeys[i];
+      var viewerData = JSON.parse(state.get(key));
+      var latlngString = viewerData.latlng;
+      var latlng = GLatLng.fromUrlValue(latlngString);
+      bounds.extend(latlng);
+      var marker = new GMarker(latlng, {icon: icon});
+      marker.bindInfoWindowHtml(viewerData.address);
+      map.addOverlay(marker);
+    }
+    zoomToBounds();
+  }
+}
+
+function zoomToBounds() {
+  map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+}
+
+function init() {
+  makeMap();
+  if (wave && wave.isInWaveContainer()) {
+    wave.setStateCallback(stateUpdated);
+    wave.ui.makeButton(document.getElementById("locateLink"));
+  }
+  stateUpdated();
+}
+
+function makeMap() {
+  map = new GMap2(document.getElementById('map'));
+  map.setCenter(new GLatLng(39.91, 116.38), 2);
+  map.addControl(new GLargeMapControl());
+  icon = new GIcon(G_DEFAULT_ICON);
+  icon.image = "http://chart.apis.google.com/chart?cht=mm&chs=24x32&chco=FFFFFF,008CFF,000000&ext=.png";
+}
+
+function findAddress() {
+  var address = document.getElementById("addressInput").value;
+  var geocoder = new GClientGeocoder();
+  geocoder.getLatLng(address, function(latlng) {
+    if (!latlng) {
+      alert(address + " not found");
+    } else {
+      if (viewerMarker) {
+        map.removeOverlay(viewerMarker); 
+      }
+      viewerMarker = new GMarker(latlng, {icon: icon});
+      map.addOverlay(viewerMarker);
+      saveLocation(address, latlng);
+    }
+  });
+}
+  
+gadgets.util.registerOnLoadHandler(init);
+</script>
+</head>
+<body>
+<div id="mainDiv">
+ <div id="formDiv">
+  <div style="float:left;"><input id="addressInput" type="text" style="width:325px" name="address" value="" /></div>
+  <div style="float:left;"><a id="locateLink" href="javascript:void(0)" onclick="findAddress()">Locate</a></div>
+ </div>
+ <div id="map" style="clear:both; width:400px;height:250px;"></div> 
+</div>
+</body>
+</html>
+]]></Content>
+</Module>

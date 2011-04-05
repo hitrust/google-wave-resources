@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block body %}
+<center>
+<p>Select a wave to visualize it:</p>
+
+{% for digest in digests %}
+<p>
+<b>{{digest.title}}</b>
+<br>
+  <a href="/app/fetchwave?wave_id={{ digest.wave_id|urlencode }}">Tree</a>
+  | 
+  <a href="/app/fetchwave?wave_id={{ digest.wave_id|urlencode }}&format=timeline">Timeline</a>
+</p>
+{% endfor %}
+</center>
+{% endblock %}

@@ -1,0 +1,13 @@
+<extension
+    name="Static Mappy"
+    thumbnailUrl="http://staticmappy-bot.appspot.com/avatar.png"
+    description="Select an address and click the toolbar to insert a static map of the address.">
+  <author name="Google"/>
+  <menuHook location="toolbar" text="Insert Map"
+    iconUrl="http://staticmappy-bot.appspot.com/icon.png">
+    <annotateSelection key="appspot/staticmappy/address" value=""/>
+    <addParticipants>
+      <participant id="staticmappy-bot@appspot.com"/>
+    </addParticipants>
+  </menuHook>
+</extension>

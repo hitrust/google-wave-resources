@@ -1,0 +1,11 @@
+application: YOUR-APP-ID
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /_wave/.*
+  script: wave.py
+
+- url: /static
+  static_dir: static

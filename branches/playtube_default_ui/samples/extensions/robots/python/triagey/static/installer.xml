@@ -1,0 +1,9 @@
+<extension name="Bug Triagey" description="Triage issues from Google Code projects inside a wave." thumbnailUrl="http://bug-triagey.appspot.com/static/avatar.png"> 
+  <version>1</version>
+  <author name="Pamela Fox" email="google-wave-api@googlegroups.com"/>
+  <menuHook location="NEW_WAVE_MENU" text="Issue Triage">
+    <createNewWave>
+      <participant id="bug-triagey@appspot.com" />
+    </createNewWave>
+  </menuHook>
+</extension>

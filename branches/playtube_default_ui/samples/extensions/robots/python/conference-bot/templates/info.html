@@ -1,0 +1,13 @@
+<html>
+  </head>
+  <body>
+    <table>
+    {% for session in sessions %}
+    <tr>
+     <td>{{session.id}}</td><td>{{session.wave_id}}</td><td>{{session.title}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+
+  </body>
+</html>

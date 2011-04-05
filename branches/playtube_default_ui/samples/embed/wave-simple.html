@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Wave Embed API Example: Simple Wave</title>
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    google.load("wave", "1");
+
+    function initialize() {
+      var waveFrame = document.getElementById("waveframe");
+      var embedOptions = {
+        target: waveFrame
+      }
+      var wavePanel = new google.wave.WavePanel(embedOptions);
+      wavePanel.loadWave("googlewave.com!w+Ism0RMW_A")
+    }
+    google.setOnLoadCallback(initialize);
+    </script>
+  </head>
+  <body >
+    <div id="waveframe" style="width: 500px; height: 100%"></div>
+  </body>
+</html>

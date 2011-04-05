@@ -1,0 +1,99 @@
+<script>
+function init() {
+  wadget.ui.convertButtons();
+  wadget.window.adjustHeight();
+}
+wadget.util.registerOnLoadHandler(init);
+</script>
+<form id="admin_form">
+<table>
+  <tr><td colspan="2"><img
+      src="http://chart.apis.google.com/chart?cht=it&chs=32x32&chco=5590D2,000000ff,ffffff01&chl=1&chx=FFFFFF,14&chf=bg,s,00000000&ext=.png"></td></tr>
+ <tr>
+   <td>
+    <label for="name">{{ type }} Name</label>
+  </td>
+  <td>
+    <input type="text" name="name">
+  </td>
+ </tr>
+ <tr>
+   <td>
+    <label for="icon">Icon URL</label>
+  </td>
+  <td>
+    <input type="text" name="icon">
+  </td>
+ </tr>
+ <tr>
+  <td>
+    <label for="groups">Group(s) to add</label><br>
+    <span style="font-size:x-small">(comma separated)</span>
+  </td>
+  <td>
+    <input type="text" name="groups">
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <label for="tags">Tag(s) to add</label><br>
+    <span style="font-size:x-small">(comma separated)</span>
+  </td>
+  <td>
+   <input type="text" name="tags">
+  </td>
+ </tr>
+ <tr>
+  <td></td>
+  <td>
+   <input type="checkbox" name="public">
+   Make waves public
+  </td>
+ </tr>
+  <tr>
+    <td></td>
+    <td><input type="button" name="createmain" value="Create Main Wave"><br>
+    </td>
+  </tr>
+<tr><td colspan="2"><img
+    src="http://chart.apis.google.com/chart?cht=it&chs=32x32&chco=5590D2,000000ff,ffffff01&chl=2&chx=FFFFFF,14&chf=bg,s,00000000&ext=.png"></td></tr>
+ <tr><td colspan="2"><div class="divider"></div></td></tr></tr>
+<tr>
+  <td>
+    <label for="template">Session Template</label>
+  </td>
+  <td>
+    <select name="template">
+      <option value="default">Normal Conference</option>
+      <option value="jonsi">Jonsi Q&amp;A</option>
+    </select>
+  </td>
+ </tr>
+ <tr><td colspan="2"><div class="divider"></div></td></tr></tr>
+ <tr>
+  <td>
+   <label for="datasource_type">Data Source</label>
+  </td>
+  <td>
+   <select name="datasource_type">
+     <option name="spreadsheet">Spreadsheet</option>
+     <option name="dapper">Dapper</option>
+     <option name="html">HTML</option>
+   </select>
+  </td>
+  </tr>
+  <tr>
+   <td>
+    <label for="datasource_url">URL</label>
+   </td>
+   <td>
+    <input type="text" name="datasource_url">
+   </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type="button" name="createsessions" value="Create Session Waves"><br>
+    </td>
+  </tr>
+</table>
+</form>

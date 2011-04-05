@@ -1,0 +1,23 @@
+application: staticmappy-bot
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /_wave/.*
+  script: wave.py
+
+- url: /installer.xml
+  static_files: installer.xml
+  upload: installer.xml
+  mime_type: text/xml
+
+- url: /avatar.png
+  static_files: avatar.png
+  upload: avatar.png
+  mime_type: img/png
+
+- url: /icon.png
+  static_files: icon.png
+  upload: icon.png
+  mime_type: text/xml

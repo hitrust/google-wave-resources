@@ -1,0 +1,22 @@
+{% extends "basegallery.html" %}
+{% block body %}
+<script language="JavaScript" src="/static/js/gen_validatorv2.js" type="text/javascript"></script>
+<script language="JavaScript" src="/static/js/projectgallery.js" type="text/javascript"></script>
+{% include "sidebar.html" %}
+
+<div id="container" class="middlecontent">
+<h1 class="page_title">Moderation Queue</h1>
+  <div style="display:none;padding-top:10px;overflow:hidden;" id="cse_results"></div>
+<p>Decide the fate of these entries</p>
+  <ul>
+  {% for app in moderation_list %}
+    <li><a href="/about_app?app_id={{app.key.id}}">{{app.title}}</a></li>
+  {% endfor %}
+  </ul>
+
+  <br>
+{% include "backto.html" %}
+  </div>
+
+{% endblock %}
+

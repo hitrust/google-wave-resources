@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Admin" height="60">
+  <Require feature="wave" />
+  <Require feature="dynamic-height" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+<style>
+  .label {
+    text-align: right;
+    font-weight: bold;
+  }
+</style>
+<script src="{{server}}/js/waveform.js"></script>
+<script type="text/javascript">
+var form;
+
+function onStateCallback() {
+  waveform.updateForm(form);
+  updateMainWaveCell();
+}
+
+function initWave() {
+  form = document.getElementById('adminForm');
+  if (wave && wave.isInWaveContainer()) {
+    // Set up state callback to update form when changes happen
+    wave.setStateCallback(onStateCallback);
+
+    // Wave-enable the form so that changes are synced to the wave
+    waveform.waveEnableForm(form);
+
+    // Make UI adjustments
+    gadgets.window.adjustHeight();
+    wave.ui.makeButton(document.getElementById('mainWaveButton'));
+    wave.ui.makeFrame(document.getElementById('adminGadget'));
+  }
+}
+
+function createMainWave() {
+  var mainWaveCell = document.getElementById('mainWaveCell');
+  var url = '{{server}}' + '/img/ajaxloader.gif';
+  mainWaveCell.innerHTML = '<img src="' + url + '">';
+  wave.getState().submitDelta({'createmain': 'clicked'});
+}
+
+function updateMainWaveCell() {
+  var mainWaveCell = document.getElementById('mainWaveCell');
+  var waveId = wave.getState().get('wave_id');
+  if (waveId) {
+    var domain = waveId.split('!')[0];
+    var url = 'http://wave.google.com/a/' + domain + '/#restored:wave:' + waveId;
+    mainWaveCell.innerHTML = '<a href="' + url + '" target="_blank">Visit</a>';
+  } else {
+    mainWaveCell.innerHTML = '<a id="mainWaveButton"' +
+     '  href="javascript:void(0)"' +
+     'onclick="createMainWave()"><b>Create</b></a>';
+  }
+}
+
+gadgets.util.registerOnLoadHandler(initWave);
+</script>
+<div id="adminGadget">
+<form id="adminForm">
+<table>
+ <tr>
+   <td class="label">
+    <label for="name">Name:</label>
+  </td>
+  <td>
+    <input type="text" name="name" onchange="waveform.submitFormDelta(form)">
+  </td>
+ </tr>
+ <tr>
+  <td class="label">
+   <label for="hashtag">Hashtag:</label><br>
+    <span style="font-size:x-small">(comma separated)</span>
+  </td>
+  <td>
+   <input type="text" name="hashtag" onchange="waveform.submitFormDelta(form)">
+  </td>
+ </tr>
+ <tr>
+ <tr>
+   <td class="label">
+    <label for="icon">Icon URL:</label>
+  </td>
+  <td>
+    <input type="text" name="icon" onchange="waveform.submitFormDelta(form)">
+  </td>
+ </tr>
+ <tr>
+  <td class="label">
+    <label for="participants">Participant(s):</label><br>
+    <span style="font-size:x-small">(comma separated)</span>
+  </td>
+  <td>
+    <input type="text" name="participants"
+      onchange="waveform.submitFormDelta(form)">
+  </td>
+ </tr>
+ <tr>
+  <td class="label">
+   <label for="tags">Extra Tag(s):</label><br>
+    <span style="font-size:x-small">(comma separated)</span>
+  </td>
+  <td>
+   <input type="text" name="tags" onchange="waveform.submitFormDelta(form)">
+  </td>
+ </tr>
+ <tr>
+  <td></td>
+  <td>
+   <input type="checkbox" name="public"
+     onchange="waveform.submitFormDelta(form)">
+   Make waves public
+  </td>
+ </tr>
+ <tr>
+    <td class="label">Main Wave:</td>
+    <td id="mainWaveCell">
+      <a id="mainWaveButton" href="javascript:void(0)"
+        onclick="createMainWave()">Create</a>
+    </td>
+  </tr>
+  <!--
+<tr><td colspan="2"><img
+    src="http://chart.apis.google.com/chart?cht=it&chs=32x32&chco=5590D2,000000ff,ffffff01&chl=2&chx=FFFFFF,14&chf=bg,s,00000000&ext=.png"></td></tr>
+ <tr><td colspan="2"><div class="divider"></div></td></tr></tr>
+<tr>
+  <td>
+    <label for="template">Session Template</label>
+  </td>
+  <td>
+    <select name="template">
+      <option value="default">Normal Conference</option>
+      <option value="jonsi">Jonsi Q&amp;A</option>
+    </select>
+  </td>
+ </tr>
+ <tr><td colspan="2"><div class="divider"></div></td></tr></tr>
+ <tr>
+  <td>
+   <label for="datasource_type">Data Source</label>
+  </td>
+  <td>
+   <select name="datasource_type">
+     <option name="spreadsheet">Spreadsheet</option>
+     <option name="dapper">Dapper</option>
+     <option name="html">HTML</option>
+   </select>
+  </td>
+  </tr>
+  <tr>
+   <td>
+    <label for="datasource_url">URL</label>
+   </td>
+   <td>
+    <input type="text" name="datasource_url">
+   </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type="button" name="createsessions" value="Create Session Waves"><br>
+    </td>
+  </tr>
+  -->
+</table>
+</form>
+</div>
+  ]]>
+  </Content>
+</Module>

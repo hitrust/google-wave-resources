@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+<ModulePrefs title="setWidth Example" height="120">
+  <Require feature="wave" /> 
+</ModulePrefs>
+<Content type="html">
+<![CDATA[ 
+<p>Drag to change width:</p>
+<input id="widthRange" type="range" min="40" max="500" value="200" onchange="rangeChanged()">
+<style type="text/css">
+body {
+  background-color: #C9E2FC;
+  font-size: 11px;
+}
+</style>
+<script type="text/javascript">
+    function rangeChanged() {
+      var width = parseInt(document.getElementById('widthRange').value);
+      gadgets.window.adjustWidth(width);
+    }
+
+    function init() {
+      if (wave && wave.isInWaveContainer()) {
+        gadgets.window.adjustWidth(200);
+      }
+    }
+    gadgets.util.registerOnLoadHandler(init);
+</script>
+
+  ]]> 
+  </Content>
+</Module>

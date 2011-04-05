@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Blogspotty">
+    <Require feature="wave"/>
+    <Require feature="dynamic-height"/>
+    <Require feature="opensocial-0.8"/>
+    <Require feature="osapi"/>
+    <Require feature="locked-domain"/>
+    <Require feature="oauthpopup"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <script type="text/javascript" src="https://www.google.com/uds/modules/gdata/gdata.js"></script>
+      <script type="text/javascript" src="https://wave-api.appspot.com/public/wave.js"></script>
+      <script type="text/javascript" src="https://blogspotty.appspot.com/client/blogspotty.js"></script>
+      <link rel="stylesheet" href="https://blogspotty.appspot.com/client/blogspotty.css" type="text/css">
+      <div id="gadget"/>
+    ]]>
+  </Content>
+</Module>

@@ -1,0 +1,9 @@
+<extension name="The Rippler" description="Easily create new ripples."
+  thumbnailUrl="http://zaksiddons.files.wordpress.com/2008/03/ripple_effect.jpg">
+  <author name="Pamela Fox" email="pamelafox@google.com"/>
+  <menuHook location="NEW_WAVE_MENU" text="New Ripple">
+    <createNewWave>
+      <participant id="ripple-bot@appspot.com"/>
+    </createNewWave>
+  </menuHook>
+</extension>

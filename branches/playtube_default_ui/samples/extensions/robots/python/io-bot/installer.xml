@@ -1,0 +1,8 @@
+<extension
+    name="Google I/O 2010"
+    thumbnailUrl="http://io2010-bot.appspot.com/img/thumbnail.png"
+    description="Easily find and join session waves.">
+  <author name="Google"/>
+  <savedSearchHook name="Google IO 2010"
+    query="group:io2010-wave@googlegroups.com tag:io2010"></savedSearchHook>
+</extension>

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+<ModulePrefs title="Bug Triagey" height="60">
+  <Require feature="wave" />
+  <Require feature="dynamic-height" />
+</ModulePrefs>
+<Content type="html">
+<![CDATA[
+<style>
+  td {
+    font-size: small;
+  }
+  input {
+    font-size: small;
+  }
+</style>
+<script src="http://bug-triagey.appspot.com/js/util.js"></script>
+<script type="text/javascript">
+gadgets.util.registerOnLoadHandler(init);
+
+var server = 'http://bug-triagey.appspot.com';
+
+function onLoadClicked() {
+  var preset_key = document.getElementById('presetKey').value;
+  wave.getState().submitDelta({'preset_key': preset_key});
+}
+
+function init() {
+  goToStart();
+  wave.ui.makeFrame(document.getElementById('frame'));
+  wave.ui.makeButton(document.getElementById('editButton'));
+  wave.ui.makeButton(document.getElementById('loadButton'));
+  wave.ui.makeButton(document.getElementById('newButton'));
+  wave.ui.makeButton(document.getElementById('saveButton'));
+  wave.setParticipantCallback(function () {
+    if (wave.getViewer()) {
+      document.getElementById('viewerInput').value = wave.getViewer().getId();
+      getPresets();
+    }
+  });
+  gadgets.window.adjustHeight();
+}
+
+function hide(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function show(id) {
+  elem = document.getElementById(id);
+  elem.style.display = 'block';
+}
+
+
+function onPresetsLoad(response) {
+  document.getElementById('presetKey').innerHTML = '';
+  for (var i = 0; i < response.data.length; i++) {
+    var preset = response.data[i];
+    var option = document.createElement('option');
+    option.value = preset.key;
+    option.innerHTML = preset.name;
+    document.getElementById('presetKey').appendChild(option);
+  }
+}
+
+function getPresets() {
+  var params = {}
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+  params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 10;
+  var url = server + '/web/presets';
+
+  // If we know who viewer is, specify in request
+  if (wave.getViewer()) {
+    url += '?viewer=' + wave.getViewer().getId();
+  }
+  gadgets.io.makeRequest(url, onPresetsLoad, params);
+}
+
+function getPreset() {
+  var params = {}
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+  params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 10;
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
+  var presetKey = getFormData(document.getElementById('startForm'));
+  gadgets.io.makeRequest(server + '/web/preset?' + presetKey, onPresetLoad, params);
+}
+
+function savePreset() {
+  var params = {}
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+  params[gadgets.io.RequestParameters.POST_DATA] = getFormData(document.getElementById('editForm'));
+  gadgets.io.makeRequest(server + '/web/save', function(){}, params);
+}
+
+function getEl(id) {
+  return document.getElementById(id);
+}
+
+var numSources = 0;
+
+function onPresetLoad(response) {
+  getEl('nameInput').value = response.data.name;
+  getEl('keyInput').value = response.data.key;
+  if (response.data.public) {
+    getEl('publicCheck').checked = true
+  }
+  for (var i = 0; i < response.data.sources.length; i++) {
+    addSource(i, response.data.sources[i]);
+ }
+}
+
+function addSource(i, source) {
+  if (i == 0) {
+    getEl('sources').innerHTML = '';
+  }
+  if (!source) source = {'project': '', 'label': '', 'status': ''}
+  getEl('sources').innerHTML += '<input type="hidden" name="source' + i + '" value="exists">' +
+      'Project: <input type="text" name="source_project' + i + '" value="' + source.project + '"><br>' +
+      'Restrict to status: <input type="text" name="source_status' + i + '" value="' + source.status + '"><br>' +
+      'Sort by label: <input type="text" name="source_label' + i + '" value="' + source.label + '">' +
+      '<br/>';
+  numSources++;
+  gadgets.window.adjustHeight();
+}
+
+function goToStart() {
+  getPresets();
+  hide('form');
+  show('start');
+  gadgets.window.adjustHeight();
+}
+
+function goToEdit() {
+  getPreset();
+  hide('start');
+  show('form');
+  gadgets.window.adjustHeight();
+}
+
+function goToNew() {
+  getEl('nameInput').value = '';
+  getEl('keyInput').value = '';
+  addSource(0);
+  hide('start');
+  show('form');
+  gadgets.window.adjustHeight();
+}
+</script>
+<div id="frame">
+<div id="start">
+  <form method="get" name="start" id="startForm">
+  Pick a template <select name="preset_key" id="presetKey">
+  </select>
+  and then
+  <a href="javascript:void(0)" id="editButton" onclick="goToEdit();">Edit</a>
+  or
+  <a href="javascript:void(0)" id="loadButton" onclick="onLoadClicked()">Load issues</a>
+  </form>
+  <br>or</br>
+  <a href="javascript:void(0)" id="newButton" onclick="goToNew();">Create new template</a>
+</div>
+<div id="form" style='display:none'>
+  <form method="get" name="edit" id="editForm">
+  <table>
+   <tr>
+    <td>Name:</td><td><input type="text" value="" name="name" id="nameInput">
+      <input type="hidden" name="key" value="" id="keyInput">
+      <input type="hidden" name="viewer" value="" id="viewerInput">
+    </td>
+   </tr>
+   <tr>
+    <td>Source(s):</td>
+    <td>
+    <div id="sources">
+    </div>
+    </td>
+   </tr>
+   <tr>
+    <td>
+    <td><a onclick="addSource(numSources)" href="#">Add another source</a></td>
+   </tr>
+   <tr>
+    <td colspan="2">
+      <input type="checkbox" name="public" id="publicCheck"> Share template
+        with world.
+   <tr>
+     <td colspan="2">
+       <a href="javascript:void(0)" id="saveButton" onclick="savePreset();goToStart()">Save</a>
+     </td>
+   </tr>
+  </table>
+  </form>
+</div>
+  <div style="text-align:right">
+  <a target="_blank"
+    href="http://code.google.com/p/google-wave-resources/issues/entry?template=Bug%20Triagey%20Report">Feedback</a>
+  | 
+  <a target="_blank"
+    href="https://wave.google.com/wave/waveref/googlewave.com/w+07fkdICrF">How-to</a>
+  </div>
+</div>
+<br><br><br><br><br><br>
+  ]]>
+  </Content>
+</Module>

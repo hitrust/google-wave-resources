@@ -1,0 +1,47 @@
+<Module> 
+<ModulePrefs 
+  title="Wave API Gadget Demo"
+  height="300"
+  width="300" > 
+  <Require feature="locked-domain" /> 
+  <Require feature="wave" /> 
+</ModulePrefs> 
+<Content type="html"><![CDATA[
+<script type="text/javascript"> 
+BACKGROUNDCOLOR = 'backgroundcolor';
+function initialize() {
+  wave.setPrivateStateCallback(receivePrivateState, this);
+};
+      
+function receivePrivateState(state) {
+  var backgroundColor = state.get(BACKGROUNDCOLOR) || 'white';
+  document.getElementById('gadget_canvas').style.backgroundColor = backgroundColor;
+};
+      
+function updateState() {
+  var dropdown = document.getElementById('color_dropdown');
+  var backgroundColor = dropdown.options[dropdown.selectedIndex].value;
+  wave.log('Updating state to: ' + backgroundColor);
+  
+  var privateState = wave.getPrivateState();
+  var delta = {};
+  delta[BACKGROUNDCOLOR] = backgroundColor;
+  privateState.submitDelta(delta);
+};
+        
+gadgets.util.registerOnLoadHandler(initialize);
+</script> 
+<div id="gadget_canvas" style="width: 100%; height: 100%"> 
+  <br/> 
+  Pick your preferred background color:
+  <select id="color_dropdown" onchange="updateState();"> 
+    <option value="white" selected>white</option> 
+    <option value="red">red</option> 
+    <option value="pink">pink</option> 
+    <option value="blue">blue</option> 
+   </select> 
+   <br> 
+   Welcome to Wave!
+</div> 
+]]></Content> 
+</Module> 

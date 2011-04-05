@@ -1,0 +1,13 @@
+<extension
+    name="Bannery"
+    thumbnailUrl="http://www.google.com/chart?chst=d_bubble_texts_big&amp;chld=bb|49D130|FFFFFF|Bannery"
+    description="Translate your wave to pirate speak.">
+  <author name="Google"/>
+  <menuHook location="toolbar" text="Bannerize"
+    iconUrl="http://www.google.com/chart?chst=d_bubble_texts_big&amp;chld=bb|49D130|FFFFFF|B">
+    <annotateSelection key="text-to-bannerize" value=""/>
+    <addParticipants>
+      <participant id="bannery-bot@appspot.com"/>
+    </addParticipants>
+  </menuHook>
+</extension>

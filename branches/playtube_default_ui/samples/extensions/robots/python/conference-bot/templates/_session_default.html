@@ -1,0 +1,19 @@
+<p></p>
+{% if session.time %}<b>Time</b>: {{ session.time }}{% endif %}
+{% if session.day %}<b>Day</b>: {{ session.day}}{% endif %}
+{% if session.location %}<b>Location</b>: {{ session.location }}{% endif %}
+
+{% if session.description %}<b>Abstract</b>: {{ session.description|fix_ampersands }}{% endif %}
+
+{% if speaker.name %}<b>Speaker</b>: {{ speaker.name }}{% endif %}
+{% if speaker.description %}<b>Bio</b>: {{ speaker.description|fix_ampersands }}{% endif %}
+
+<b>Session Materials:</b>
+<i>Link to any slides, URLs, etc.</i>
+
+<b>Session Notes:</b>
+<i>It usually works best if a few people self-elect themselves as note-takers, and edit this bit with running notes.</i>
+
+<b>Wave Tips:</b>
+- To reply inline to a particular part of a blip, double click + select 'Reply' in the doodad that appears.
+- To have a general discussion, reply below this root blip.

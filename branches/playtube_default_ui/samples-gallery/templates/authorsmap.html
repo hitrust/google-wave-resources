@@ -1,0 +1,107 @@
+﻿{% extends "basegallery.html" %}
+{% block head %}
+<style type="text/css">
+body {font-family: Verdana, Arial, sans serif; font-size: 11px; margin: 2px;}
+h2 {margin: 0px 40px 0px 40px}
+a:hover {text-decoration: underline overline}
+table.main th {background-color:#ccf; height:20px;}
+li {margin-left: -20px;}
+.file-menu td {border: 1px solid silver; text-align:center}
+.sidebar-entry {text-decoration:none; border:1px solid silver;}
+a.sidebar-entry {color:#000; text-decoration: none}
+a.sidebar-entry:hover {background-color:#eee; text-decoration: none}
+a.sidebar-entry:focus {background-color:#ccf; text-decoration: none}
+.iw-cell-2 {background-color:#eee;font-weight:bold}
+#sidebar {width:180px; height:400px; overflow:auto}
+#map {width:480px; height:400px;}
+#novel {width:310px; height:400px; overflow:auto; border:1px solid silver;}
+</style>
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA-O3c-Om9OcvXMOJXreXHAxRlOb26qSyU154aZeLwOrF4C7-DphSw7JoLuXrcDjUb_7h-S1txkSCY7A"
+      type="text/javascript"></script> 
+<script type="text/javascript">
+var map;
+var locations = [];
+/**
+ * Map
+ */
+function createMap() {
+  map = new GMap2(document.getElementById("map"), {size:new GSize(480,400)});
+  map.setCenter(new GLatLng(0,0), 9);
+  map.addControl(new GLargeMapControl());
+  map.addControl(new GMapTypeControl());
+  map.addControl(new GScaleControl(300));
+  populateMap();
+}
+
+
+/**
+ * create the markers
+ */
+function populateMap(points, opt_options){
+  var bounds = new GLatLngBounds();
+  {% for author in authors %}
+  var location = {};
+  location.marker = new GMarker(new GLatLng({{author.latlng}}),{title: "{{author.name}}" });
+  location.marker.bindInfoWindowHtml('<a target="_blank" href="/profile?id={{author.key.id}}">' + location.marker.getTitle() + '</a>');
+  map.addOverlay(location.marker);
+  bounds.extend(location.marker.getLatLng());
+  addToSideBar(location);
+  locations.push(location);
+  {% endfor %}
+  map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+}
+
+
+/**
+ * A general helper function for creating html elements. <div> as default element type
+ * @author Esa 2008 
+ * used for infowindows and sidebar
+ */
+function createElem(opt_className, opt_html, opt_tagName) {
+  var tag = opt_tagName||"div";
+  var elem = document.createElement(tag);
+  if (opt_html) elem.innerHTML = opt_html;
+  if (opt_className) elem.className = opt_className;
+  return elem;
+}
+
+
+/**
+ * Populate sidebar
+ */
+function addToSideBar(point,opt_options){
+  var sideBar = document.getElementById("sidebar");
+  var opts = opt_options||{};
+  var iLabel = opts.iLabel||2;
+  var label = createElem("sidebar-entry", point.marker.getTitle(), "a");
+  label.href = "#";
+  label.style.display = "block";
+  label.onclick = function(){GEvent.trigger(point.marker,'click'); return false};//x-browser
+  label.onfocus = function(){GEvent.trigger(point.marker,'click'); return false};
+  sideBar.appendChild(label);
+  GEvent.addListener(point.marker,'click',function(){label.focus(); return false});
+  return point;
+}
+</script>
+{% endblock %}
+{% block body %}
+
+<!-- Main Content -->
+<div id="container" class="middlecontent">
+  <h1 class="page_title">Authors Map</h1>
+  <table class="main">
+  <tr>
+  <td valign="top"><div id="sidebar"></div></td>
+  <td valign="top"><div id="map"></div></td>
+  </tr>
+  </table>
+</div>
+
+<script>
+createMap();
+</script>
+{% include "backto.html" %}
+
+</div> <!-- End Main content -->
+
+{% endblock %}

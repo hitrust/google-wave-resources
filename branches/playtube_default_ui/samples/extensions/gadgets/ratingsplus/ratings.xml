@@ -1,0 +1,198 @@
+<Module>
+  <ModulePrefs title="Wave Rating" height="200">
+    <Require feature="rpc"/>
+    <Require feature="wave"/>
+  </ModulePrefs>
+<Content type="html">
+  <![CDATA[
+  <script>
+function setStars(selectedStar) {
+  var state = wave.getState();
+  showStars(selectedStar);
+
+  var viewerId = wave.getViewer().getId()
+  state.submitValue(viewerId + '-vote', selectedStar);
+}
+
+function showStars(numStars) {
+  var viewerId = wave.getViewer().getId();
+  var viewerVote = viewerId + '-vote';
+  // If no stars are specified (i.e. this is onmouseover),
+  // just show number of stars for the viewer
+  if (!numStars && wave && wave.getState().get(viewerVote)) {
+    numStars = parseInt(wave.getState().get(viewerVote));
+  }
+  var _rating_star_names = [ '','Poor','Below average','Average','Above average','Excellent!' ];
+  var imgOnUrl =
+  gadgets.io.getProxyUrl('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/img/star_on.png');
+  var imgOffUrl = gadgets.io.getProxyUrl('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/img/star_off.png');
+
+  if (!numStars) {
+    numStars = 0;
+  }
+  for (var i = 1; i <= 5; ++i) {
+    var star_elem = _gel('star'+i);
+    if (!star_elem) {
+      continue;
+    }
+    if (numStars >= i) {
+      star_elem.src = imgOnUrl;
+    } else {
+      star_elem.src = imgOffUrl;
+    }
+  }
+  var star_name = _gel('star_name');
+  if (star_name && numStars >= 0 && numStars < _rating_star_names.length) {
+    star_name.innerHTML = _rating_star_names[numStars];
+  }
+}
+
+function stateChanged() {
+  showStars();
+  var keys = wave.getState().getKeys();
+  var totalVotes = 0;
+  var starVotes = {};
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (key.indexOf('-vote') > 0) {
+      // its a vote
+      totalVotes++;
+      var value = wave.getState().get(key);
+      if (starVotes[value]) {
+        starVotes[value]++
+      } else {
+        starVotes[value] = 1;
+      }
+    }
+  }
+
+  if (totalVotes > 0) {
+    updateStarVotes('1', starVotes, totalVotes);
+    updateStarVotes('2', starVotes, totalVotes);
+    updateStarVotes('3', starVotes, totalVotes);
+    updateStarVotes('4', starVotes, totalVotes);
+    updateStarVotes('5', starVotes, totalVotes);
+  }
+}
+
+function updateStarVotes(star, starVotes, totalVotes) {
+  var percentElem = document.getElementById('percent' + star);
+  var tdElem = document.getElementById('td' + star);
+  var divElem = document.getElementById('div' + star);
+  var parenElem = document.getElementById('paren' + star);
+  if (starVotes[star]) {
+    var numVotes = parseInt(starVotes[star])
+    starPercentage = (numVotes/totalVotes) * 100;
+    starPercentage = starPercentage.toFixed(2);
+    percentElem.innerHTML = starPercentage + '%';
+    tdElem.title = starPercentage + '%';
+    divElem.style.width = starPercentage + '%';
+    parenElem.innerHTML = '(' + starVotes[star] + ')';
+  } else {
+    percentElem.innerHTML = '';
+    tdElem.title = '';
+    divElem.style.width = '0%';
+    parenElem.innerHTML = '';
+  }
+}
+
+function main() {
+  var imgUrl = gadgets.io.getProxyUrl('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/ratingsplus/img/star_off.png');
+  document.getElementById('star1').src = imgUrl;
+  document.getElementById('star2').src = imgUrl;
+  document.getElementById('star3').src = imgUrl;
+  document.getElementById('star4').src = imgUrl;
+  document.getElementById('star5').src = imgUrl;
+  if (wave && wave.isInWaveContainer()) {
+    wave.setStateCallback(stateChanged);
+  }
+}
+gadgets.util.registerOnLoadHandler(main);
+  </script>
+  <style type="text/css">
+    #star1, #star2, #star3, #star4, #star5 {
+      cursor: pointer, hand;
+      width: 14px;
+      height: 13px;
+    }
+  </style>
+<div style="padding:3px; border: 1px solid #5590D2;
+  background-color:#C9E2FC; width:95%;">
+  <div id="rating_panel" style="font-size:small;">
+    <div><b>How do you rate it?</b></div>
+    <div style="height:40px; margin-top:10px">
+      <img id="star1"
+        onclick="setStars(1)" onmouseover="showStars(1)"
+        onmouseout="showStars()" />
+      <img id="star2"
+        onclick="setStars(2)" onmouseover="showStars(2)"
+        onmouseout="showStars()" />
+      <img id="star3"
+        onclick="setStars(3)" onmouseover="showStars(3)"
+        onmouseout="showStars()" />
+      <img id="star4"
+        onclick="setStars(4)" onmouseover="showStars(4)"
+        onmouseout="showStars()" />
+      <img id="star5" 
+        onclick="setStars(5)" onmouseover="showStars(5)"
+        onmouseout="showStars()" />
+      <span id="star_name" style="font-size:small;"></span>
+    </div>
+    <span id="error_msg" style="font-size:small;"></span>
+  </div>
+  <!--
+  <div style="display:block; padding-bottom: 5px; font-size:small">
+    <b><span id="total_votes"></span> Entries</b>
+  </div>
+  -->
+  <table border="0" cellspacing="1" cellpadding="0">
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      5 star:
+    </td>
+    <td id="td5" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div5" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent5" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren5" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      4 star:
+    </td>
+    <td id="td4" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div4" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent4" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren4" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      3 star:
+    </td>
+    <td id="td3" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div3" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent3" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren3" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      2 star:
+    </td>
+    <td id="td2" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div2" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent2" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren2" style="font-size:small;"></span></td>
+  </tr>
+  <tr>
+    <td align="left" style="padding-right:0.5em;padding-bottom:1px;white-space:nowrap;font-size:small;">
+      1 star:
+    </td>
+    <td id="td1" style="min-width:60;" width="60" align="left" bgcolor="#E8E8E8" title="">
+      <div id="div1" style="background-color:#FFCC33; height:13px;
+        width:0%;"><span id="percent1" style="font-size:x-small;"></span></div></td>
+    <td align="right">&nbsp;<span id="paren1" style="font-size:small;"></span></td>
+   </tr>
+  </table>
+</div>  
+]]>
+</Content>
+</Module>

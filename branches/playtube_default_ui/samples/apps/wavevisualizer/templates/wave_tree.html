@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="http://thejit.org/static/v20/Jit/jit-yc.js"></script>
+  <link type="text/css" href="http://thejit.org/static/v20/Jit/Examples/css/base.css" rel="stylesheet" /> 
+<link type="text/css" href="http://thejit.org/static/v20/Jit/Examples/css/Spacetree.css" rel="stylesheet" />
+{% endblock %}
+{% block body %}
+  <div id="infovis" style="width:99%%; height:99%%;"></div>
+  <script>
+var json = {{ json }};
+
+var st = new $jit.ST({
+  //id of viz container element
+  injectInto: 'infovis',
+  //set duration for the animation
+  duration: 100,
+  //set distance between node and its children
+  levelDistance: 50,
+  levelsToShow: 30,
+  constrained: false,
+//  offsetX: (window.innerWidth/2 - 100),
+  //enable panning
+  Navigation: {
+    enable:true,
+    panning:true
+  },
+  //set node and edge styles
+  //set overridable=true for styling individual
+  //nodes or edges
+  Node: {
+    height: 17,
+    width: 100,
+    type: 'rectangle',
+    color: '#aaa',
+    overridable: true
+  },
+  Edge: {
+    type: 'bezier',
+    overridable: true
+  },
+  Tips: {
+    enable: true,
+    offsetX: 10,
+    offsetY: 10,
+    onShow: function(tip, node) {
+      tip.innerHTML = node.data.snippet;
+      tip.style.overflow = 'hidden';
+    }
+  },
+
+  //This method is called on DOM label creation.
+  //Use this method to add event handlers and styles to
+  //your node.
+  onCreateLabel: function(label, node){
+    label.id = node.id;
+    //set label styles
+    var style = label.style;
+    style.width = 100 + 'px';
+    style.height = 14 + 'px';
+    style.cursor = 'pointer';
+    style.fontSize = '0.7em';
+    style.textAlign= 'center';
+    style.paddingTop = '3px';
+    style.overflow = 'hidden';
+    if (node.data.type == 'thread') {
+      label.innerHTML = node.data.snippet;
+      style.backgroundColor = '#C9E2FC';
+    } else {
+      label.innerHTML = node.data.snippet.substr(0, 20) + '...';
+      style.backgroundColor = '#ffffff';
+      label.onclick = function() {
+        window.open(node.data.url, '_blank');
+      };
+    }
+  },
+});
+
+//load json data
+st.loadJSON(json);
+
+//compute node positions and layout
+st.compute();
+
+//emulate a click on the root node.
+st.onClick(st.root);
+
+st.switchPosition('top', 'replot');
+ </script>
+{% endblock %}

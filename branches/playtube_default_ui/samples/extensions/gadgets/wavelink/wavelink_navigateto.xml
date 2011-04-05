@@ -1,0 +1,17 @@
+<Module> 
+  <ModulePrefs height="100" width="150" title="Link to Wave"> 
+    <Require feature="wave" /> 
+    <Require feature="views" /> 
+  </ModulePrefs> 
+  <Content type="html"> 
+    <![CDATA[ 
+<input type="button" onclick="changeWave()" value="Open Wave"/> 
+<script> 
+function changeWave() {
+  gadgets.views.requestNavigateTo('#restored:wave:googlewave.com%252Fw%252B6rNdILhKA.2');
+}
+ 
+gadgets.util.registerOnLoadHandler(init);
+</script> 
+    ]]>
+</Content> </Module> 

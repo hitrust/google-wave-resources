@@ -1,0 +1,123 @@
+               <tr>
+                 <td nowrap style="padding:2px">Sample Name*:</td>
+                 <td style="padding:2px"> <input class="input required" name="title" size="50" {% if app.title %}value="{{app.title|escape}}"{% endif %}></input></div></td>
+               </tr>
+               <tr>    
+                 <td nowrap style="padding:2px">Sample Description:</td>
+                 <td style="padding:2px"> <TEXTAREA name="content" cols="50" rows="4" class="input required">{% if app.description %}{{app.description|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+               <tr>
+                <td nowrap style="padding:2px">What are you submitting?</td>
+                <td style="padding:2px">
+                  <select name="type" id="type">
+                    <option value="app" {% ifequal app.type "app" %} SELECTED {% endifequal %}>Working Sample</option>
+                    <option value="code" {% ifequal app.type "code" %} SELECTED {% endifequal %}>Code Snippet</option>
+                  </select>
+                </td>
+               </tr>
+               <tr class="code-class" style="display:none">
+                 <td nowrap style="padding:2px">Code Snippet*:</td>
+                   <td style="padding:2px" > <TEXTAREA id="code_snippet" name="code_snippet" class="input" cols="50" rows="20">{% if app.code_snippet %}{{app.code_snippet|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+                {% if is_admin %}
+               <tr>
+                 <td nowrap style="padding:2px">Best Practice?:</td>
+                 <td style="padding:2px"> <input type="checkbox" name="best_practice" size="50" {% if app.best_practice %} checked="yes" {% endif %}></input></div></td>
+               </tr>
+               {% endif %}
+               <tr class="app-class">
+                   <td nowrap style="padding:2px;width:175px;">What aspects of the API does this show off?</td>
+                   <td style="padding:2px" > <TEXTAREA name="api_usage" cols="50" rows="3" class="input">{% if app.api_usage %}{{app.api_usage|escape}}{% endif %}</TEXTAREA></td>
+               </tr>
+               <tr {% if not is_admin %} style="display:none" {% endif %}>
+                  <td>Tech details</td>
+                  <td>
+                   <TEXTAREA name="tech_details" {% if not is_admin %} style="display:none" {% endif %} cols="50" rows="3" class="input">{% if app.tech_details %}{{app.tech_details|escape}}{% endif %}</TEXTAREA>
+                  </td>
+               </tr>
+               <tr class="app-class">
+                 <td nowrap style="padding:2px">Source URL*:</td>
+                 <td style="padding:2px;margin-left:5px"><input class="input" id="source_url" name="source_url" size="50"{% if app.source_url %}value="{{app.source_url|escape}}"{% endif %}></td>
+               </tr>
+               <tr>
+                  <td nowrap style="padding:2px">Tags (comma separated):</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="tags" size="50" {% if app.tags %}value="{% for t in app.tags %}{{t|escape}},{% endfor %}"{% endif %}></td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr>
+                  <td nowrap style="padding:2px">APIs Used:</td>
+                  <td style="padding:2px;margin-left:5px">
+                    <input type="checkbox" name="apis" {% if Robots %} checked = true {% endif %} value="Robots">Robots
+                    <input type="checkbox" name="apis" {% if Gadgets %} checked = true {% endif %} value="Gadgets">Gadgets
+                    <input type="checkbox" name="apis" {% if Embed %} checked = true {% endif %} value="Embed">Embed
+                    <input type="checkbox" name="apis" {% if Installer %} checked = true {% endif %} value="Installer">Installer
+                    <br>
+                    <input type="checkbox" name="apis" {% if Data %} checked = true {% endif %} value="Data">Data
+                    <input type="checkbox" name="apis" {% if WaveThis %} checked = true {% endif %} value="WaveThis">WaveThis
+                  </td>
+               </tr>
+               <tr>
+                 <td nowrap style="padding:2px">If you checked robots, does
+                   robot use API v2?</td>
+                 <td style="padding:2px">
+                   <input type="radio" name="api_v2" {% if app.api_v2 %}
+                   checked {% endif %} value="yes"></input>Yes
+                   <input type="radio" name="api_v2" {% if not app.api_v2 %}
+                   checked {% endif %} value="no"></input>No
+                 </td>
+               </tr>
+               <tr>
+                  <td nowrap style="padding:2px">Languages Used:</td>
+                  <td style="padding:2px;margin-left:5px">
+                    <input type="checkbox" name="languages" {% if Java %} checked = true {% endif %} value="Java">Java
+                    <input type="checkbox" name="languages" {% if Python %} checked = true {% endif %} value="Python">Python
+                    <input type="checkbox" name="languages" {% if JavaScript %} checked = true {% endif %} value="JavaScript">JavaScript
+                    <input type="checkbox" name="languages" {% if ActionScript %} checked = true {% endif %} value="ActionScript">ActionScript
+                  </td>
+               </tr>
+               <tr><td style="" colspan="2">&nbsp;</td></tr>
+               <tr class="app-class">
+                  <td>Sample Wave/Page*:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" id="url" name="url" size="50" {% if app.url %}value="{{app.url|escape}}"{% endif %}></td>
+               </tr>
+               <tr class="app-class"><td style="padding-left:10px;" colspan="2"><em>To make a Wave public (to anyone with access), add public@a.gwave.com to it and copy the URL from the status bar. The sample wave should be in the Wave developer sandbox, not preview.</em></td></tr>
+               <tr class="app-class"><td style="" colspan="2">&nbsp;</td></tr>
+               <tr class="app-class">
+                  <td>Installer XML:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="installer_xml" size="50" {% if app.installer_xml %}value="{{app.installer_xml|escape}}"{% endif %}></td>
+               </tr>
+               <tr class="app-class"><td style="" colspan="2">&nbsp;</td></tr>
+               <tr class="app-class">
+                  <td>Robot Address:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="robot_email" size="50" {% if app.robot_email %}value="{{app.robot_email|escape}}"{% endif %}></td>
+               </tr>
+               <tr class="app-class">
+                  <td>Gadget XML:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="gadget_xml" size="50" {% if app.gadget_xml %}value="{{app.gadget_xml|escape}}"{% endif %}></td>
+               </tr>
+               <tr class="app-class"><td style="" colspan="2">&nbsp;</td></tr>
+               <tr class="app-class">
+                  <td>Youtube Video ID:</td>
+                  <td style="padding:2px;margin-left:5px"><input class="input" name="video_url" size="50" {% if app.video_url %}value="{{app.video_url|escape}}"{% endif %}></td>
+               </tr>
+               <tr class="app-class"><td style="padding-left:10px" colspan="2"><em>To easily make a screencast of your app, try using <a href="http://www.jingproject.com">Jing</a> or other free screen capture software, and then upload it to Youtube. </em></td></tr>
+               <tr class="app-class"><td style="" colspan="2">&nbsp;</td></tr>
+                {% if is_admin %}
+               <tr>
+                  <td nowrap style="padding:2px;width:175px;">Admin Tags:</td>
+                <td style="padding:2px;margin-left:5px"><input class="input" name="admin_tags" size="50" value="{{app.admin_tags|join:","|escape}}"></td>
+                </tr>
+                {% endif %}
+<script>
+  function toggleForm() {
+    if ($("#type").val() == "code") {
+      $(".code-class").show();
+      $(".app-class").hide();
+    } else {
+      $(".code-class").hide();
+      $(".app-class").show();
+    }
+  }
+  $("#type").change(toggleForm);
+  toggleForm();
+</script>

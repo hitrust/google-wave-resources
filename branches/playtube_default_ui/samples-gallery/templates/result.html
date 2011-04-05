@@ -1,0 +1,34 @@
+     <table width="100%" style="margin-bottom:.5em" border="0" cellspacing="0" cellpadding="5" repeat="true" >
+       <tr>
+         <td width="120" align="center" valign="top" class="rowPadding">
+          <table width="120">
+             <tr>
+               <td>
+           {% if app.thumbnail %}
+               <div align="left"><img src="/images?img_id={{app.key.id|escape}}&amp;img_type=thumbnail" class="smallThumbnail" style="margin-top:-10px;"/></div>
+           {% else %}
+             {% ifequal app.type "app" %}
+               <div align="left"><img src="/static/img/project_gallery_logo.png" style="margin-top:-10px;"/></div>
+             {% endifequal %}
+             {% ifequal app.type "code" %}
+               <div align="left"><img src="/static/img/project_code.png" style="margin-top:-10px;"/></div>
+             {% endifequal %}
+           {% endif %}
+               </td>
+              </tr>
+            </table>
+         </td>
+         <td width="100%" align="center" valign="middle" class="rowPadding">
+           <div align="left"><font size="+1"><a href="/about_app?app_id={{app.key.id|escape}}">{{app.title|escape}}</a></font></div>
+           <div style="color:gray;padding-top:3px">{{app.author_ref.name}}{% if app.author_ref.googler %}&nbsp;<img title="By Googler" src="http://groups.google.com/groups/img/blue_g.gif" align="absmiddle">{% endif %}
+             - {{app.created|date:"M d, Y"}}</div>
+           <div align="left" style="color:black;padding-top:3px">{{ app.description|urlize }}</div>
+           <div {% if app.best_practice %}style="background-color:#f5f0b4; border: 1px dotted #a6822c; padding: 5px; margin-top:7px; margin-bottom:7px" {% endif %}>
+             {% if app.best_practice %}<img align="absmiddle" width="16" height="16" src="static/img/icon_check.gif" title="Best Practice"> {% endif %}
+             {% if app.api_usage %}
+              <span style="color:black;">{{ app.api_usage|urlize }}</span>
+             {% endif %}
+           </div>
+         </td>
+      </tr>
+    </table>

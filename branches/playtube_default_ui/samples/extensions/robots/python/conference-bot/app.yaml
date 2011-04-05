@@ -1,0 +1,39 @@
+application: confrenzy
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /_wave/.*
+  script: handler_wave.py
+
+- url: /web/.*
+  script: handler_web.py
+
+- url: /service/.*
+  script: handler_service.py
+
+- url: /js
+  static_dir: js
+
+- url: /img
+  static_dir: img
+
+- url: /gadget_attendees.xml.*
+  static_files: gadget_attendees.xml
+  upload: gadget_attendees.xml
+  mime_type: text/xml
+
+- url: /gadget_moderator.xml.*
+  static_files: gadget_moderator.xml
+  upload: gadget_moderator.xml
+  mime_type: text/xml
+
+- url: /installer.xml.*
+  static_files: installer.xml
+  upload: installer.xml
+  mime_type: text/xml
+
+- url: /_ah/queue/deferred
+  script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py
+  login: admin

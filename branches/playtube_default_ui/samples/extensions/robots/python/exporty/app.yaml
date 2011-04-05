@@ -1,0 +1,24 @@
+application: exporty-bot
+version: 5
+runtime: python
+api_version: 1
+
+handlers:
+- url: /localdebug.html
+  static_files: localdebug.html
+  upload: localdebug.html
+  mime_type: text/html
+
+- url: /avatar.png
+  static_files: avatar.png
+  upload: avatar.png
+  mime_type: image/png
+
+- url: /js
+  static_dir: js
+
+- url: /_wave/.*
+  script: wave.py
+
+- url: /.*
+  script: export.py

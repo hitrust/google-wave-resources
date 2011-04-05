@@ -1,0 +1,23 @@
+{% extends "basegallery.html" %}
+{% block body %}
+{% include "sidebar.html" %}
+
+ <div id="container" class="middlecontent">
+  <h1 class="page_title">Search Results - {{label|escape}}</h1>
+  <div style="padding-top:10px" id="searchresults">
+{% ifequal total 0 %}
+There are no matching results
+{% else %}
+  {% include "pager.html" %}
+   {% for app in apps %}
+     {% include "result.html" %}
+   {% endfor %}
+  {% include "pager.html" %}
+  {% include "asterisk.html" %}
+{% endifequal %}
+
+{% include "backto.html" %}
+</div>
+
+</div>
+{% endblock %}

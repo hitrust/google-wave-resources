@@ -1,0 +1,9 @@
+<extension name="Blog Reviewy" description="Creates new blog post review waves."
+  thumbnailUrl="http://submitty-bot.appspot.com/img/submitty_thumbnail.png">
+  <author name="Pamela Fox" email="google-wave-api@googlegroups.com"/>
+  <menuHook location="NEW_WAVE_MENU" text="New Blog Post Review">
+    <createNewWave>
+      <participant id="blog-reviewey@appspot.com" />
+    </createNewWave>
+  </menuHook>
+</extension>

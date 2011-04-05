@@ -1,0 +1,62 @@
+{% extends "basegallery.html" %}
+{% block body %}
+<div id="container" class="middlecontent">
+<h1 class="page_title">Share Your {{app_name}}</h1>
+  <div style="display:none;padding-top:10px;overflow:hidden;" id="cse_results"></div>
+<br/>
+<p>Want to inspire and help other developers by sharing your {{app_name|lower}}?
+Use the form below to submit your {{app_name|lower}} to the gallery.</p>
+<p>Fields marked with * are required.</p>
+
+  <form action="/submit.do" id="submit" enctype="multipart/form-data" method="post" name="createapp">
+      <div id="form" style="padding-top:10px;width:100%">
+             <table>
+               <tr>
+                 <td colspan="2" align="center">
+                   <div id="errmsg">{% if error %}{{error|escape}}{% endif %}</div>
+                 </td>
+               </tr>
+              {% include "form.html" %}
+               <tr class="app-class">
+                  <td nowrap style="padding:2px">Thumbnail (120x60):</td>
+                  <td style="padding:2px;margin-left:5px"><div class="fileinputs"><input type="file" name="thumbnail" size="45"></div></td>
+               </tr>
+               <tr class="app-class">
+                  <td nowrap style="padding:2px">Screenshot (300x200):</td>
+                  <td style="padding:2px;margin-left:5px"><div class="fileinputs"><input class="file" type="file" name="screenshot" size="45"></div></td>
+               </tr>
+               <tr>
+                 <td colspan="2" style="padding-top:25px">
+                    <input type="hidden" name="app_id" value="{{key}}" />
+                    <input type="submit" value="Save" />
+                    <input type="reset" value="Cancel"/>
+                 </td>
+               </tr>
+           </table>
+  </form>
+  <br>
+  <br>
+  <p style="color:gray">
+  By submitting your {{app_name|lower}}, you are confirming your acceptance of our <a href="http://code.google.com/apis/wave/terms.html">Terms and Conditions.</a>
+  We may add to our directory anything that meets our guidelines. We
+  reserve the right to remove any anything that does not meet our terms at any point from this gallery.</p>
+  <br>
+  <br>
+  <br>
+<script>
+  function toggleForm(formValue) {
+    if (formValue == "code") {
+      jQuery(".code-class").show();
+      jQuery(".app-class").hide();
+    } else {
+      jQuery(".code-class").hide();
+      jQuery(".app-class").show();
+    }
+  }
+</script>
+
+{% include "backto.html" %}
+  </div>
+
+{% endblock %}
+

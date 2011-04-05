@@ -1,0 +1,14 @@
+application: wave-data-api
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /oauth(.*)
+  script: oauth_handler.py
+
+- url: /app(.*)
+  script: app_handler.py
+
+- url: /
+  script: app_handler.py
