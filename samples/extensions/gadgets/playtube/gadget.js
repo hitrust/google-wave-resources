@@ -336,13 +336,10 @@ function prepVideo() {
   DOM.PLAYER.show();
   DOM.PLAYINGNOW.html('Now playing: ' + videoState.getTitle());
   if (!youtubePlayer) {
-    var params = {allowScriptAccess: 'always', allowFullScreen: 'true', wmode: 'transparent'};
-    var atts = {id: 'myytplayer'};
-    var width = DOM.PLAYER.outerWidth();
-    var height = DOM.PLAYER.outerHeight() - 100;
-    var url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&playerapiid=ytplayer&video_id=' + videoState.getId();
-    swfobject.embedSWF(url,
-      'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
+    var params = { allowScriptAccess: "always", wmode: 'transparent' };
+    var atts = { id: "myytplayer" };
+    swfobject.embedSWF('http://www.youtube.com/e/' + videoState.getId() + '?enablejsapi=1&playerapiid=ytplayer',
+                       'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
   } else {
     stopVideo();
     youtubePlayer.cueVideoById(videoState.getId());
@@ -352,6 +349,7 @@ function prepVideo() {
 
 function onYouTubePlayerReady(playerId) {
   youtubePlayer = document.getElementById('myytplayer');
+  log("YouTube player ready: " + youtubePlayer);
   youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
   youtubePlayer.setVolume(DEFAULT_VOLUME);
   preloadVideo();
@@ -478,6 +476,7 @@ function onYouTubePlayerStateChange(state) {
       showEnded();
       break;
     case PLAYERSTATE.PLAYING:
+      videoState.saveStatus(STATUS.PLAYING);
       if (bufferStart) {
         bufferTimeEstimation = (new Date().getTime() / 1000) - bufferStart;
       }
@@ -488,6 +487,7 @@ function onYouTubePlayerStateChange(state) {
       justBuffered = false;
       break;
     case PLAYERSTATE.PAUSED:
+      videoState.saveStatus(STATUS.PAUSED);
       DOM.CONTROL.removeClass('loading pause replay').addClass('play');
       updateProgress();
       break;
@@ -603,11 +603,50 @@ function isParticipant() {
   return !!wave.getViewer().thumbnailUrl_;
 }
 
+function mute() {
+  window.console.log('mute');
+  var state = gadgetAV.getState();
+  state.mic = false;
+  gadgetAV.setState(state)
+}
+
+function unmute() {
+  window.console.log('unmute');
+  var state = gadgetAV.getState();
+  state.mic = true;
+  gadgetAV.setState(state)
+}
+
 /**
  * Sets up state callback and initializes UI elements.
  */
 $(function() {
   gadgets.window.adjustHeight(-1);
+
+  gadgetAV.setStateChangedCallback(function(state) {
+    window.console.log('AV state changed: %o', state)
+  });
+
+  var spaceDown = false;
+  $(document).keydown(function(evt) {
+    // Space
+    if (evt.keyCode == 32) {
+      // We get continous keydown events while the key is down but we should only mute once.
+      if (!spaceDown) {
+        unmute();
+        spaceDown = true;
+      }
+    }
+  });
+  $(document).keyup(function(evt) {
+    // Space
+    if (evt.keyCode == 32) {
+      mute();
+      spaceDown = false;
+    }
+  });
+  mute();
+
   DOM.PICKER = $('#picker');
   DOM.PICKERTRIGGER = $('#picker-trigger');
   DOM.PICKERRESULTS = $('#picker-results');

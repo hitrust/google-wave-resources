@@ -14,7 +14,7 @@
 
 <div id="picker" class="overlay">
  <div id="picker-header">
-  <img src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/youtubelogo.png">
+  <img src="http://tirsen.com/playtube/youtubelogo.png">
   <input id="search-input" type="text" placeholder="e.g. fox, robyn">
   <button id="search-button">Search</button>
  </div>
@@ -22,15 +22,9 @@
 </div>
 
 <div id="player" style="display:none">
- <div id="player-header">
-   <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
-   <div id="player-nowplaying"></div>
- </div>
  <div id="player-ytapiplayer"></div>
- <div id="player-control" class="control-button loading"></div>
- <div id="player-volume"></div>
- <div id="player-progressbar" class="progress-bar">
-   <div id="player-elapsedbar" class="elapsed"></div>
+ <div id="player-footer">
+   <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
  </div>
  <div id="player-time"></div>
  </div>
@@ -39,11 +33,12 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-<script src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/util.js"></script>
+<script src="http://google-wave-resources.googlecode.com/svn/branches/playtube_default_ui/samples/extensions/gadgets/playtube/util.js"></script>
+<script src="http://54-douwe.latest.sharedspaces.googlelabs.com/static/av.js"></script>
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/themes/base/jquery-ui.css" type="text/css" />
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/smoothness/jquery-ui.css" type="text/css" />
-<link href="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/styles.css" rel="stylesheet" type="text/css"/>
-<script src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/gadget.js"></script>
+<link href="http://google-wave-resources.googlecode.com/svn/branches/playtube_default_ui/samples/extensions/gadgets/playtube/styles.css" rel="stylesheet" type="text/css"/>
+<script src="http://google-wave-resources.googlecode.com/svn/branches/playtube_default_ui/samples/extensions/gadgets/playtube/gadget.js"></script>
 ]]></Content>
 </Module>
 
