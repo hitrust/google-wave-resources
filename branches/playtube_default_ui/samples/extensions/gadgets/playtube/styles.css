@@ -150,7 +150,7 @@ button:hover, button:focus {
   background-position:center center;
 }
 
-#player-header {
+#player-footer {
   color: white;
   width: 99%;
   padding: 7px;
@@ -163,8 +163,10 @@ button:hover, button:focus {
 }
 
 #player-link {
-  float: right;
+  display: inline;
   font-size: 12px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 #player-link button {
