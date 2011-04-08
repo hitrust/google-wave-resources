@@ -82,6 +82,8 @@ button:hover, button:focus {
   height: 15px;
   left: 0;
   right: 0;
+  z-index: 10;
+  bottom: 0;
   background-color:#141414;
   overflow:hidden;
   cursor:pointer;
@@ -105,7 +107,7 @@ button:hover, button:focus {
   width:120px;
   height:120px;
   cursor:pointer;
-  top:45%;
+  top:60%;
   left:50%;
   margin:-60px 0 0 -60px;
 }
@@ -175,7 +177,7 @@ button:hover, button:focus {
   position: absolute;
   height: 300px;
   width: 10px;
-  bottom: 20%;
+  bottom: 10%;
   left: 5%;
   z-index: 100;
 }

@@ -1,9 +1,3 @@
-var youtubePlayer = null;
-var pickerOverlay = null;
-var videoState = null;
-var preloadingNow = false;
-var progressInterval = null;
-
 var DEBUG = true;
 
 /** Timing related constants **/
@@ -11,6 +5,7 @@ var SECONDS_PRELOAD = 3;
 var SECONDS_WAITING = 0;
 
 var DEFAULT_VOLUME = 60;
+var UNMUTED_VOLUME = 10;
 
 /** DOM elements **/
 var DOM = {
@@ -37,6 +32,7 @@ var DIFF = {
 /** Keys + key prefixes **/
 var KEY = {
   ID: 'video-id',
+  VOLUME: 'volume',
   STATUS: 'video-status:',
   DATA: 'video-data:',
   PLAYTIME: 'video-playtime:',
@@ -61,6 +57,28 @@ var PLAYERSTATE = {
   BUFFERING: 3,
   CUED: 5
 };
+
+var youtubePlayer = null;
+var pickerOverlay = null;
+var videoState = null;
+var preloadingNow = false;
+var progressInterval = null;
+/**
+ * The volume selected by the user. Restore to this when not PTT-ing or having a shared volume
+ */
+var userSelectedVolume = DEFAULT_VOLUME;
+
+function setSharedVolume(volume) {
+  var delta = {};
+  delta[KEY.VOLUME] = volume;
+  wave.getState().submitDelta(delta);
+}
+
+function clearSharedVolume() {
+  var delta = {};
+  delta[KEY.VOLUME] = null;
+  wave.getState().submitDelta(delta);
+}
 
 /**
  * Object for managing state for a selected video.
@@ -180,6 +198,13 @@ function onStateChange(state, changedState) {
   log("State change:");
   log(state);
   log(changedState);
+
+  if (youtubePlayer) {
+    var volume = state.get(KEY.VOLUME) || userSelectedVolume;
+    log("Changing volume to: " + volume);
+    youtubePlayer.setVolume(volume);
+  }
+
   // If no video has been selected, show picker + featured vids
   if (!state.get(KEY.ID)) {
     pickerOverlay.load();
@@ -342,7 +367,7 @@ function prepVideo() {
     var height = DOM.PLAYER.outerHeight() - 100;
     var url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&playerapiid=ytplayer&video_id=' + videoState.getId();
     swfobject.embedSWF(url,
-      'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
+      'player-ytapiplayer', '100%', '100%', '8', null, null, params, atts);
   } else {
     stopVideo();
     youtubePlayer.cueVideoById(videoState.getId());
@@ -603,11 +628,44 @@ function isParticipant() {
   return !!wave.getViewer().thumbnailUrl_;
 }
 
+function onGadgetVisible() {
+  var state = gadgetAV.getState();
+  state.mic = false;
+  gadgetAV.setState(state);
+}
+
+function onGadgetHidden() {
+}
+
+function mute() {
+  window.console.log('mute');
+  var state = gadgetAV.getState();
+  state.mic = false;
+  gadgetAV.setState(state);
+  clearSharedVolume();
+  if (youtubePlayer) {
+    youtubePlayer.setVolume(userSelectedVolume);
+  }
+}
+
+function unmute() {
+  window.console.log('unmute');
+  var state = gadgetAV.getState();
+  state.mic = true;
+  gadgetAV.setState(state);
+  setSharedVolume(UNMUTED_VOLUME);
+  if (youtubePlayer) {
+    userSelectedVolume = youtubePlayer.getVolume();
+    youtubePlayer.setVolume(UNMUTED_VOLUME);
+  }
+}
+
 /**
  * Sets up state callback and initializes UI elements.
  */
 $(function() {
   gadgets.window.adjustHeight(-1);
+
   DOM.PICKER = $('#picker');
   DOM.PICKERTRIGGER = $('#picker-trigger');
   DOM.PICKERRESULTS = $('#picker-results');
@@ -677,6 +735,9 @@ $(function() {
   );
 
   DOM.VOLUME.height(300);
+  $(window).resize(function() {
+    DOM.VOLUME.height(Math.floor(DOM.PLAYER.height() * 0.5));
+  });
   DOM.VOLUME.slider({
     orientation: "vertical",
     range: "min",
@@ -689,5 +750,32 @@ $(function() {
   });
 
   wave.setStateCallback(onStateChange);
+
+
+  gadgetAV.setStateChangedCallback(function(state) {
+    window.console.log('AV state changed: %o', state)
+  });
+
+  var spaceDown = false;
+  $(document).keydown(function(evt) {
+    // Space
+    if (evt.keyCode == 32) {
+      // We get continous keydown events while the key is down but we should only mute once.
+      if (!spaceDown) {
+        unmute();
+        spaceDown = true;
+      }
+    }
+  });
+  $(document).keyup(function(evt) {
+    // Space
+    if (evt.keyCode == 32) {
+      mute();
+      spaceDown = false;
+    }
+  });
+
+  // TODO: Implement this callback in gcomm.
+  onGadgetVisible();
 });
 
