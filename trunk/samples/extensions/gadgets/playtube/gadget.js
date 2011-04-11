@@ -200,9 +200,11 @@ function onStateChange(state, changedState) {
   log(changedState);
 
   if (youtubePlayer) {
-    var volume = state.get(KEY.VOLUME) || userSelectedVolume;
-    log("Changing volume to: " + volume);
-    youtubePlayer.setVolume(volume);
+    if (changedState[KEY.ID]) {
+      var volume = state.get(KEY.VOLUME) || userSelectedVolume;
+      log("Changing volume to: " + volume);
+      youtubePlayer.setVolume(volume);
+    }
   }
 
   // If no video has been selected, show picker + featured vids
@@ -378,6 +380,7 @@ function prepVideo() {
 function onYouTubePlayerReady(playerId) {
   youtubePlayer = document.getElementById('myytplayer');
   youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
+  youtubePlayer.addEventListener('onError', 'onYouTubePlayerError');
   youtubePlayer.setVolume(DEFAULT_VOLUME);
   preloadVideo();
 }
@@ -528,6 +531,10 @@ function onYouTubePlayerStateChange(state) {
   }
 }
 
+function onYouTubePlayerError(error) {
+  log("YouTube error: " + error);
+}
+
 function showEnded() {
   DOM.CONTROL.removeClass('loading play pause').addClass('replay');
   DOM.PLAYINGNOW.html('Last played: ' + videoState.getTitle());
@@ -597,27 +604,29 @@ function controlVideo() {
   var modifier = videoState.getModifier();
   switch(status) {
     case STATUS.PAUSED:
-      var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getPlaytime());
-      if (modifier != wave.getViewer().getId() && timeDiff >= DIFF.PAUSELAG) {
-        log('Pausing because ' + modifier + ' told me to and time diff is ' + timeDiff);
-        pauseWithPreload();
-      }
       if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING) {
         log('Pausing because I was playing before');
         pauseWithPreload();
+      } else {
+        var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getPlaytime());
+        if (modifier != wave.getViewer().getId() && timeDiff >= DIFF.PAUSELAG) {
+          log('Pausing because ' + modifier + ' told me to and time diff is ' + timeDiff);
+          pauseWithPreload();
+        }
       }
       break;
     case STATUS.PLAYING:
       console.log('playing now');
-      var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getComputedPlaytime());
-      // Sync only play requests from other user that are more than X seconds diff
-      if (modifier != wave.getViewer().getId() && timeDiff > DIFF.PLAYLAG) {
-        log('Playing because ' + modifier + ' told me to and timeDiff is ' + timeDiff);
-        playVideo(videoState.getComputedPlaytime() + bufferTimeEstimation);
-      }
       if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
         log('Playing because I was paused before');
         playVideo(videoState.getComputedPlaytime());
+      } else {
+        var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getComputedPlaytime());
+        // Sync only play requests from other user that are more than X seconds diff
+        if (modifier != wave.getViewer().getId() && timeDiff > DIFF.PLAYLAG) {
+          log('Playing because ' + modifier + ' told me to and timeDiff is ' + timeDiff);
+          playVideo(videoState.getComputedPlaytime() + bufferTimeEstimation);
+        }
       }
       break;
   }
@@ -705,7 +714,7 @@ $(function() {
     DOM.ELAPSEDBAR.width(ratio*100+'%');
     var playtime = videoState.getDuration()*ratio;
     youtubePlayer.seekTo(playtime, true);
-    videoState.saveStatus(STATUS.PLAYING, playtime);
+    videoState.saveStatus(videoState.getStatus(), playtime);
     return false;
   });
 
