@@ -385,7 +385,10 @@ function onYouTubePlayerReady(playerId) {
   preloadVideo();
 }
 
+var preloadStopTaskId;
+
 function preloadVideo() {
+  clearInterval(preloadStopTaskId);
   // Handle easy cases where video is paused or
   // video was playing but is now past the end time
   if (videoState.getStatus() == STATUS.PAUSED) {
@@ -415,10 +418,11 @@ function preloadVideo() {
   }
 
   var preloadPlaytime = currentPlaytime + SECONDS_PRELOAD;
-  var checkInterval = window.setInterval(function() {
+  preloadStopTaskId = window.setInterval(function() {
     var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - preloadPlaytime);
     if (youtubePlayer.getPlayerState() == PLAYERSTATE.PLAYING && timeDiff <= DIFF.PRELOAD) {
-     window.clearInterval(checkInterval);
+     window.clearInterval(preloadStopTaskId);
+      log('Pause video after preload.');
      youtubePlayer.pauseVideo();
      preloadingNow = false;
      almostPlayVideo();
@@ -450,7 +454,8 @@ function almostPlayVideo() {
 
 
 function playVideo(playtime) {
-  if (preloadingNow) return;
+  clearTimeout(preloadStopTaskId);
+  preloadingNow = false;
   youtubePlayer.style.visibility = 'visible';
   youtubePlayer.unMute();
   if (playtime != undefined) {
