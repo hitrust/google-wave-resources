@@ -19,7 +19,8 @@ var DOM = {
   PLAYTIME: null,
   CONTROL: null,
   PROGRESSBAR: null,
-  ELAPSEDBAR: null
+  ELAPSEDBAR: null,
+  PTT: null
 };
 
 /** Time diffs allowed **/
@@ -653,6 +654,7 @@ function onGadgetHidden() {
 
 function mute() {
   window.console.log('mute');
+  DOM.PTT.text('Click to talk');
   var state = gadgetAV.getState();
   state.mic = false;
   gadgetAV.setState(state);
@@ -664,6 +666,7 @@ function mute() {
 
 function unmute() {
   window.console.log('unmute');
+  DOM.PTT.text('Talk...');
   var state = gadgetAV.getState();
   state.mic = true;
   gadgetAV.setState(state);
@@ -693,6 +696,7 @@ $(function() {
   DOM.PROGRESSBAR = $('#player-progressbar');
   DOM.ELAPSEDBAR = $('#player-elapsedbar');
   DOM.VOLUME = $('#player-volume');
+  DOM.PTT = $('#ptt-button');
 
   DOM.PICKERTRIGGER.overlay({target: DOM.PICKER});
   pickerOverlay = DOM.PICKERTRIGGER.data('overlay');
@@ -770,24 +774,10 @@ $(function() {
     window.console.log('AV state changed: %o', state)
   });
 
-  var spaceDown = false;
-  $(document).keydown(function(evt) {
-    // Space
-    if (evt.keyCode == 32) {
-      // We get continous keydown events while the key is down but we should only mute once.
-      if (!spaceDown) {
-        unmute();
-        spaceDown = true;
-      }
-    }
-  });
-  $(document).keyup(function(evt) {
-    // Space
-    if (evt.keyCode == 32) {
-      mute();
-      spaceDown = false;
-    }
-  });
+  DOM.PTT.mousedown(unmute);
+  DOM.PTT.mouseup(mute);
+  DOM.PTT.mouseout(mute);
+  mute();
 
   // TODO: Implement this callback in gcomm.
   onGadgetVisible();
