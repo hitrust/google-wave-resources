@@ -33,8 +33,9 @@
    <div id="player-elapsedbar" class="elapsed"></div>
  </div>
  <div id="player-time"></div>
- </div>
 </div>
+
+<div id="ptt-button" class="up">Click to talk</div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
