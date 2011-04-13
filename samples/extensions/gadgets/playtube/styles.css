@@ -265,13 +265,18 @@ button:hover, button:focus {
 
 #ptt-button {
   position: absolute;
-  bottom: 0;
+  bottom: 6px;
   left: 50%;
-  width: 120px;
-  margin-left: -60px;
+  width: 100px;
+  margin-left: -50px;
   text-align: center;
+  background-image: url(ptt.png);
+  height: 26px;
 }
 
 #ptt-button.up {
-  background-color: green;
+  background-position: 0 26px;
+}
+
+#ptt-button.down {
 }

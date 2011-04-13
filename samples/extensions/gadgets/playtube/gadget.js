@@ -268,7 +268,12 @@ function showRelated(id) {
 }
 
 
+var featuredShowing = false;
 function showFeatured() {
+  if (featuredShowing) {
+    return;
+  }
+  featuredShowing = true;
   var feedUrl = 'http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured';
   var params = {
     'v': '2',
@@ -654,7 +659,7 @@ function onGadgetHidden() {
 
 function mute() {
   window.console.log('mute');
-  DOM.PTT.text('Click to talk');
+  DOM.PTT.addClass('up').removeClass('down');
   var state = gadgetAV.getState();
   state.mic = false;
   gadgetAV.setState(state);
@@ -666,7 +671,7 @@ function mute() {
 
 function unmute() {
   window.console.log('unmute');
-  DOM.PTT.text('Talk...');
+  DOM.PTT.addClass('down').removeClass('up');
   var state = gadgetAV.getState();
   state.mic = true;
   gadgetAV.setState(state);
