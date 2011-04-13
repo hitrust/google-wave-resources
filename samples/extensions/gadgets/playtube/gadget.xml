@@ -22,25 +22,28 @@
 </div>
 
 <div id="player" style="display:none">
- <div id="player-header">
-   <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
-   <div id="player-nowplaying"></div>
- </div>
- <div id="player-main">
-   <div id="player-ytapiplayer"></div>
-   <div id="player-control" class="control-button loading"></div>
-   <div id="player-volume"></div>
-   <div id="player-progressbar" class="progress-bar">
-     <div id="player-elapsedbar" class="elapsed"></div>
-   </div>
- </div>
- <div id="player-time"></div>
+  <div id="player-header">
+    <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
+    <div id="player-nowplaying"></div>
+  </div>
+  <div id="player-ytapiplayer"></div>
+  <div id="player-control-container">
+    <div id="player-control" class="control-button play"></div>
+    <div id="player-volume-button" class="control-button">
+      <div id="player-volume"></div>
+    </div>
+    <div id="player-progressbar-container">
+      <div id="player-progressbar" class="progress-bar">
+        <div id="player-elapsedbar" class="elapsed"></div>
+      </div>
+    </div>
+  </div>
+  <div id="player-time"></div>
 </div>
-
 <div id="ptt-button" class="up"></div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
+<script src="https://Kajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
 <script src="http://sharedspaces.googlelabs.com/static/av.js"></script>
 <script src="http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/util.js"></script>

@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: #F4F8FB;
 }
 
 #tooltip {
@@ -22,12 +22,12 @@ body {
   z-index: 10000;
   padding: 10px;
   background-color: white;
-  width: 80%;	
+  width: 80%;
   min-height: 200px;
   height: 80%;
   border:1px solid #666;
   -moz-box-shadow:0 0 5px 5px #000;
-  -webkit-box-shadow: 0 0 5px #000;	
+  -webkit-box-shadow: 0 0 5px #000;
   -moz-border-radius: 10px 10px;
   -webkit-border-radius: 10px 10px;
   border-radius: 10px 10px;
@@ -76,45 +76,63 @@ button:hover, button:focus {
   box-shadow: 0 0 3px #999;
 }
 
-.progress-bar {
-  position: absolute;
+#player-control-container {
+  position: relative;
   width: auto;
-  height: 15px;
+  height: 31px;
   left: 0;
   right: 0;
-  z-index: 10;
   bottom: 0;
-  background-color:#141414;
-  overflow:hidden;
-  cursor:pointer;
-  /* A light CSS3 bottom highlight */
-  -moz-box-shadow:0 1px 0 rgba(255, 255, 255, 0.3);
-  -webkit-box-shadow:0 1px 0 rgba(255, 255, 255, 0.3);
-  box-shadow:0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+#player-progressbar-container {
+  position: absolute;
+  height: 5px;
+  border: #B8B8B8 solid 1px;
+  border-left: none;
+  background-color: #E6E6E6;
+  padding: 12px;
+  left: 67px;
+  right: 0;
+}
+
+.progress-bar {
+  width: auto;
+  height: 5px;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  background-color: #999999;
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .progress-bar .elapsed {
-  position:absolute;
   width:0;
   height:100%;
-  background-color: red;
-  border-right:1px solid #49AFF0;
+  background-color: #F93D31;
 }
 
 .control-button {
   /* Centering the control div */
-  position:absolute;
-  width:120px;
-  height:120px;
-  cursor:pointer;
-  top:60%;
-  left:50%;
-  margin:-60px 0 0 -60px;
+  position: absolute;
+  width: 32px;
+  height: 29px;
+  cursor: pointer;
+  border: #B8B8B8 solid 1px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #E6E6E6;
+}
+
+#player-volume-button {
+  left: 34px;
+  border-left: none;
+  background-image:url('http://tirsen.com/playtube/speaker_default.png');
 }
 
 .control-button.play {
-  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/play.png') no-repeat center center;
-  cursor: pointer;
+  background-image:url('http://tirsen.com/playtube/play_default.png');
 }
 
 .control-button.replay {
@@ -123,20 +141,20 @@ button:hover, button:focus {
 }
 
 .control-button.pause {
-  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/pause.png') no-repeat -99999px;
-  cursor: pointer;
+  background-image: url(http://tirsen.com/playtube/pause_default.png);
 }
 
 .control-button.loading {
-  background:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/ajax-loader.gif') no-repeat center center;
-  cursor: default;
+  background-image:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/ajax-loader.gif');
 }
 
 #player {
   width: 100%;
-  height: 90%;
   position:relative;
-  overflow:hidden;
+}
+
+#player-main {
+  width: 100%;
 }
 
 #player-time {
@@ -148,12 +166,8 @@ button:hover, button:focus {
   left: 45%;
 }
 
-#player:hover .control-button.pause {
-  background-position:center center;
-}
-
 #player-header {
-  color: white;
+  color: black;
   width: 99%;
   padding: 7px;
   padding-bottom: 12px;
@@ -175,11 +189,12 @@ button:hover, button:focus {
 
 #player-volume {
   position: absolute;
-  height: 300px;
+  height: 100px;
   width: 10px;
-  bottom: 10%;
-  left: 5%;
-  z-index: 100;
+  bottom: 29px;
+  left: 50%;
+  margin-left: -5px;
+  z-index: 10;
 }
 
 #picker-results {
@@ -270,7 +285,7 @@ button:hover, button:focus {
   width: 100px;
   margin-left: -50px;
   text-align: center;
-  background-image: url(ptt.png);
+  background-image: url(http://tirsen.com/playtube/ptt.png);
   height: 26px;
 }
 
