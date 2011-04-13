@@ -76,6 +76,9 @@ function setSharedVolume(volume) {
 }
 
 function clearSharedVolume() {
+  if (!wave || !wave.getState()) {
+    return;
+  }
   var delta = {};
   delta[KEY.VOLUME] = null;
   wave.getState().submitDelta(delta);
@@ -210,9 +213,12 @@ function onStateChange(state, changedState) {
 
   // If no video has been selected, show picker + featured vids
   if (!state.get(KEY.ID)) {
-    pickerOverlay.load();
-    DOM.PICKER.addClass('start');
-    showFeatured();
+    // Make sure we have a size first so delay 100ms.
+    setTimeout(function() {
+      pickerOverlay.load();
+      DOM.PICKER.addClass('start');
+      showFeatured();
+    }, 100);
     return;
   }
 
@@ -646,17 +652,11 @@ function isParticipant() {
   return !!wave.getViewer().thumbnailUrl_;
 }
 
-function onGadgetVisible() {
-  var state = gadgetAV.getState();
-  state.mic = false;
-  gadgetAV.setState(state);
-}
+var pushToTalking = false;
 
-function onGadgetHidden() {
-}
-
-function mute() {
-  window.console.log('mute');
+function pushToTalkOff() {
+  window.console.log('pushToTalkOff');
+  pushToTalking = false;
   DOM.PTT.addClass('up').removeClass('down');
   var state = gadgetAV.getState();
   state.mic = false;
@@ -667,8 +667,9 @@ function mute() {
   }
 }
 
-function unmute() {
-  window.console.log('unmute');
+function pushToTalkOn() {
+  window.console.log('pushToTalkOn');
+  pushToTalking = true;
   DOM.PTT.addClass('down').removeClass('up');
   var state = gadgetAV.getState();
   state.mic = true;
@@ -677,6 +678,14 @@ function unmute() {
   if (youtubePlayer) {
     userSelectedVolume = youtubePlayer.getVolume();
     youtubePlayer.setVolume(UNMUTED_VOLUME);
+  }
+}
+
+function onAVStateChange(state) {
+  // Turn off the mic when gadget is visible and not PTTing.
+  if (!pushToTalking && state.gadgetVisible && state.mic) {
+    state.mic = false;
+    gadgetAV.setState(state);
   }
 }
 
@@ -701,7 +710,7 @@ $(function() {
   DOM.VOLUME = $('#player-volume');
   DOM.PTT = $('#ptt-button');
 
-  DOM.PICKERTRIGGER.overlay({target: DOM.PICKER});
+  DOM.PICKERTRIGGER.overlay({target: DOM.PICKER, top: '5%'});
   pickerOverlay = DOM.PICKERTRIGGER.data('overlay');
 
   DOM.SEARCHBUTTON.click(function() {
@@ -772,17 +781,13 @@ $(function() {
 
   wave.setStateCallback(onStateChange);
 
+  gadgetAV.setStateChangedCallback(onAVStateChange);
+  DOM.PTT.mousedown(pushToTalkOn);
+  DOM.PTT.mouseup(pushToTalkOff);
+  DOM.PTT.mouseout(pushToTalkOff);
 
-  gadgetAV.setStateChangedCallback(function(state) {
-    window.console.log('AV state changed: %o', state)
-  });
-
-  DOM.PTT.mousedown(unmute);
-  DOM.PTT.mouseup(mute);
-  DOM.PTT.mouseout(mute);
-  mute();
-
-  // TODO: Implement this callback in gcomm.
-  onGadgetVisible();
+  var state = {};
+  state.mic = false;
+  gadgetAV.setState(state);
 });
 
