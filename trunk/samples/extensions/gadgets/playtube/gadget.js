@@ -267,7 +267,6 @@ function showRelated(id) {
   });
 }
 
-
 var featuredShowing = false;
 function showFeatured() {
   if (featuredShowing) {
