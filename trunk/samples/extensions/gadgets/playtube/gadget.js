@@ -20,6 +20,8 @@ var DOM = {
   CONTROL: null,
   PROGRESSBAR: null,
   ELAPSEDBAR: null,
+  VOLUMEBUTTON: null,
+  VOLUMEBAR: null,
   PTT: null
 };
 
@@ -379,7 +381,7 @@ function prepVideo() {
     var height = DOM.PLAYER.outerHeight() - 100;
     var url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&playerapiid=ytplayer&video_id=' + videoState.getId();
     swfobject.embedSWF(url,
-      'player-ytapiplayer', '100%', '100%', '8', null, null, params, atts);
+      'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
   } else {
     stopVideo();
     youtubePlayer.cueVideoById(videoState.getId());
@@ -514,7 +516,6 @@ function onYouTubePlayerStateChange(state) {
   }
   switch (state) {
     case PLAYERSTATE.UNSTARTED:
-      DOM.CONTROL.removeClass('loading play pause').addClass('replay');
       break;
     case PLAYERSTATE.ENDED:
       videoState.saveStatus(STATUS.ENDED);
@@ -535,11 +536,9 @@ function onYouTubePlayerStateChange(state) {
       updateProgress();
       break;
     case PLAYERSTATE.BUFFERING:
-      DOM.CONTROL.removeClass('play pause replay').addClass('loading');
       bufferStart = new Date().getTime() / 1000;
       break;
     case PLAYERSTATE.CUED:
-      DOM.CONTROL.removeClass('play pause replay').addClass('loading');
       break;
     default:
       break;
@@ -707,7 +706,8 @@ $(function() {
   DOM.CONTROL = $('#player-control');
   DOM.PROGRESSBAR = $('#player-progressbar');
   DOM.ELAPSEDBAR = $('#player-elapsedbar');
-  DOM.VOLUME = $('#player-volume');
+  DOM.VOLUMEBUTTON = $('#player-volume-button');
+  DOM.VOLUMEBAR = $('#player-volume');
   DOM.PTT = $('#ptt-button');
 
   DOM.PICKERTRIGGER.overlay({target: DOM.PICKER, top: '5%'});
@@ -751,24 +751,17 @@ $(function() {
     }
   });
 
-  DOM.PROGRESSBAR.hide();
-  DOM.VOLUME.hide();
-  DOM.PLAYER.hover(
+  DOM.VOLUMEBAR.hide();
+  DOM.VOLUMEBUTTON.hover(
     function() {
-      DOM.PROGRESSBAR.fadeIn();
-      DOM.VOLUME.fadeIn();
+      DOM.VOLUMEBAR.fadeIn();
     },
     function() {
-      DOM.PROGRESSBAR.fadeOut();
-      DOM.VOLUME.fadeOut();
+      DOM.VOLUMEBAR.fadeOut();
     }
   );
 
-  DOM.VOLUME.height(300);
-  $(window).resize(function() {
-    DOM.VOLUME.height(Math.floor(DOM.PLAYER.height() * 0.5));
-  });
-  DOM.VOLUME.slider({
+  DOM.VOLUMEBAR.slider({
     orientation: "vertical",
     range: "min",
     min: 0,
