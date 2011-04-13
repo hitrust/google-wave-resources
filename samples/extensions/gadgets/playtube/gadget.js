@@ -291,7 +291,6 @@ function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
 }
 
-
 function handleFeedResults(json) {
   DOM.PICKERRESULTS.removeClass('search').addClass('feed');
   var results = json.data.items || [];
