@@ -381,7 +381,7 @@ function prepVideo() {
     var height = DOM.PLAYER.outerHeight() - 100;
     var url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&playerapiid=ytplayer&video_id=' + videoState.getId();
     swfobject.embedSWF(url,
-      'player-ytapiplayer', '100%', '80%', '8', null, null, params, atts);
+      'player-ytapiplayer', '100%', '300px', '8', null, null, params, atts);
   } else {
     stopVideo();
     youtubePlayer.cueVideoById(videoState.getId());
@@ -394,6 +394,7 @@ function onYouTubePlayerReady(playerId) {
   youtubePlayer.addEventListener('onStateChange', 'onYouTubePlayerStateChange');
   youtubePlayer.addEventListener('onError', 'onYouTubePlayerError');
   youtubePlayer.setVolume(DEFAULT_VOLUME);
+  resizeYouTubePlayer();
   preloadVideo();
 }
 
@@ -724,6 +725,11 @@ function onAVStateChange(state) {
 /**
  * Sets up state callback and initializes UI elements.
  */
+function resizeYouTubePlayer() {
+  var viewportHeight = gadgets.window.getViewportDimensions().height;
+  var nonytHeight = DOM.PTT.height() + $('#player-header').height() + $('#player-control-container').height() + 30;
+  $('#myytplayer').height(viewportHeight - nonytHeight);
+}
 $(function() {
   gadgets.window.adjustHeight(-1);
 
@@ -806,6 +812,10 @@ $(function() {
     youtubePlayer.setVolume(volume);
     DOM.VOLUMEBARELAPSED.height('' + volume + '%');
     return false;
+  });
+
+  $(window).resize(function() {
+    resizeYouTubePlayer();
   });
 
   wave.setStateCallback(onStateChange);
