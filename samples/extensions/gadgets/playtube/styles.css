@@ -316,7 +316,7 @@ button:hover, button:focus {
 
 #ptt-button {
   position: absolute;
-  bottom: 12px;
+  bottom: 0px;
   left: 50%;
   width: 100px;
   margin-left: -50px;
