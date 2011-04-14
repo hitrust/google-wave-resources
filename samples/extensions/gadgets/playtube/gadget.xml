@@ -30,9 +30,13 @@
   <div id="player-control-container">
     <div id="player-control" class="control-button play"></div>
     <div id="player-volume-button" class="control-button">
-      <div id="player-volume"></div>
+      <div id="player-volumebar-container" class="progress-bar-vertical-container">
+        <div id="player-volumebar" class="progress-bar-vertical">
+          <div id="player-volumebar-elapsed" class="elapsed"></div>
+        </div>
+      </div>
     </div>
-    <div id="player-progressbar-container">
+    <div id="player-progressbar-container" class="progress-bar-container">
       <div id="player-progressbar" class="progress-bar">
         <div id="player-elapsedbar" class="elapsed"></div>
       </div>
