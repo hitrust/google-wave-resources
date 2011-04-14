@@ -727,7 +727,7 @@ function onAVStateChange(state) {
  */
 function resizeYouTubePlayer() {
   var viewportHeight = gadgets.window.getViewportDimensions().height;
-  var nonytHeight = DOM.PTT.height() + $('#player-header').height() + $('#player-control-container').height() + 30;
+  var nonytHeight = DOM.PTT.height() + $('#player-header').height() + $('#player-control-container').height() + 50;
   $('#myytplayer').height(viewportHeight - nonytHeight);
 }
 $(function() {
