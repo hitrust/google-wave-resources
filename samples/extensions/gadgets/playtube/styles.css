@@ -47,15 +47,14 @@ body {
 
 button {
   background: #F6F6F6;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(white), to(#EFEFEF));
-  background-image: -moz-linear-gradient(top, #fff, #EFEFEF);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFFFFF), to(#CFCFCF));
+  background-image: -moz-linear-gradient(top, #FFFFFF, #CFCFCF);
   border: 1px solid #CCC;
   -moz-border-radius: 3px 3px;
   -webkit-border-radius: 3px 3px;
   border-radius: 3px 3px;
   color: black;
   cursor: pointer;
-  height: 2.0833em;
   overflow: visible;
   padding: 0px 0.5em;
   white-space: nowrap;
@@ -68,8 +67,19 @@ button {
 button:hover, button:focus {
   border-color: #999;
   background: #f3f3f3;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(#ffffff),to(#ebebeb));
-  background-image: -moz-linear-gradient(top,#ffffff,#ebebeb);
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#FFFFFF),to(#AFAFAF));
+  background-image: -moz-linear-gradient(top,#FFFFFF,#AFAFAF);
+  outline: 0;
+  -moz-box-shadow: 0 0 3px #999;
+  -webkit-box-shadow: 0 0 3px #999;
+  box-shadow: 0 0 3px #999;
+}
+
+button:active {
+  border-color: #999;
+  background: #f3f3f3;
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#AFAFAF),to(#FFFFFF));
+  background-image: -moz-linear-gradient(top,#AFAFAF,#FFFFFF);
   outline: 0;
   -moz-box-shadow: 0 0 3px #999;
   -webkit-box-shadow: 0 0 3px #999;
@@ -216,7 +226,8 @@ button:hover, button:focus {
 
 #player-link {
   float: right;
-  font-size: 12px;
+  padding: 5px;
+  margin: 0px;
 }
 
 #player-link button {
@@ -330,4 +341,11 @@ button:hover, button:focus {
 }
 
 #ptt-button.down {
+}
+
+#player-icon {
+  background-image: url(find.png);
+  display: inline-block;
+  width: 14px;
+  height: 14px;
 }

@@ -23,7 +23,10 @@
 
 <div id="player" style="display:none">
   <div id="player-header">
-    <div id="player-link">Tired of this video? <button>Find a new one.</button></div>
+    <button id="player-link">
+      <div id="player-icon">&nbsp;</div>
+      Find another video
+    </div>
     <div id="player-nowplaying"></div>
   </div>
   <div id="player-ytapiplayer"></div>
