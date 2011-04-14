@@ -613,8 +613,20 @@ function pauseWithPreload() {
   }, 30);
 }
 
+function isVisible() {
+  if (gadgetAV && gadgetAV.getState && gadgetAV.getState() && 'gadgetVisible' in gadgetAV.getState()) {
+    return gadgetAV.getState().gadgetVisible == undefined || gadgetAV.getState().gadgetVisible;
+  } else {
+    return true;
+  }
+}
+
 function controlVideo() {
   if (!youtubePlayer || !youtubePlayer.pauseVideo) return;
+  if (!isVisible()) {
+    log('Not controlling video because not visible');
+    return;
+  }
   var status = videoState.getStatus();
   var modifier = videoState.getModifier();
   switch(status) {
