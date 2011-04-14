@@ -445,6 +445,9 @@ function preloadVideo() {
 
 function almostPlayVideo() {
   log('Almost playing video');
+  if (!isVisible()) {
+    log('Not visible so not playing new video');
+  }
   if (isParticipant()) {
     if (videoState.getStatus() == STATUS.SELECTED) {
       log('Noone else started playing it, Ill start playing in ' + SECONDS_WAITING + ' seconds');
