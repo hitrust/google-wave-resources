@@ -514,6 +514,7 @@ function onYouTubePlayerStateChange(state) {
     log('Preloading now, dont care about state change.');
     return;
   }
+  DOM.VOLUMEBARELAPSED.height('' + youtubePlayer.getVolume() + '%')
   switch (state) {
     case PLAYERSTATE.UNSTARTED:
       break;
@@ -686,6 +687,21 @@ function onAVStateChange(state) {
     state.mic = false;
     gadgetAV.setState(state);
   }
+  if (!state.gadgetVisible) {
+    youtubePlayer.stopVideo();
+  }
+  if (state.gadgetVisible) {
+    if (!wave.getState().get(KEY.ID)) {
+      // Make sure we have a size first so delay 100ms.
+      setTimeout(function() {
+        pickerOverlay.load();
+        DOM.PICKER.addClass('start');
+        showFeatured();
+      }, 100);
+    } else {
+      controlVideo();
+    }
+  }
 }
 
 /**
@@ -707,7 +723,9 @@ $(function() {
   DOM.PROGRESSBAR = $('#player-progressbar');
   DOM.ELAPSEDBAR = $('#player-elapsedbar');
   DOM.VOLUMEBUTTON = $('#player-volume-button');
-  DOM.VOLUMEBAR = $('#player-volume');
+  DOM.VOLUMEBARCONTAINER = $('#player-volumebar-container');
+  DOM.VOLUMEBARELAPSED = $('#player-volumebar-elapsed');
+  DOM.VOLUMEBAR = $('#player-volumebar');
   DOM.PTT = $('#ptt-button');
 
   DOM.PICKERTRIGGER.overlay({target: DOM.PICKER, top: '5%'});
@@ -751,26 +769,38 @@ $(function() {
     }
   });
 
-  DOM.VOLUMEBAR.hide();
+  DOM.VOLUMEBARCONTAINER.height(0);
+  DOM.VOLUMEBARCONTAINER.hide();
+  DOM.VOLUMEBARELAPSED.height(0);
   DOM.VOLUMEBUTTON.hover(
     function() {
-      DOM.VOLUMEBAR.fadeIn();
+      DOM.VOLUMEBARCONTAINER.show();
+      DOM.VOLUMEBARCONTAINER.animate({height: '100px'}, 200);
     },
     function() {
-      DOM.VOLUMEBAR.fadeOut();
+      DOM.VOLUMEBARCONTAINER.animate({height: '0px'}, 200, function() {
+        DOM.VOLUMEBARCONTAINER.hide();
+      });
     }
   );
-
-  DOM.VOLUMEBAR.slider({
-    orientation: "vertical",
-    range: "min",
-    min: 0,
-    max: 100,
-    value: DEFAULT_VOLUME,
-    slide: function( event, ui ) {
-      youtubePlayer.setVolume(parseInt(ui.value));
-    }
+  DOM.VOLUMEBAR.click(function(e){
+    var ratio = (e.clientY - DOM.VOLUMEBAR.offset().top) / DOM.VOLUMEBAR.height();
+    var volume = 100 - ratio * 100;
+    youtubePlayer.setVolume(volume);
+    DOM.VOLUMEBARELAPSED.height('' + volume + '%');
+    return false;
   });
+
+//  DOM.VOLUMEBAR.slider({
+//    orientation: "vertical",
+//    range: "min",
+//    min: 0,
+//    max: 100,
+//    value: DEFAULT_VOLUME,
+//    slide: function( event, ui ) {
+//      youtubePlayer.setVolume(parseInt(ui.value));
+//    }
+//  });
 
   wave.setStateCallback(onStateChange);
 

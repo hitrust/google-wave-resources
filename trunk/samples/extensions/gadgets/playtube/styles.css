@@ -85,7 +85,7 @@ button:hover, button:focus {
   bottom: 0;
 }
 
-#player-progressbar-container {
+.progress-bar-container {
   position: absolute;
   height: 5px;
   border: #B8B8B8 solid 1px;
@@ -113,6 +113,35 @@ button:hover, button:focus {
   background-color: #F93D31;
 }
 
+.progress-bar-vertical-container {
+  position: absolute;
+  border: #B8B8B8 solid 1px;
+  border-bottom: none;
+  background-color: #E6E6E6;
+  bottom: 30px;
+  width: 31px;
+}
+
+.progress-bar-vertical {
+  width: 7px;
+  bottom: 12px;
+  top: 12px;
+  left: 12px;
+  background-color: #999;
+  overflow: hidden;
+  cursor: pointer;
+  position: absolute;
+}
+
+.progress-bar-vertical .elapsed {
+  width: 7px;
+  background-color: #F93D31;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 .control-button {
   /* Centering the control div */
   position: absolute;
@@ -128,20 +157,27 @@ button:hover, button:focus {
 #player-volume-button {
   left: 34px;
   border-left: none;
-  background-image:url('http://tirsen.com/playtube/speaker_default.png');
+  background-image:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/speaker_default.png');
+}
+
+#player-volume-button:hover {
+  background-image:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/speaker_hover.png');
 }
 
 .control-button.play {
-  background-image:url('http://tirsen.com/playtube/play_default.png');
+  background-image:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/play_default.png');
 }
 
-.control-button.replay {
-  background: transparent;
-  cursor: default;
+.control-button.play:hover {
+  background-image:url('http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/play_hover.png');
 }
 
 .control-button.pause {
-  background-image: url(http://tirsen.com/playtube/pause_default.png);
+  background-image: url(http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/pause_default.png);
+}
+
+.control-button.pause:hover {
+  background-image: url(http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/pause_hover.png);
 }
 
 .control-button.loading {
@@ -285,7 +321,7 @@ button:hover, button:focus {
   width: 100px;
   margin-left: -50px;
   text-align: center;
-  background-image: url(http://tirsen.com/playtube/ptt.png);
+  background-image: url(http://google-wave-resources.googlecode.com/svn/trunk/samples/extensions/gadgets/playtube/ptt.png);
   height: 26px;
 }
 
