@@ -635,6 +635,9 @@ function controlVideo() {
       if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
         log('Playing because I was paused before');
         playVideo(videoState.getComputedPlaytime());
+      } else if (youtubePlayer.getPlayerState() == PLAYERSTATE.UNSTARTED) {
+        log('Playing because I was unstarted before');
+        playVideo(videoState.getComputedPlaytime());
       } else {
         var timeDiff = Math.abs(youtubePlayer.getCurrentTime() - videoState.getComputedPlaytime());
         // Sync only play requests from other user that are more than X seconds diff
@@ -688,18 +691,20 @@ function onAVStateChange(state) {
     gadgetAV.setState(state);
   }
   if (!state.gadgetVisible) {
-    youtubePlayer.stopVideo();
+    if (youtubePlayer && wave.getState().get(KEY.ID)) {
+      pauseWithPreload();
+    }
   }
   if (state.gadgetVisible) {
-    if (!wave.getState().get(KEY.ID)) {
+    if (wave.getState().get(KEY.ID)) {
+      controlVideo();
+    } else {
       // Make sure we have a size first so delay 100ms.
       setTimeout(function() {
         pickerOverlay.load();
         DOM.PICKER.addClass('start');
         showFeatured();
       }, 100);
-    } else {
-      controlVideo();
     }
   }
 }
@@ -790,17 +795,6 @@ $(function() {
     DOM.VOLUMEBARELAPSED.height('' + volume + '%');
     return false;
   });
-
-//  DOM.VOLUMEBAR.slider({
-//    orientation: "vertical",
-//    range: "min",
-//    min: 0,
-//    max: 100,
-//    value: DEFAULT_VOLUME,
-//    slide: function( event, ui ) {
-//      youtubePlayer.setVolume(parseInt(ui.value));
-//    }
-//  });
 
   wave.setStateCallback(onStateChange);
 
