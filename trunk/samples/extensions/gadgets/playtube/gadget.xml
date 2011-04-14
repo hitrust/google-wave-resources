@@ -26,7 +26,7 @@
     <button id="player-link">
       <div id="player-icon">&nbsp;</div>
       Find another video
-    </div>
+    </button>
     <div id="player-nowplaying"></div>
   </div>
   <div id="player-ytapiplayer"></div>
