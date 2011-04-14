@@ -447,6 +447,7 @@ function almostPlayVideo() {
   log('Almost playing video');
   if (!isVisible()) {
     log('Not visible so not playing new video');
+    return;
   }
   if (isParticipant()) {
     if (videoState.getStatus() == STATUS.SELECTED) {
@@ -457,7 +458,7 @@ function almostPlayVideo() {
         playVideo(0);
       }, 1000 * SECONDS_WAITING);
       // Only do this if we're a participant. Otherwise we'd auto-join the space.
-        videoState.saveStatus(STATUS.PLAYING, 0, predictedTimestamp);
+      videoState.saveStatus(STATUS.PLAYING, 0, predictedTimestamp);
     } else if (videoState.getStatus() == STATUS.PLAYING) {
       var currentPlaytime = videoState.getComputedPlaytime();
       log('Someone else is already playing it, Im starting at ' + currentPlaytime);
