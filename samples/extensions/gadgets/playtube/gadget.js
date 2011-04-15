@@ -4,7 +4,7 @@ var DEBUG = true;
 var SECONDS_PRELOAD = 3;
 var SECONDS_WAITING = 0;
 
-var DEFAULT_VOLUME = 60;
+var DEFAULT_VOLUME = 40;
 var UNMUTED_VOLUME = 10;
 
 /** DOM elements **/
