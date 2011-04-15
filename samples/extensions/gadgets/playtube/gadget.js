@@ -445,7 +445,7 @@ function preloadVideo() {
 
 function almostPlayVideo() {
   log('Almost playing video');
-  if (!isVisible()) {
+  if (!isVisible()) {tP
     log('Not visible so not playing new video');
     return;
   }
@@ -785,6 +785,7 @@ $(function() {
   });
 
   DOM.CONTROL.click(function(){
+    if (!youtubePlayer) return;
     if (youtubePlayer.getPlayerState() == PLAYERSTATE.PAUSED) {
       playVideo();
       log('Saving the playing state');
