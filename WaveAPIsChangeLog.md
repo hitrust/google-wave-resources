@@ -1,0 +1,1 @@
+<wiki:gadget url="http://hosting.gmodules.com/ig/gadgets/file/102816022445188405566/wave-embed.xml" up\_waveID="googlewave.com!w+AU-ZLT\_uA" up\_wavePath="https://wave.google.com/wave/" up\_bgcolor="white" width="600" height="800" border="0" />
